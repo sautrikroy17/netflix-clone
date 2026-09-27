@@ -340,8 +340,12 @@ app.use((req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
 
-// Start Server
-app.listen(PORT, () => {
-  console.log(`🎬 Netflix Clone Server running at http://localhost:${PORT}`);
-  console.log(`📊 SQLite database connected: data/netflix.db`);
-});
+// Export for serverless (Vercel) & direct execution
+module.exports = app;
+
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`🎬 Netflix Clone Server running at http://localhost:${PORT}`);
+    console.log(`📊 SQLite database connected: data/netflix.db`);
+  });
+}

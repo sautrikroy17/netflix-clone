@@ -5,3 +5,4 @@ data/netflix.db-wal
 data/netflix.db-shm
 public/*_preview.png
 public/*_full.png
+.vercel
