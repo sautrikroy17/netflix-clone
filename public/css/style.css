@@ -1,0 +1,334 @@
+/* ══════════════════════════════════════════════════════════════
+   NETFLIX DESIGN SYSTEM & CORE TOKENS
+══════════════════════════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Bebas+Neue&display=swap');
+
+:root {
+  --netflix-red: #E50914;
+  --netflix-red-hover: #F40612;
+  --netflix-black: #141414;
+  --netflix-dark: #0f0f0f;
+  --netflix-card: #181818;
+  --netflix-card-hover: #232323;
+  --netflix-gray: #808080;
+  --netflix-light-gray: #e5e5e5;
+  --netflix-border: rgba(255, 255, 255, 0.15);
+  --netflix-glass: rgba(0, 0, 0, 0.75);
+  --netflix-font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --netflix-headline-font: 'Bebas Neue', sans-serif;
+  --transition-smooth: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.6);
+  --shadow-glow: 0 0 20px rgba(229, 9, 20, 0.4);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  min-height: 100%;
+  background-color: var(--netflix-black);
+  color: #ffffff;
+  font-family: var(--netflix-font);
+  font-size: 16px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   NAVIGATION BAR
+══════════════════════════════════════════════════════════════ */
+.netflix-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 4%;
+  transition: background-color 0.4s ease, padding 0.3s ease;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0) 100%);
+}
+
+.netflix-header.scrolled {
+  background-color: var(--netflix-black);
+  padding: 12px 4%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 35px;
+}
+
+.netflix-logo {
+  font-family: var(--netflix-headline-font);
+  font-size: 2.3rem;
+  letter-spacing: 2px;
+  color: var(--netflix-red);
+  text-transform: uppercase;
+  font-weight: 900;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.2s ease, text-shadow 0.2s ease;
+}
+
+.netflix-logo:hover {
+  transform: scale(1.03);
+  text-shadow: 0 0 15px rgba(229, 9, 20, 0.6);
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  list-style: none;
+}
+
+.nav-item a {
+  color: var(--netflix-light-gray);
+  font-size: 0.88rem;
+  font-weight: 400;
+  transition: color 0.2s ease;
+  cursor: pointer;
+}
+
+.nav-item a:hover,
+.nav-item.active a {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* Header Buttons */
+.btn-primary-red {
+  background-color: var(--netflix-red);
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 7px 18px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.btn-primary-red:hover {
+  background-color: var(--netflix-red-hover);
+  transform: scale(1.02);
+}
+
+.btn-primary-red:active {
+  transform: scale(0.98);
+}
+
+/* User profile avatar dropdown */
+.user-profile-menu {
+  position: relative;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.user-avatar-img {
+  width: 34px;
+  height: 34px;
+  border-radius: 4px;
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.profile-caret {
+  margin-left: 6px;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid #fff;
+  transition: transform 0.2s ease;
+}
+
+.profile-dropdown {
+  position: absolute;
+  top: 45px;
+  right: 0;
+  background-color: rgba(15, 15, 15, 0.96);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--netflix-border);
+  border-radius: 4px;
+  min-width: 190px;
+  padding: 10px 0;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+  display: none;
+  flex-direction: column;
+  z-index: 1001;
+}
+
+.profile-dropdown.open {
+  display: flex;
+}
+
+.profile-dropdown-user {
+  padding: 8px 16px 12px;
+  border-bottom: 1px solid var(--netflix-border);
+  margin-bottom: 6px;
+}
+
+.profile-user-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.profile-user-plan {
+  font-size: 0.75rem;
+  color: var(--netflix-red);
+}
+
+.profile-dropdown a, .profile-dropdown button {
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  color: var(--netflix-light-gray);
+  text-align: left;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.profile-dropdown a:hover, .profile-dropdown button:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+/* Search Input */
+.search-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.search-toggle-btn {
+  color: #fff;
+  font-size: 1.1rem;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-input-box {
+  width: 0;
+  opacity: 0;
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #fff;
+  padding: 6px 10px;
+  font-size: 0.85rem;
+  border-radius: 3px;
+  transition: width 0.3s ease, opacity 0.3s ease;
+  outline: none;
+}
+
+.search-container.active .search-input-box {
+  width: 220px;
+  opacity: 1;
+  margin-left: 6px;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   TOAST NOTIFICATIONS
+══════════════════════════════════════════════════════════════ */
+#toast-container {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.toast {
+  background: rgba(20, 20, 20, 0.95);
+  border-left: 4px solid var(--netflix-red);
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 4px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8);
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  pointer-events: auto;
+  animation: slideInToast 0.3s ease forwards;
+  backdrop-filter: blur(10px);
+}
+
+.toast.toast-success {
+  border-left-color: #46d369;
+}
+
+.toast.toast-error {
+  border-left-color: var(--netflix-red);
+}
+
+@keyframes slideInToast {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutToast {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   RESPONSIVE UTILITIES
+══════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .nav-links {
+    display: none;
+  }
+  .netflix-logo {
+    font-size: 1.8rem;
+  }
+}

@@ -1,0 +1,332 @@
+/* ══════════════════════════════════════════════════════════════
+   NETFLIX LANDING PAGE (UNAUTHENTICATED)
+══════════════════════════════════════════════════════════════ */
+
+/* Hero Banner */
+.landing-hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 120px 20px 80px;
+  background-image: 
+    linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.4) 60%, rgba(0, 0, 0, 0.8) 100%),
+    url('https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?auto=format&fit=crop&w=1920&q=80');
+  background-size: cover;
+  background-position: center;
+  box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.9);
+}
+
+.landing-hero::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100px;
+  background: linear-gradient(180deg, transparent, var(--netflix-black));
+}
+
+.landing-hero-content {
+  max-width: 950px;
+  z-index: 10;
+}
+
+.landing-title {
+  font-size: clamp(2.2rem, 5vw, 3.6rem);
+  font-weight: 900;
+  line-height: 1.15;
+  margin-bottom: 16px;
+  letter-spacing: -0.5px;
+}
+
+.landing-subtitle {
+  font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+  font-weight: 500;
+  margin-bottom: 24px;
+  color: var(--netflix-light-gray);
+}
+
+.landing-text {
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  font-weight: 400;
+  margin-bottom: 28px;
+  color: #fff;
+}
+
+/* Email CTA Form */
+.cta-email-form {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: 10px;
+  max-width: 600px;
+  margin: 0 auto;
+  flex-wrap: wrap;
+}
+
+.cta-input-wrapper {
+  flex: 1;
+  min-width: 280px;
+  position: relative;
+}
+
+.cta-input {
+  width: 100%;
+  padding: 18px 16px 6px;
+  background: rgba(16, 16, 16, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  color: #fff;
+  font-size: 1rem;
+  backdrop-filter: blur(5px);
+  outline: none;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.cta-input:focus {
+  border-color: #fff;
+  background: rgba(16, 16, 16, 0.9);
+}
+
+.cta-label {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--netflix-gray);
+  font-size: 1rem;
+  pointer-events: none;
+  transition: all 0.2s ease;
+}
+
+.cta-input:focus ~ .cta-label,
+.cta-input:not(:placeholder-shown) ~ .cta-label {
+  top: 8px;
+  transform: translateY(0);
+  font-size: 0.75rem;
+  color: #b3b3b3;
+}
+
+.btn-get-started {
+  background-color: var(--netflix-red);
+  color: #fff;
+  font-size: 1.3rem;
+  font-weight: 700;
+  padding: 14px 28px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  white-space: nowrap;
+}
+
+.btn-get-started:hover {
+  background-color: var(--netflix-red-hover);
+  transform: scale(1.02);
+}
+
+.btn-get-started svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+/* Feature Showcase Rows */
+.feature-section {
+  padding: 70px 4%;
+  border-bottom: 8px solid #232323;
+  background-color: var(--netflix-black);
+}
+
+.feature-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+}
+
+.feature-container.reversed {
+  flex-direction: row-reverse;
+}
+
+.feature-text {
+  flex: 1;
+}
+
+.feature-title {
+  font-size: clamp(2rem, 3.5vw, 3rem);
+  font-weight: 800;
+  margin-bottom: 16px;
+  line-height: 1.2;
+}
+
+.feature-desc {
+  font-size: clamp(1.1rem, 2vw, 1.4rem);
+  color: var(--netflix-light-gray);
+  line-height: 1.4;
+}
+
+.feature-media {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.feature-media img {
+  max-width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+}
+
+.feature-tv-card {
+  position: relative;
+  border: 4px solid #333;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #000;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.9);
+}
+
+.feature-tv-card img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* FAQ Section */
+.faq-section {
+  padding: 80px 4%;
+  border-bottom: 8px solid #232323;
+  text-align: center;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.faq-heading {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 800;
+  margin-bottom: 35px;
+}
+
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 45px;
+  text-align: left;
+}
+
+.faq-item {
+  background-color: #2d2d2d;
+  border-radius: 2px;
+  overflow: hidden;
+  transition: background-color 0.2s ease;
+}
+
+.faq-item:hover {
+  background-color: #414141;
+}
+
+.faq-question {
+  padding: 24px 30px;
+  font-size: 1.3rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+  list-style: none;
+}
+
+.faq-question::-webkit-details-marker {
+  display: none;
+}
+
+.faq-icon {
+  font-size: 2rem;
+  font-weight: 300;
+  transition: transform 0.3s ease;
+}
+
+details[open] .faq-icon {
+  transform: rotate(45deg);
+}
+
+.faq-answer {
+  padding: 0 30px 24px;
+  border-top: 1px solid #141414;
+  font-size: 1.2rem;
+  color: var(--netflix-light-gray);
+  line-height: 1.5;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Landing Footer */
+.landing-footer {
+  padding: 70px 4% 50px;
+  max-width: 1000px;
+  margin: 0 auto;
+  color: var(--netflix-gray);
+  font-size: 0.88rem;
+}
+
+.footer-top {
+  margin-bottom: 30px;
+}
+
+.footer-top a:hover {
+  text-decoration: underline;
+}
+
+.footer-links-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 16px;
+  margin-bottom: 35px;
+  list-style: none;
+}
+
+.footer-links-grid a {
+  color: var(--netflix-gray);
+  transition: color 0.2s ease;
+}
+
+.footer-links-grid a:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.footer-country {
+  font-size: 0.85rem;
+  color: var(--netflix-gray);
+}
+
+@media (max-width: 768px) {
+  .feature-container,
+  .feature-container.reversed {
+    flex-direction: column;
+    text-align: center;
+  }
+  .cta-email-form {
+    flex-direction: column;
+  }
+  .btn-get-started {
+    justify-content: center;
+  }
+}

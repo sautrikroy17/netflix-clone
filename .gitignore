@@ -1,0 +1,7 @@
+node_modules/
+.DS_Store
+*.log
+data/netflix.db-wal
+data/netflix.db-shm
+public/*_preview.png
+public/*_full.png
