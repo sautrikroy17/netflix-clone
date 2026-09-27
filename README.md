@@ -6,8 +6,10 @@ Designed for the **2nd Year Web Development Assessment &amp; Technical Recruitme
 
 ---
 
-## 🌟 Live Demo & Preview
-- **Live Local Server:** `http://localhost:3000`
+## 🌟 Live Demo & Deployment
+- **Live Hosted Application (Frontend + Backend):** [https://netflix-clone-one-lemon-83.vercel.app](https://netflix-clone-one-lemon-83.vercel.app)
+- **GitHub Public Repository:** [https://github.com/sautrikroy17/netflix-clone](https://github.com/sautrikroy17/netflix-clone)
+- **Local Development Server:** `http://localhost:3000`
 - **One-Click Demo Credentials:**
   - **Email:** `demo@netflix.com`
   - **Password:** `password123`
