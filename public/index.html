@@ -25,6 +25,134 @@
   <!-- Dynamic Application Root -->
   <div id="app-root"></div>
 
+  <!-- Dedicated Netflix Fullscreen Cinema Player -->
+  <div id="netflix-cinema-player">
+    <video id="cinema-video" class="cinema-video-element" playsinline></video>
+
+    <!-- Top Bar -->
+    <header class="cinema-top-bar">
+      <button class="cinema-back-btn" id="cinema-back-btn" title="Back to Browse">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        <span>Back</span>
+      </button>
+
+      <div class="cinema-top-title-group">
+        <div class="cinema-top-title" id="cinema-title">Stranger Things</div>
+        <div class="cinema-top-meta">
+          <span id="cinema-episode-badge">S1:E1 "Chapter One"</span>
+          <span>•</span>
+          <span class="quality-badge">4K Ultra HD</span>
+          <span class="quality-badge" style="border-color:#555;">Dolby Atmos</span>
+        </div>
+      </div>
+
+      <div class="cinema-top-right">
+        <button class="cinema-btn" id="cinema-flag-btn" title="Report issue">
+          <svg viewBox="0 0 24 24"><path d="M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Center Stage (Subtitles & OSD) -->
+    <div class="cinema-stage">
+      <div class="cinema-osd-pill" id="cinema-osd-pill">
+        <span id="cinema-osd-icon">🔊</span>
+        <span id="cinema-osd-text">Audio: Hindi [Dubbed] (5.1)</span>
+      </div>
+      <div class="cinema-subtitles-container" id="cinema-subtitles"></div>
+    </div>
+
+    <!-- Bottom Controls Bar -->
+    <footer class="cinema-bottom-bar">
+      <!-- Scrubber -->
+      <div class="cinema-scrubber-wrapper" id="cinema-scrubber-wrapper">
+        <div class="cinema-scrubber-buffered" id="cinema-scrubber-buffered"></div>
+        <div class="cinema-scrubber-progress" id="cinema-scrubber-progress">
+          <div class="cinema-scrubber-handle"></div>
+        </div>
+      </div>
+
+      <!-- Controls Row -->
+      <div class="cinema-controls-row">
+        <div class="cinema-controls-left">
+          <!-- Play / Pause -->
+          <button class="cinema-btn" id="cinema-play-btn" title="Play/Pause (Space)">
+            <svg id="cinema-play-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          </button>
+
+          <!-- 10s Rewind -->
+          <button class="cinema-btn" id="cinema-rewind-btn" title="Rewind 10 seconds (Left Arrow)">
+            <svg viewBox="0 0 24 24"><path d="M12.5 8c-2.65 0-5.05 1-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.2 3.16-1.98 5.12-1.98 3.73 0 6.84 2.55 7.73 6h2.08c-.96-4.57-5.02-8-9.81-8z"/><text x="12" y="15" font-size="7" font-weight="900" text-anchor="middle" fill="#fff" font-family="sans-serif">10</text></svg>
+          </button>
+
+          <!-- 10s Forward -->
+          <button class="cinema-btn" id="cinema-forward-btn" title="Fast Forward 10 seconds (Right Arrow)">
+            <svg viewBox="0 0 24 24"><path d="M11.5 8c2.65 0 5.05 1 6.9 2.6L22 7v9h-9l3.62-3.62c-1.39-1.2-3.16-1.98-5.12-1.98-3.73 0-6.84 2.55-7.73 6H1.69c.96-4.57 5.02-8 9.81-8z"/><text x="12" y="15" font-size="7" font-weight="900" text-anchor="middle" fill="#fff" font-family="sans-serif">10</text></svg>
+          </button>
+
+          <!-- Volume -->
+          <div class="cinema-volume-group">
+            <button class="cinema-btn" id="cinema-volume-btn" title="Mute/Unmute (M)">
+              <svg id="cinema-volume-icon" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+            </button>
+            <input type="range" class="cinema-volume-slider" id="cinema-volume-slider" min="0" max="1" step="0.05" value="0.85" title="Volume">
+          </div>
+
+          <!-- Time Display -->
+          <div class="cinema-time-display" id="cinema-time-display">00:00 / 00:00</div>
+        </div>
+
+        <div class="cinema-controls-right">
+          <!-- Next Episode -->
+          <button class="cinema-btn" id="cinema-next-btn" title="Next Episode">
+            <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+          </button>
+
+          <!-- Audio & Subtitles Menu Trigger -->
+          <div class="cinema-audio-btn-wrapper">
+            <button class="cinema-btn" id="cinema-audio-btn" title="Audio & Subtitles">
+              <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>
+            </button>
+
+            <!-- Netflix Dual-Column Audio & Subtitles Flyout -->
+            <div class="cinema-audio-menu" id="cinema-audio-menu">
+              <!-- Column 1: Audio Dubbing -->
+              <div class="cinema-menu-col">
+                <div class="cinema-menu-col-title">Audio</div>
+                <ul class="cinema-menu-options" id="cinema-audio-options">
+                  <li class="cinema-option-item selected" data-audio-track="en-orig">English [Original] (5.1)</li>
+                  <li class="cinema-option-item" data-audio-track="hi-dub">Hindi [Dubbed] (5.1)</li>
+                  <li class="cinema-option-item" data-audio-track="ta-dub">Tamil [Dubbed]</li>
+                  <li class="cinema-option-item" data-audio-track="te-dub">Telugu [Dubbed]</li>
+                  <li class="cinema-option-item" data-audio-track="es-dub">Spanish [Dubbed]</li>
+                </ul>
+              </div>
+
+              <!-- Column 2: Subtitles -->
+              <div class="cinema-menu-col">
+                <div class="cinema-menu-col-title">Subtitles</div>
+                <ul class="cinema-menu-options" id="cinema-subtitles-options">
+                  <li class="cinema-option-item" data-sub-track="off">Off</li>
+                  <li class="cinema-option-item selected" data-sub-track="en">English [CC]</li>
+                  <li class="cinema-option-item" data-sub-track="hi">Hindi</li>
+                  <li class="cinema-option-item" data-sub-track="es">Spanish</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Playback Speed -->
+          <button class="cinema-speed-btn" id="cinema-speed-btn" title="Playback Speed">1x</button>
+
+          <!-- Fullscreen -->
+          <button class="cinema-btn" id="cinema-fullscreen-btn" title="Fullscreen (F)">
+            <svg id="cinema-fs-icon" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+          </button>
+        </div>
+      </div>
+    </footer>
+  </div>
+
   <!-- Application Logic -->
   <script src="/js/app.js"></script>
 </body>

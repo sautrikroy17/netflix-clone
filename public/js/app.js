@@ -1,6 +1,6 @@
 /* ══════════════════════════════════════════════════════════════
    NETFLIX FULL-STACK CLIENT APPLICATION
-   State Management, Client-Side Router, Auth & CRUD Operations
+   State Management, Client-Side Router, Auth & Cinema Player
 ══════════════════════════════════════════════════════════════ */
 
 class NetflixApp {
@@ -12,6 +12,14 @@ class NetflixApp {
     this.activeCategory = 'all';
     this.searchQuery = '';
     this.selectedMovie = null;
+    this.activeCinemaMovie = null;
+    this.currentSubTrack = 'en';
+    this.currentAudioTrack = 'en-orig';
+    this.isMuted = false;
+    this.idleTimer = null;
+    this.speeds = [1, 1.25, 1.5, 0.75];
+    this.speedIndex = 0;
+    this.currentLang = 'en';
 
     this.init();
   }
@@ -20,6 +28,7 @@ class NetflixApp {
     this.setupRouter();
     await this.checkAuthSession();
     await this.fetchMovies();
+    this.setupCinemaPlayer();
     this.renderCurrentRoute();
     this.setupGlobalEvents();
   }
@@ -129,8 +138,6 @@ class NetflixApp {
 
       this.currentUser = data.user;
       this.showToast(`Welcome to Netflix, ${data.user.name}!`, 'success');
-      await this.fetchMovies();
-      await this.fetchWatchlist();
       this.navigate('/browse');
     } catch (err) {
       this.showAuthError(err.message);
@@ -148,9 +155,8 @@ class NetflixApp {
       if (!res.ok) throw new Error(data.error || 'Login failed');
 
       this.currentUser = data.user;
-      this.showToast(`Welcome back, ${data.user.name}!`, 'success');
-      await this.fetchMovies();
       await this.fetchWatchlist();
+      this.showToast(`Welcome back, ${data.user.name}`, 'success');
       this.navigate('/browse');
     } catch (err) {
       this.showAuthError(err.message);
@@ -163,65 +169,59 @@ class NetflixApp {
     } catch (e) {}
     this.currentUser = null;
     this.watchlist = [];
-    this.showToast('You have been logged out.', 'info');
-    this.navigate('/login');
+    this.showToast('You have been signed out.', 'info');
+    this.navigate('/');
   }
 
   /* ══════════════════════════════════════════════
-     WATCHLIST CRUD (Persisted in SQLite)
+     WATCHLIST CRUD (SQLite Backend)
   ══════════════════════════════════════════════ */
   async toggleWatchlist(movieId) {
-    if (!this.currentUser) {
-      this.showToast('Please sign in to add to My List', 'error');
-      return this.navigate('/login');
-    }
+    if (!this.currentUser) return this.navigate('/login');
 
-    const isInList = this.watchlist.some(m => m.id === movieId);
+    const inList = this.watchlist.some(m => m.id === movieId);
     const movie = this.movies.find(m => m.id === movieId);
 
     try {
-      if (isInList) {
-        // DELETE from DB
+      if (inList) {
         const res = await fetch(`/api/watchlist/${movieId}`, { method: 'DELETE' });
         if (res.ok) {
           this.watchlist = this.watchlist.filter(m => m.id !== movieId);
-          this.showToast(`Removed "${movie ? movie.title : 'item'}" from My List`, 'info');
+          this.showToast(`Removed "${movie?.title || 'Title'}" from My List`, 'info');
         }
       } else {
-        // POST to DB
         const res = await fetch('/api/watchlist', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ movieId })
         });
         if (res.ok) {
-          if (movie) this.watchlist.unshift({ ...movie, inWatchlist: true });
-          this.showToast(`Added "${movie ? movie.title : 'item'}" to My List!`, 'success');
+          if (movie) this.watchlist.push(movie);
+          this.showToast(`Added "${movie?.title || 'Title'}" to My List`, 'success');
         }
       }
-
-      this.updateWatchlistButtons(movieId);
+      this.updateWatchlistBadges();
       if (this.activeCategory === 'mylist') {
         this.renderCurrentRoute();
       }
     } catch (err) {
-      this.showToast('Failed to update My List. Try again.', 'error');
+      this.showToast('Failed to update watchlist', 'error');
     }
   }
 
-  updateWatchlistButtons(movieId) {
-    const isInList = this.watchlist.some(m => m.id === movieId);
-    const btns = document.querySelectorAll(`[data-watchlist-id="${movieId}"]`);
-    btns.forEach(btn => {
+  updateWatchlistBadges() {
+    document.querySelectorAll('[data-watchlist-id]').forEach(btn => {
+      const id = btn.getAttribute('data-watchlist-id');
+      const isIn = this.watchlist.some(m => m.id === id);
       if (btn.classList.contains('btn-billboard-list')) {
-        btn.innerHTML = isInList 
+        btn.innerHTML = isIn 
           ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> In My List`
           : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> My List`;
-        btn.classList.toggle('in-list', isInList);
-      } else {
-        btn.innerHTML = isInList ? `✓` : `+`;
-        btn.classList.toggle('active', isInList);
-        btn.title = isInList ? 'Remove from My List' : 'Add to My List';
+        btn.classList.toggle('in-list', isIn);
+      } else if (btn.classList.contains('card-btn-list')) {
+        btn.innerHTML = isIn ? '✓' : '+';
+        btn.setAttribute('title', isIn ? 'Remove from My List' : 'Add to My List');
+        btn.classList.toggle('in-list', isIn);
       }
     });
   }
@@ -232,10 +232,10 @@ class NetflixApp {
     const newRating = current === rating ? 'none' : rating;
 
     try {
-      const res = await fetch('/api/ratings', {
+      const res = await fetch(`/api/ratings/${movieId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ movieId, rating: newRating })
+        body: JSON.stringify({ rating: newRating })
       });
       if (res.ok) {
         if (newRating === 'none') {
@@ -252,24 +252,35 @@ class NetflixApp {
      VIEW RENDERERS
   ══════════════════════════════════════════════ */
 
-  // 1. Landing Page (Unauthenticated)
+  // 1. Authentic Netflix Landing Page (Unauthenticated)
   renderLandingPage() {
+    const top10 = this.movies.slice(0, 10);
+
     return `
-      <!-- Landing Header -->
+      <!-- Official Netflix Header -->
       <header class="netflix-header">
         <div class="header-left">
-          <div class="netflix-logo" data-route="/">NETFLIX</div>
+          <a href="/" data-route="/" class="netflix-brand-link">
+            <img src="/assets/netflix-logo.svg" alt="Netflix" class="netflix-brand-logo" />
+          </a>
         </div>
         <div class="header-right">
+          <div class="lang-picker-wrapper">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+            <select class="lang-picker" id="landing-lang-picker">
+              <option value="en">English</option>
+              <option value="hi">हिन्दी</option>
+            </select>
+          </div>
           <button class="btn-primary-red" data-route="/login">Sign In</button>
         </div>
       </header>
 
-      <!-- Hero Section -->
+      <!-- Hero Section (Dark poster wall with gradient vignette) -->
       <section class="landing-hero">
         <div class="landing-hero-content">
           <h1 class="landing-title">Unlimited movies, TV shows and more</h1>
-          <p class="landing-subtitle">Starts at ₹149. Cancel anytime.</p>
+          <p class="landing-subtitle">Starts at ₹149. Cancel at any time.</p>
           <p class="landing-text">Ready to watch? Enter your email to create or restart your membership.</p>
           
           <form class="cta-email-form" id="landing-cta-form">
@@ -285,61 +296,66 @@ class NetflixApp {
         </div>
       </section>
 
-      <!-- Feature 1: Enjoy on TV -->
-      <section class="feature-section">
-        <div class="feature-container">
-          <div class="feature-text">
-            <h2 class="feature-title">Enjoy on your TV</h2>
-            <p class="feature-desc">Watch on smart TVs, PlayStation, Xbox, Chromecast, Apple TV, Blu-ray players and more.</p>
+      <!-- Netflix Iconic Curved Red Glow Separator -->
+      <div class="landing-curve-wrapper">
+        <div class="landing-curve"></div>
+      </div>
+
+      <!-- Trending Now Section on Landing Page -->
+      <section class="landing-trending-section">
+        <div class="trending-header">
+          <h2 class="trending-heading">Trending Now</h2>
+          <div class="trending-filters">
+            <select class="trending-select" id="landing-filter-select">
+              <option value="india">India &bull; Movies & Shows</option>
+              <option value="global">Global &bull; Top 10</option>
+            </select>
           </div>
-          <div class="feature-media">
-            <div class="feature-tv-card">
-              <img src="https://images.unsplash.com/photo-1593305841991-05c297ba4575?auto=format&fit=crop&w=700&q=80" alt="Smart TV streaming">
+        </div>
+
+        <div class="landing-top10-container">
+          ${top10.map((m, idx) => `
+            <div class="landing-top10-item" data-landing-play-id="${m.id}" title="Watch ${m.title} in HD">
+              <span class="landing-rank-number">${idx + 1}</span>
+              <div class="landing-top10-poster-wrap">
+                <img src="${m.poster}" alt="${m.title}" class="landing-top10-poster" loading="lazy">
+                <div class="landing-poster-overlay">
+                  <span class="landing-play-pill">▶ Play Trailer</span>
+                </div>
+              </div>
             </div>
+          `).join('')}
+        </div>
+      </section>
+
+      <!-- More Reasons to Join 4-Card Showcase -->
+      <section class="reasons-section">
+        <h2 class="reasons-title">More Reasons to Join</h2>
+        <div class="reasons-grid">
+          <div class="reason-card">
+            <h3 class="reason-card-title">Enjoy on your TV</h3>
+            <p class="reason-card-desc">Watch on smart TVs, PlayStation, Xbox, Chromecast, Apple TV, Blu-ray players and more.</p>
+            <svg class="reason-icon" viewBox="0 0 24 24"><path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.99-.9 1.99-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z"/></svg>
+          </div>
+          <div class="reason-card">
+            <h3 class="reason-card-title">Download shows to watch offline</h3>
+            <p class="reason-card-desc">Save your favourites easily and always have something to watch anywhere you go.</p>
+            <svg class="reason-icon" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
+          </div>
+          <div class="reason-card">
+            <h3 class="reason-card-title">Watch everywhere</h3>
+            <p class="reason-card-desc">Stream unlimited movies and TV shows on your phone, tablet, laptop, and TV without paying more.</p>
+            <svg class="reason-icon" viewBox="0 0 24 24"><path d="M4 6h18V4H4c-1.1 0-2 .9-2 2v11H0v3h14v-3H4V6zm19 2h-6c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h6c.55 0 1-.45 1-1V9c0-.55-.45-1-1-1zm-1 9h-4v-7h4v7z"/></svg>
+          </div>
+          <div class="reason-card">
+            <h3 class="reason-card-title">Create profiles for kids</h3>
+            <p class="reason-card-desc">Send children on adventures with their favourite characters in a space made just for them — free with membership.</p>
+            <svg class="reason-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5-9c.83 0 1.5-.67 1.5-1.5S7.83 8 7 8s-1.5.67-1.5 1.5S6.17 11 7 11zm10 0c.83 0 1.5-.67 1.5-1.5S17.83 8 17 8s-1.5.67-1.5 1.5.67 1.5 1.5 1.5zm-5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/></svg>
           </div>
         </div>
       </section>
 
-      <!-- Feature 2: Download Shows -->
-      <section class="feature-section">
-        <div class="feature-container reversed">
-          <div class="feature-text">
-            <h2 class="feature-title">Download your shows to watch offline</h2>
-            <p class="feature-desc">Save your favourites easily and always have something to watch anywhere you go.</p>
-          </div>
-          <div class="feature-media">
-            <img src="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=700&q=80" alt="Mobile offline viewing">
-          </div>
-        </div>
-      </section>
-
-      <!-- Feature 3: Watch Everywhere -->
-      <section class="feature-section">
-        <div class="feature-container">
-          <div class="feature-text">
-            <h2 class="feature-title">Watch everywhere</h2>
-            <p class="feature-desc">Stream unlimited movies and TV shows on your phone, tablet, laptop, and TV.</p>
-          </div>
-          <div class="feature-media">
-            <img src="https://images.unsplash.com/photo-1522869635100-9f4c5e86aa37?auto=format&fit=crop&w=700&q=80" alt="Multi device streaming">
-          </div>
-        </div>
-      </section>
-
-      <!-- Feature 4: Kids Profiles -->
-      <section class="feature-section">
-        <div class="feature-container reversed">
-          <div class="feature-text">
-            <h2 class="feature-title">Create profiles for kids</h2>
-            <p class="feature-desc">Send children on adventures with their favourite characters in a space made just for them — free with your membership.</p>
-          </div>
-          <div class="feature-media">
-            <img src="https://images.unsplash.com/photo-1560169897-fc0cdbdfa4d5?auto=format&fit=crop&w=700&q=80" alt="Kids entertainment">
-          </div>
-        </div>
-      </section>
-
-      <!-- FAQ Section (Native details name="faq" exclusive accordion) -->
+      <!-- Frequently Asked Questions -->
       <section class="faq-section">
         <h2 class="faq-heading">Frequently Asked Questions</h2>
         <div class="faq-list">
@@ -406,11 +422,11 @@ class NetflixApp {
         </form>
       </section>
 
-      <!-- Footer -->
+      <!-- Official Netflix Footer -->
       <footer class="landing-footer">
         <div class="footer-top">Questions? Call <a href="tel:0008009191694">000-800-919-1694</a></div>
         <ul class="footer-links-grid">
-          <li><a href="#faq">FAQ</a></li>
+          <li><a href="#">FAQ</a></li>
           <li><a href="#">Help Centre</a></li>
           <li><a href="#">Account</a></li>
           <li><a href="#">Media Centre</a></li>
@@ -419,236 +435,343 @@ class NetflixApp {
           <li><a href="#">Ways to Watch</a></li>
           <li><a href="#">Terms of Use</a></li>
           <li><a href="#">Privacy</a></li>
+          <li><a href="#">Cookie Preferences</a></li>
           <li><a href="#">Corporate Information</a></li>
+          <li><a href="#">Contact Us</a></li>
           <li><a href="#">Speed Test</a></li>
+          <li><a href="#">Legal Notices</a></li>
           <li><a href="#">Only on Netflix</a></li>
         </ul>
-        <p class="footer-country">Netflix India &bull; Engineering Prototype</p>
+        <div class="footer-lang-container">
+          <div class="lang-picker-wrapper">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+            <select class="lang-picker">
+              <option value="en">English</option>
+              <option value="hi">हिन्दी</option>
+            </select>
+          </div>
+        </div>
+        <div class="footer-country">Netflix India</div>
       </footer>
     `;
   }
 
-  // 2. Sign Up Page
-  renderSignupPage() {
-    const prefilledEmail = sessionStorage.getItem('netflix_signup_email') || '';
+  attachLandingEvents() {
+    const handleCta = (e, inputId) => {
+      e.preventDefault();
+      const input = document.getElementById(inputId);
+      const email = input ? input.value.trim() : '';
+      if (email) {
+        sessionStorage.setItem('prefill_email', email);
+      }
+      this.navigate('/signup');
+    };
 
-    return `
-      <div class="auth-wrapper">
-        <header class="auth-header">
-          <div class="netflix-logo" data-route="/">NETFLIX</div>
-          <button class="btn-primary-red" data-route="/login">Sign In</button>
-        </header>
+    const topForm = document.getElementById('landing-cta-form');
+    if (topForm) topForm.addEventListener('submit', (e) => handleCta(e, 'landing-email-input'));
 
-        <main class="auth-card-container">
-          <div class="auth-card">
-            <span class="auth-step-badge">STEP 1 OF 2</span>
-            <h1 class="auth-title">Create a password to start your membership</h1>
-            <p class="auth-subtitle">Just a few more steps and you're done! We hate paperwork, too.</p>
+    const btmForm = document.getElementById('landing-bottom-cta');
+    if (btmForm) btmForm.addEventListener('submit', (e) => handleCta(e, 'landing-email-bottom'));
 
-            <div id="auth-error-banner" class="auth-error-banner">
-              <span id="auth-error-text"></span>
-            </div>
-
-            <form id="signup-form">
-              <div class="form-group">
-                <input type="text" id="signup-name" class="form-control" placeholder=" " required autocomplete="name">
-                <label for="signup-name" class="form-label">Full Name</label>
-              </div>
-
-              <div class="form-group">
-                <input type="email" id="signup-email" class="form-control" placeholder=" " value="${prefilledEmail}" required autocomplete="email" inputmode="email">
-                <label for="signup-email" class="form-label">Email address</label>
-              </div>
-
-              <div class="form-group">
-                <input type="password" id="signup-password" class="form-control" placeholder=" " required minlength="6" autocomplete="new-password">
-                <label for="signup-password" class="form-label">Add a password (min 6 characters)</label>
-                <button type="button" class="password-toggle-btn" id="signup-password-toggle">SHOW</button>
-              </div>
-
-              <!-- Password Strength Meter -->
-              <div class="password-strength-container" id="password-strength-container">
-                <div class="password-strength-bar">
-                  <div class="password-strength-fill" id="password-strength-fill"></div>
-                </div>
-                <div class="password-strength-text">
-                  <span>Strength</span>
-                  <span id="password-strength-label">Weak</span>
-                </div>
-              </div>
-
-              <!-- Choose Plan -->
-              <label style="font-size:0.85rem; color:#aaa; margin-bottom:8px; display:block;">Select your streaming plan:</label>
-              <div class="plans-grid">
-                <div class="plan-card" data-plan="Mobile">
-                  <div class="plan-name">Mobile</div>
-                  <div class="plan-price">₹149</div>
-                  <div class="plan-res">480p</div>
-                </div>
-                <div class="plan-card" data-plan="Basic">
-                  <div class="plan-name">Basic</div>
-                  <div class="plan-price">₹199</div>
-                  <div class="plan-res">720p HD</div>
-                </div>
-                <div class="plan-card" data-plan="Standard">
-                  <div class="plan-name">Standard</div>
-                  <div class="plan-price">₹499</div>
-                  <div class="plan-res">1080p FHD</div>
-                </div>
-                <div class="plan-card active" data-plan="Premium">
-                  <div class="plan-name">Premium</div>
-                  <div class="plan-price">₹649</div>
-                  <div class="plan-res">4K + HDR</div>
-                </div>
-              </div>
-
-              <button type="submit" class="btn-auth-submit" id="btn-submit-signup">
-                Next &mdash; Start Membership
-              </button>
-            </form>
-
-            <div class="auth-divider"><span>OR</span></div>
-
-            <button type="button" class="btn-demo-login" id="btn-quick-signup">
-              ⚡ Quick Auto-Fill Test Account
-            </button>
-
-            <div class="auth-switch-text">
-              Already have an account? <a href="/login" class="auth-switch-link" data-route="/login">Sign in now</a>.
-            </div>
-            <p class="auth-captcha-text">
-              This page is protected by Google reCAPTCHA to ensure you're not a bot.
-            </p>
-          </div>
-        </main>
-
-        <footer class="landing-footer" style="padding-top:20px;">
-          <p class="footer-country">Questions? Contact Support &bull; Netflix System</p>
-        </footer>
-      </div>
-    `;
+    // Landing Page Top 10 Click -> Play in Cinema Player
+    document.querySelectorAll('[data-landing-play-id]').forEach(item => {
+      item.addEventListener('click', () => {
+        const id = item.getAttribute('data-landing-play-id');
+        this.openCinemaPlayer(id);
+      });
+    });
   }
 
-  // 3. Log In Page
+  // 2. Sign In Page
   renderLoginPage() {
     return `
       <div class="auth-wrapper">
         <header class="auth-header">
-          <div class="netflix-logo" data-route="/">NETFLIX</div>
+          <a href="/" data-route="/" class="netflix-brand-link">
+            <img src="/assets/netflix-logo.svg" alt="Netflix" class="netflix-brand-logo" />
+          </a>
         </header>
 
         <main class="auth-card-container">
           <div class="auth-card">
             <h1 class="auth-title">Sign In</h1>
 
-            <div id="auth-error-banner" class="auth-error-banner">
-              <span id="auth-error-text"></span>
+            <div class="auth-error-banner" id="auth-error-banner">
+              <span id="auth-error-text">Incorrect password or email.</span>
             </div>
 
-            <form id="login-form">
+            <form class="auth-form" id="login-form">
               <div class="form-group">
-                <input type="email" id="login-email" class="form-control" placeholder=" " required autocomplete="email" inputmode="email">
+                <input type="email" id="login-email" class="form-control" placeholder=" " required autocomplete="email">
                 <label for="login-email" class="form-label">Email or mobile number</label>
               </div>
 
               <div class="form-group">
                 <input type="password" id="login-password" class="form-control" placeholder=" " required autocomplete="current-password">
                 <label for="login-password" class="form-label">Password</label>
-                <button type="button" class="password-toggle-btn" id="login-password-toggle">SHOW</button>
               </div>
 
-              <button type="submit" class="btn-auth-submit" id="btn-submit-login">
-                Sign In
+              <button type="submit" class="btn-auth-submit" id="btn-login-submit">Sign In</button>
+
+              <div class="auth-divider"><span>OR</span></div>
+
+              <button type="button" class="btn-demo-login" id="btn-quick-demo">
+                ⚡ Use One-Click Demo Account (Instant Access)
               </button>
+
+              <div class="form-helper-row">
+                <label class="remember-checkbox">
+                  <input type="checkbox" checked>
+                  <span>Remember me</span>
+                </label>
+                <a href="#" class="help-link" id="link-forgot-pw">Need help?</a>
+              </div>
             </form>
 
-            <div class="auth-divider"><span>OR</span></div>
-
-            <!-- Instant One-Click Demo Login -->
-            <button type="button" class="btn-demo-login" id="btn-quick-demo">
-              🚀 One-Click Demo Evaluator Login (demo@netflix.com)
-            </button>
-
-            <div class="form-helper-row">
-              <label class="remember-checkbox">
-                <input type="checkbox" checked>
-                <span>Remember me</span>
-              </label>
-              <a href="#" class="help-link">Need help?</a>
-            </div>
-
             <div class="auth-switch-text">
-              New to Netflix? <a href="/signup" class="auth-switch-link" data-route="/signup">Sign up now</a>.
+              New to Netflix? <a href="/signup" data-route="/signup" class="auth-switch-link">Sign up now</a>.
             </div>
-            <p class="auth-captcha-text">
-              This page is protected by Google reCAPTCHA to ensure you're not a bot. Learn more.
-            </p>
+
+            <div class="auth-captcha-text">
+              This page is protected by Google reCAPTCHA to ensure you're not a bot.
+            </div>
           </div>
         </main>
 
-        <footer class="landing-footer" style="padding-top:20px;">
-          <p class="footer-country">Questions? Contact Support &bull; Netflix System</p>
+        <footer class="landing-footer" style="background: rgba(0,0,0,0.85); border-top: 1px solid #333;">
+          <div class="footer-top">Questions? Call <a href="tel:0008009191694">000-800-919-1694</a></div>
+          <ul class="footer-links-grid">
+            <li><a href="#">FAQ</a></li>
+            <li><a href="#">Help Centre</a></li>
+            <li><a href="#">Terms of Use</a></li>
+            <li><a href="#">Privacy</a></li>
+            <li><a href="#">Cookie Preferences</a></li>
+            <li><a href="#">Corporate Information</a></li>
+          </ul>
         </footer>
       </div>
     `;
   }
 
-  // 4. Authenticated Browse Dashboard (The Living Netflix Experience)
+  attachLoginEvents() {
+    const form = document.getElementById('login-form');
+    if (form) {
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const email = document.getElementById('login-email').value.trim();
+        const pass = document.getElementById('login-password').value;
+        this.handleLogin(email, pass);
+      });
+    }
+
+    const demoBtn = document.getElementById('btn-quick-demo');
+    if (demoBtn) {
+      demoBtn.addEventListener('click', () => {
+        document.getElementById('login-email').value = 'demo@netflix.com';
+        document.getElementById('login-password').value = 'password123';
+        this.handleLogin('demo@netflix.com', 'password123');
+      });
+    }
+
+    const forgotPw = document.getElementById('link-forgot-pw');
+    if (forgotPw) {
+      forgotPw.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.showToast('Demo Credentials: demo@netflix.com / password123', 'info');
+      });
+    }
+  }
+
+  // 3. Sign Up Page
+  renderSignupPage() {
+    const prefillEmail = sessionStorage.getItem('prefill_email') || '';
+
+    return `
+      <div class="auth-wrapper">
+        <header class="auth-header">
+          <a href="/" data-route="/" class="netflix-brand-link">
+            <img src="/assets/netflix-logo.svg" alt="Netflix" class="netflix-brand-logo" />
+          </a>
+          <button class="btn-primary-red" data-route="/login">Sign In</button>
+        </header>
+
+        <main class="auth-card-container">
+          <div class="auth-card">
+            <div class="signup-step-header">
+              <span class="auth-step-badge">STEP 1 OF 3</span>
+              <h1 class="auth-title" style="margin-top:8px;">Create a password to start your membership</h1>
+              <p style="color:#bbb; font-size:0.95rem; margin-bottom:20px;">Just a few more steps and you're done! We hate paperwork, too.</p>
+            </div>
+
+            <div class="auth-error-banner" id="auth-error-banner">
+              <span id="auth-error-text"></span>
+            </div>
+
+            <form class="auth-form" id="signup-form">
+              <div class="form-group">
+                <input type="text" id="signup-name" class="form-control" placeholder=" " required autocomplete="name">
+                <label for="signup-name" class="form-label">Your Name</label>
+              </div>
+
+              <div class="form-group">
+                <input type="email" id="signup-email" class="form-control" placeholder=" " value="${prefillEmail}" required autocomplete="email">
+                <label for="signup-email" class="form-label">Email address</label>
+              </div>
+
+              <div class="form-group">
+                <input type="password" id="signup-password" class="form-control" placeholder=" " required minlength="6" autocomplete="new-password">
+                <label for="signup-password" class="form-label">Add a password (min 6 chars)</label>
+              </div>
+
+              <!-- Password Strength Meter -->
+              <div class="password-strength-container" style="display:block;">
+                <div class="password-strength-bar">
+                  <div class="password-strength-fill" id="pw-strength-fill"></div>
+                </div>
+                <div class="password-strength-text" id="pw-strength-text">Password strength</div>
+              </div>
+
+              <button type="submit" class="btn-auth-submit" id="btn-signup-submit" style="margin-top:20px;">Next &bull; Start Membership</button>
+            </form>
+
+            <div class="auth-switch-text" style="margin-top:24px;">
+              Already have an account? <a href="/login" data-route="/login" class="auth-switch-link">Sign in</a>.
+            </div>
+          </div>
+        </main>
+
+        <footer class="landing-footer" style="background: rgba(0,0,0,0.85); border-top: 1px solid #333;">
+          <div class="footer-top">Questions? Call 000-800-919-1694</div>
+          <ul class="footer-links-grid">
+            <li><a href="#">FAQ</a></li>
+            <li><a href="#">Help Centre</a></li>
+            <li><a href="#">Terms of Use</a></li>
+            <li><a href="#">Privacy</a></li>
+          </ul>
+        </footer>
+      </div>
+    `;
+  }
+
+  attachSignupEvents() {
+    const form = document.getElementById('signup-form');
+    const pwInput = document.getElementById('signup-password');
+    const bar = document.getElementById('pw-strength-fill');
+    const text = document.getElementById('pw-strength-text');
+
+    if (pwInput && bar && text) {
+      pwInput.addEventListener('input', () => {
+        const val = pwInput.value;
+        let score = 0;
+        if (val.length >= 6) score += 25;
+        if (val.length >= 10) score += 25;
+        if (/[A-Z]/.test(val) && /[a-z]/.test(val)) score += 25;
+        if (/[0-9]/.test(val) || /[^A-Za-z0-9]/.test(val)) score += 25;
+
+        bar.style.width = score + '%';
+        if (score <= 25) {
+          bar.style.backgroundColor = '#e50914';
+          text.textContent = 'Weak';
+          text.style.color = '#e50914';
+        } else if (score <= 50) {
+          bar.style.backgroundColor = '#ffa00a';
+          text.textContent = 'Fair';
+          text.style.color = '#ffa00a';
+        } else if (score <= 75) {
+          bar.style.backgroundColor = '#2ecc71';
+          text.textContent = 'Good';
+          text.style.color = '#2ecc71';
+        } else {
+          bar.style.backgroundColor = '#00d2d3';
+          text.textContent = 'Strong & Secure';
+          text.style.color = '#00d2d3';
+        }
+      });
+    }
+
+    if (form) {
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('signup-name').value.trim();
+        const email = document.getElementById('signup-email').value.trim();
+        const pass = document.getElementById('signup-password').value;
+        this.handleSignup(name, email, pass);
+      });
+    }
+  }
+
+  // 4. Authenticated Browse Dashboard
   renderBrowseDashboard() {
     const featured = this.movies[0] || {};
     const isInWatchlist = this.watchlist.some(m => m.id === featured.id);
 
-    // Filter movies based on category and search
     let displayedMovies = [...this.movies];
+    if (this.activeCategory === 'tv') displayedMovies = displayedMovies.filter(m => m.type === 'TV Series');
+    if (this.activeCategory === 'movies') displayedMovies = displayedMovies.filter(m => m.type === 'Movie');
+    if (this.activeCategory === 'mylist') displayedMovies = this.watchlist;
 
     if (this.searchQuery) {
       const q = this.searchQuery.toLowerCase();
-      displayedMovies = displayedMovies.filter(m =>
+      displayedMovies = this.movies.filter(m => 
         m.title.toLowerCase().includes(q) ||
-        m.overview.toLowerCase().includes(q) ||
-        m.genres.some(g => g.toLowerCase().includes(q))
+        m.genres.some(g => g.toLowerCase().includes(q)) ||
+        m.cast.some(c => c.toLowerCase().includes(q))
       );
     }
 
-    const trending = displayedMovies.filter(m => m.category === 'trending');
-    const top10 = displayedMovies.filter(m => m.top10Rank).sort((a, b) => a.top10Rank - b.top10Rank);
-    const scifi = displayedMovies.filter(m => m.genres.includes('Sci-Fi') || m.category === 'scifi');
-    const action = displayedMovies.filter(m => m.genres.includes('Action') || m.category === 'action');
-    const drama = displayedMovies.filter(m => m.genres.includes('Drama') || m.category === 'drama');
+    const trending = this.movies.filter(m => m.category === 'trending');
+    const top10 = this.movies.slice(0, 10);
+    const scifi = this.movies.filter(m => m.category === 'scifi');
+    const action = this.movies.filter(m => m.category === 'action');
+    const drama = this.movies.filter(m => m.category === 'drama');
 
     return `
       <div class="browse-container">
-        <!-- Netflix Main Header -->
+        <!-- Netflix Browse Header -->
         <header class="netflix-header" id="browse-header">
           <div class="header-left">
-            <div class="netflix-logo" data-route="/browse">NETFLIX</div>
+            <a href="/browse" data-route="/browse" class="netflix-brand-link">
+              <img src="/assets/netflix-logo.svg" alt="Netflix" class="netflix-brand-logo" />
+            </a>
             <ul class="nav-links">
-              <li class="nav-item ${this.activeCategory === 'all' && !this.searchQuery ? 'active' : ''}"><a data-category="all" data-route="/browse">Home</a></li>
-              <li class="nav-item ${this.activeCategory === 'tv' ? 'active' : ''}"><a data-category="tv">TV Shows</a></li>
-              <li class="nav-item ${this.activeCategory === 'movies' ? 'active' : ''}"><a data-category="movies">Movies</a></li>
-              <li class="nav-item ${this.activeCategory === 'trending' ? 'active' : ''}"><a data-category="trending">New & Popular</a></li>
-              <li class="nav-item ${this.activeCategory === 'mylist' ? 'active' : ''}"><a data-category="mylist" data-route="/mylist">My List (${this.watchlist.length})</a></li>
+              <li class="nav-item ${this.activeCategory === 'all' && !this.searchQuery ? 'active' : ''}">
+                <a href="/browse" data-category="all">Home</a>
+              </li>
+              <li class="nav-item ${this.activeCategory === 'tv' ? 'active' : ''}">
+                <a href="/browse" data-category="tv">TV Shows</a>
+              </li>
+              <li class="nav-item ${this.activeCategory === 'movies' ? 'active' : ''}">
+                <a href="/browse" data-category="movies">Movies</a>
+              </li>
+              <li class="nav-item ${this.activeCategory === 'trending' ? 'active' : ''}">
+                <a href="/browse" data-category="trending">New & Popular</a>
+              </li>
+              <li class="nav-item ${this.activeCategory === 'mylist' ? 'active' : ''}">
+                <a href="/mylist" data-category="mylist">My List (${this.watchlist.length})</a>
+              </li>
             </ul>
           </div>
 
           <div class="header-right">
-            <!-- Search Bar -->
-            <div class="search-container" id="search-container">
-              <button class="search-toggle-btn" id="search-toggle" title="Search movies">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <!-- Expandable Search Bar -->
+            <div class="search-box ${this.searchQuery ? 'active' : ''}" id="search-box">
+              <button class="search-icon-btn" id="search-toggle-btn" aria-label="Search">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
               </button>
-              <input type="text" id="search-input" class="search-input-box" placeholder="Titles, people, genres..." value="${this.searchQuery}">
+              <input type="text" id="search-input" class="search-input" placeholder="Titles, people, genres" value="${this.searchQuery}">
+              ${this.searchQuery ? `<button class="search-clear-btn" id="search-clear-btn">✕</button>` : ''}
             </div>
 
-            <!-- User Menu -->
-            <div class="user-profile-menu" id="user-menu-trigger">
-              <img src="${this.currentUser.avatar}" alt="${this.currentUser.name}" class="user-avatar-img">
-              <div class="profile-caret"></div>
-              
-              <div class="profile-dropdown" id="user-dropdown">
-                <div class="profile-dropdown-user">
+            <!-- Profile Menu Dropdown -->
+            <div class="profile-menu-wrapper" id="profile-menu-wrapper">
+              <div class="profile-avatar-btn">
+                <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80" alt="Profile Avatar" class="profile-img">
+                <span class="profile-caret">▼</span>
+              </div>
+              <div class="profile-dropdown-menu" id="profile-dropdown">
+                <div class="profile-user-info">
                   <div class="profile-user-name">${this.currentUser.name}</div>
-                  <div class="profile-user-plan">${this.currentUser.plan}</div>
+                  <div class="profile-user-plan">${this.currentUser.plan} &bull; 4K UHD</div>
                 </div>
                 <a href="/mylist" data-route="/mylist">📋 My List (${this.watchlist.length})</a>
                 <button type="button" id="btn-logout">🚪 Sign Out of Netflix</button>
@@ -657,7 +780,7 @@ class NetflixApp {
           </div>
         </header>
 
-        <!-- Search Results View (If active search) -->
+        <!-- Search Results View -->
         ${this.searchQuery ? `
           <div style="padding: 120px 4% 40px;">
             <h2 style="font-size: 1.5rem; margin-bottom: 20px;">Search results for "${this.searchQuery}" (${displayedMovies.length} found)</h2>
@@ -666,7 +789,7 @@ class NetflixApp {
             </div>
           </div>
         ` : `
-          <!-- Hero Billboard Spotlight (If Home) -->
+          <!-- Hero Billboard Spotlight -->
           ${this.activeCategory !== 'mylist' && featured.id ? `
             <section class="billboard" style="background-image: url('${featured.backdrop}')">
               <div class="billboard-vignette"></div>
@@ -680,16 +803,17 @@ class NetflixApp {
                   <span class="match-score">${featured.matchScore}% Match</span>
                   <span class="age-badge">${featured.ageRating}</span>
                   <span class="quality-badge">${featured.quality}</span>
+                  <span class="quality-badge" style="border-color:#555;">${featured.audio || 'Dolby Atmos'}</span>
                   <span style="color:#bbb;">${featured.duration}</span>
                 </div>
                 <p class="billboard-desc">${featured.overview}</p>
                 <div class="billboard-actions">
                   <button class="btn-billboard-play" data-play-id="${featured.id}">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
                     Play
                   </button>
                   <button class="btn-billboard-info" data-info-id="${featured.id}">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
                     More Info
                   </button>
                   <button class="btn-billboard-list ${isInWatchlist ? 'in-list' : ''}" data-watchlist-id="${featured.id}">
@@ -740,7 +864,7 @@ class NetflixApp {
               <!-- 3. Top 10 in India Today Row -->
               <div class="category-row">
                 <div class="category-header">
-                  <h2 class="category-title">Top 10 Movies & TV Shows Today</h2>
+                  <h2 class="category-title">Top 10 in India Today</h2>
                 </div>
                 <div class="movie-slider">
                   ${top10.map(m => this.renderTop10Card(m)).join('')}
@@ -750,27 +874,27 @@ class NetflixApp {
               <!-- 4. Sci-Fi & Cyberpunk Row -->
               <div class="category-row">
                 <div class="category-header">
-                  <h2 class="category-title">Mind-Bending &amp; Sci-Fi</h2>
+                  <h2 class="category-title">Blockbuster Sci-Fi & Mind-Bending</h2>
                 </div>
                 <div class="movie-slider">
                   ${scifi.map(m => this.renderMovieCard(m)).join('')}
                 </div>
               </div>
 
-              <!-- 5. Action & High Stakes Row -->
+              <!-- 5. Action & Thrillers Row -->
               <div class="category-row">
                 <div class="category-header">
-                  <h2 class="category-title">Action &amp; Thrillers</h2>
+                  <h2 class="category-title">Action & Adrenaline Thrillers</h2>
                 </div>
                 <div class="movie-slider">
                   ${action.map(m => this.renderMovieCard(m)).join('')}
                 </div>
               </div>
 
-              <!-- 6. Critically Acclaimed Dramas Row -->
+              <!-- 6. Critically Acclaimed TV Dramas -->
               <div class="category-row">
                 <div class="category-header">
-                  <h2 class="category-title">Critically Acclaimed Dramas</h2>
+                  <h2 class="category-title">Critically Acclaimed TV Dramas</h2>
                 </div>
                 <div class="movie-slider">
                   ${drama.map(m => this.renderMovieCard(m)).join('')}
@@ -781,292 +905,471 @@ class NetflixApp {
           </main>
         `}
 
-        <!-- Interactive Movie Detail & Video Player Modal Dialog (<dialog>) -->
-        <dialog id="movie-detail-dialog"></dialog>
+        <!-- Interactive Movie Detail Modal Dialog (<dialog>) -->
+        <dialog class="movie-modal" id="movie-detail-dialog"></dialog>
       </div>
     `;
   }
 
-  // Render individual movie card
   renderMovieCard(movie) {
     const isInList = this.watchlist.some(m => m.id === movie.id);
-    const rating = this.ratings[movie.id];
+    const userRating = this.ratings[movie.id] || 'none';
 
     return `
-      <div class="movie-card" data-movie-id="${movie.id}">
-        <img src="${movie.backdrop}" alt="${movie.title}" loading="lazy">
-        <div class="movie-card-overlay">
-          <div class="movie-card-title">${movie.title}</div>
-          <div class="movie-card-actions">
+      <div class="movie-card" data-card-id="${movie.id}">
+        <img src="${movie.backdrop}" alt="${movie.title}" loading="lazy" class="movie-card-thumb">
+        <div class="movie-card-hover-box">
+          <div class="hover-media-preview" style="background-image:url('${movie.backdrop}')"></div>
+          <div class="hover-content">
+            <div class="hover-actions-row">
+              <div class="hover-left-btns">
+                <button class="card-btn card-btn-play" data-play-id="${movie.id}" title="Play in HD with Audio">▶</button>
+                <button class="card-btn card-btn-list ${isInList ? 'in-list' : ''}" data-watchlist-id="${movie.id}" title="${isInList ? 'Remove from My List' : 'Add to My List'}">
+                  ${isInList ? '✓' : '+'}
+                </button>
+                <button class="card-btn card-btn-thumb ${userRating === 'like' ? 'rated' : ''}" data-rating-id="${movie.id}" data-rating-val="like" title="I like this">👍</button>
+              </div>
+              <button class="card-btn card-btn-info" data-info-id="${movie.id}" title="Episode info & more">⌄</button>
+            </div>
+            <div class="hover-meta-row">
+              <span class="match-score">${movie.matchScore}% Match</span>
+              <span class="age-badge">${movie.ageRating}</span>
+              <span class="quality-badge">${movie.quality}</span>
+            </div>
+            <div class="hover-genres">${movie.genres.slice(0, 3).join(' • ')}</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  renderTop10Card(movie) {
+    const isInList = this.watchlist.some(m => m.id === movie.id);
+
+    return `
+      <div class="top10-card" data-card-id="${movie.id}">
+        <div class="top10-number">${movie.top10Rank || 1}</div>
+        <div class="top10-poster-wrap">
+          <img src="${movie.poster}" alt="${movie.title}" loading="lazy" class="top10-poster">
+          <div class="top10-overlay-actions">
             <button class="card-btn card-btn-play" data-play-id="${movie.id}" title="Play preview">▶</button>
-            <button class="card-btn ${isInList ? 'active' : ''}" data-watchlist-id="${movie.id}" title="${isInList ? 'Remove from My List' : 'Add to My List'}">
+            <button class="card-btn card-btn-list ${isInList ? 'in-list' : ''}" data-watchlist-id="${movie.id}">
               ${isInList ? '✓' : '+'}
             </button>
-            <button class="card-btn ${rating === 'like' ? 'active' : ''}" data-rate-id="${movie.id}" data-rating="like" title="I like this">👍</button>
-            <button class="card-btn" data-info-id="${movie.id}" style="margin-left:auto;" title="More Info">⌄</button>
+            <button class="card-btn card-btn-info" data-info-id="${movie.id}">⌄</button>
           </div>
-          <div class="movie-card-info">
-            <span class="match-score">${movie.matchScore}% Match</span>
-            <span class="age-badge">${movie.ageRating}</span>
-            <span style="color:#aaa;">${movie.duration}</span>
-          </div>
-          <div class="movie-card-genres">${movie.genres.join(' &bull; ')}</div>
         </div>
       </div>
     `;
-  }
-
-  // Render Top 10 Ranked Card
-  renderTop10Card(movie) {
-    return `
-      <div class="top10-card" data-info-id="${movie.id}">
-        <div class="top10-rank">${movie.top10Rank}</div>
-        <div class="top10-poster">
-          <img src="${movie.poster}" alt="${movie.title}" loading="lazy">
-        </div>
-      </div>
-    `;
-  }
-
-  /* ══════════════════════════════════════════════
-     EVENT ATTACHMENTS
-  ══════════════════════════════════════════════ */
-  attachLandingEvents() {
-    const handleCta = (e, inputId) => {
-      e.preventDefault();
-      const val = document.getElementById(inputId).value;
-      if (val) {
-        sessionStorage.setItem('netflix_signup_email', val);
-      }
-      this.navigate('/signup');
-    };
-
-    const form1 = document.getElementById('landing-cta-form');
-    if (form1) form1.addEventListener('submit', (e) => handleCta(e, 'landing-email-input'));
-
-    const form2 = document.getElementById('landing-bottom-cta');
-    if (form2) form2.addEventListener('submit', (e) => handleCta(e, 'landing-email-bottom'));
-  }
-
-  attachLoginEvents() {
-    const form = document.getElementById('login-form');
-    if (form) {
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('login-email').value;
-        const password = document.getElementById('login-password').value;
-        const btn = document.getElementById('btn-submit-login');
-        btn.disabled = true;
-        btn.innerText = 'Signing In...';
-        await this.handleLogin(email, password);
-        btn.disabled = false;
-        btn.innerText = 'Sign In';
-      });
-    }
-
-    // One-Click Demo Evaluator Login
-    const demoBtn = document.getElementById('btn-quick-demo');
-    if (demoBtn) {
-      demoBtn.addEventListener('click', async () => {
-        document.getElementById('login-email').value = 'demo@netflix.com';
-        document.getElementById('login-password').value = 'password123';
-        demoBtn.disabled = true;
-        demoBtn.innerText = 'Logging into Demo...';
-        await this.handleLogin('demo@netflix.com', 'password123');
-      });
-    }
-
-    // Password Toggle
-    const toggleBtn = document.getElementById('login-password-toggle');
-    const pwdInput = document.getElementById('login-password');
-    if (toggleBtn && pwdInput) {
-      toggleBtn.addEventListener('click', () => {
-        const isPwd = pwdInput.type === 'password';
-        pwdInput.type = isPwd ? 'text' : 'password';
-        toggleBtn.innerText = isPwd ? 'HIDE' : 'SHOW';
-      });
-    }
-  }
-
-  attachSignupEvents() {
-    const form = document.getElementById('signup-form');
-    const pwdInput = document.getElementById('signup-password');
-    const strengthBar = document.getElementById('password-strength-fill');
-    const strengthLabel = document.getElementById('password-strength-label');
-    const strengthContainer = document.getElementById('password-strength-container');
-
-    // Live Password Strength Meter
-    if (pwdInput && strengthBar) {
-      pwdInput.addEventListener('input', () => {
-        const val = pwdInput.value;
-        if (!val) {
-          strengthContainer.style.display = 'none';
-          return;
-        }
-        strengthContainer.style.display = 'block';
-
-        let score = 0;
-        if (val.length >= 6) score++;
-        if (val.length >= 10) score++;
-        if (/[A-Z]/.test(val) && /[0-9]/.test(val)) score++;
-        if (/[^A-Za-z0-9]/.test(val)) score++;
-
-        if (score <= 1) {
-          strengthBar.style.width = '33%';
-          strengthBar.style.backgroundColor = '#e50914';
-          strengthLabel.innerText = 'Weak';
-          strengthLabel.style.color = '#e50914';
-        } else if (score === 2) {
-          strengthBar.style.width = '66%';
-          strengthBar.style.backgroundColor = '#ffa00a';
-          strengthLabel.innerText = 'Medium';
-          strengthLabel.style.color = '#ffa00a';
-        } else {
-          strengthBar.style.width = '100%';
-          strengthBar.style.backgroundColor = '#46d369';
-          strengthLabel.innerText = 'Strong';
-          strengthLabel.style.color = '#46d369';
-        }
-      });
-    }
-
-    // Plan Selection
-    const planCards = document.querySelectorAll('.plan-card');
-    planCards.forEach(card => {
-      card.addEventListener('click', () => {
-        planCards.forEach(c => c.classList.remove('active'));
-        card.classList.add('active');
-      });
-    });
-
-    if (form) {
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const name = document.getElementById('signup-name').value;
-        const email = document.getElementById('signup-email').value;
-        const password = document.getElementById('signup-password').value;
-        const btn = document.getElementById('btn-submit-signup');
-        btn.disabled = true;
-        btn.innerText = 'Creating Account...';
-        await this.handleSignup(name, email, password);
-        btn.disabled = false;
-        btn.innerText = 'Next — Start Membership';
-      });
-    }
-
-    // Quick Auto-Fill Test Account
-    const quickBtn = document.getElementById('btn-quick-signup');
-    if (quickBtn) {
-      quickBtn.addEventListener('click', () => {
-        const rand = Math.floor(1000 + Math.random() * 9000);
-        document.getElementById('signup-name').value = 'SRM Evaluator';
-        document.getElementById('signup-email').value = `evaluator_${rand}@netflix.com`;
-        document.getElementById('signup-password').value = 'securepass2026';
-        if (pwdInput) pwdInput.dispatchEvent(new Event('input'));
-      });
-    }
-
-    // Password Toggle
-    const toggleBtn = document.getElementById('signup-password-toggle');
-    if (toggleBtn && pwdInput) {
-      toggleBtn.addEventListener('click', () => {
-        const isPwd = pwdInput.type === 'password';
-        pwdInput.type = isPwd ? 'text' : 'password';
-        toggleBtn.innerText = isPwd ? 'HIDE' : 'SHOW';
-      });
-    }
   }
 
   attachBrowseEvents() {
-    // Header scroll background toggle
+    // Header scroll background change
     const header = document.getElementById('browse-header');
-    window.addEventListener('scroll', () => {
-      if (header) {
-        header.classList.toggle('scrolled', window.scrollY > 50);
-      }
+    if (header) {
+      window.addEventListener('scroll', () => {
+        if (window.scrollY > 40) {
+          header.classList.add('scrolled');
+        } else {
+          header.classList.remove('scrolled');
+        }
+      });
+    }
+
+    // Category Tabs
+    document.querySelectorAll('[data-category]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const cat = btn.getAttribute('data-category');
+        this.activeCategory = cat;
+        this.searchQuery = '';
+        this.renderCurrentRoute();
+      });
     });
 
-    // Profile Dropdown Toggle
-    const profileTrigger = document.getElementById('user-menu-trigger');
-    const profileDropdown = document.getElementById('user-dropdown');
-    if (profileTrigger && profileDropdown) {
-      profileTrigger.addEventListener('click', (e) => {
+    // Expandable Search Bar
+    const searchToggle = document.getElementById('search-toggle-btn');
+    const searchBox = document.getElementById('search-box');
+    const searchInput = document.getElementById('search-input');
+    const searchClear = document.getElementById('search-clear-btn');
+
+    if (searchToggle && searchBox && searchInput) {
+      searchToggle.addEventListener('click', (e) => {
         e.stopPropagation();
-        profileDropdown.classList.toggle('open');
+        searchBox.classList.toggle('active');
+        if (searchBox.classList.contains('active')) {
+          searchInput.focus();
+        }
       });
+
+      searchInput.addEventListener('input', (e) => {
+        this.searchQuery = e.target.value.trim();
+        this.renderCurrentRoute();
+      });
+
+      if (searchClear) {
+        searchClear.addEventListener('click', () => {
+          this.searchQuery = '';
+          searchInput.value = '';
+          this.renderCurrentRoute();
+        });
+      }
+    }
+
+    // Profile Dropdown Toggle
+    const profileWrap = document.getElementById('profile-menu-wrapper');
+    const profileMenu = document.getElementById('profile-dropdown');
+    if (profileWrap && profileMenu) {
+      profileWrap.addEventListener('click', (e) => {
+        e.stopPropagation();
+        profileMenu.classList.toggle('show');
+      });
+
       document.addEventListener('click', () => {
-        profileDropdown.classList.remove('open');
+        profileMenu.classList.remove('show');
       });
     }
 
     // Logout
     const logoutBtn = document.getElementById('btn-logout');
     if (logoutBtn) {
-      logoutBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        this.handleLogout();
-      });
+      logoutBtn.addEventListener('click', () => this.handleLogout());
     }
+  }
 
-    // Search Toggle & Input (Debounced)
-    const searchContainer = document.getElementById('search-container');
-    const searchToggle = document.getElementById('search-toggle');
-    const searchInput = document.getElementById('search-input');
+  /* ══════════════════════════════════════════════
+     FULLSCREEN CINEMA PLAYER SETUP & LOGIC
+  ══════════════════════════════════════════════ */
+  setupCinemaPlayer() {
+    this.cinemaPlayer = document.getElementById('netflix-cinema-player');
+    this.cinemaVideo = document.getElementById('cinema-video');
+    this.cinemaSubtitles = document.getElementById('cinema-subtitles');
+    this.cinemaOsdPill = document.getElementById('cinema-osd-pill');
+    this.cinemaOsdText = document.getElementById('cinema-osd-text');
+    this.cinemaPlayBtn = document.getElementById('cinema-play-btn');
+    this.cinemaPlayIcon = document.getElementById('cinema-play-icon');
+    this.cinemaScrubberWrapper = document.getElementById('cinema-scrubber-wrapper');
+    this.cinemaScrubberProgress = document.getElementById('cinema-scrubber-progress');
+    this.cinemaScrubberBuffered = document.getElementById('cinema-scrubber-buffered');
+    this.cinemaTimeDisplay = document.getElementById('cinema-time-display');
+    this.cinemaVolumeSlider = document.getElementById('cinema-volume-slider');
+    this.cinemaVolumeBtn = document.getElementById('cinema-volume-btn');
+    this.cinemaVolumeIcon = document.getElementById('cinema-volume-icon');
+    this.cinemaAudioBtn = document.getElementById('cinema-audio-btn');
+    this.cinemaAudioMenu = document.getElementById('cinema-audio-menu');
+    this.cinemaSpeedBtn = document.getElementById('cinema-speed-btn');
+    this.cinemaBackBtn = document.getElementById('cinema-back-btn');
+    this.cinemaForwardBtn = document.getElementById('cinema-forward-btn');
+    this.cinemaRewindBtn = document.getElementById('cinema-rewind-btn');
+    this.cinemaFullscreenBtn = document.getElementById('cinema-fullscreen-btn');
+    this.cinemaNextBtn = document.getElementById('cinema-next-btn');
 
-    if (searchToggle && searchContainer && searchInput) {
-      searchToggle.addEventListener('click', (e) => {
-        e.stopPropagation();
-        searchContainer.classList.toggle('active');
-        if (searchContainer.classList.contains('active')) {
-          searchInput.focus();
+    if (!this.cinemaPlayer || !this.cinemaVideo) return;
+
+    // Video play/pause events
+    this.cinemaPlayBtn.addEventListener('click', () => this.toggleCinemaPlay());
+    this.cinemaVideo.addEventListener('click', () => this.toggleCinemaPlay());
+
+    // Back button
+    this.cinemaBackBtn.addEventListener('click', () => this.closeCinemaPlayer());
+
+    // Rewind & Fast Forward (10s)
+    this.cinemaRewindBtn.addEventListener('click', () => {
+      this.cinemaVideo.currentTime = Math.max(0, this.cinemaVideo.currentTime - 10);
+      this.showCinemaOsd('↺ 10s', 'Rewind 10 seconds');
+    });
+
+    this.cinemaForwardBtn.addEventListener('click', () => {
+      this.cinemaVideo.currentTime = Math.min(this.cinemaVideo.duration || 0, this.cinemaVideo.currentTime + 10);
+      this.showCinemaOsd('↻ 10s', 'Forward 10 seconds');
+    });
+
+    // Volume Slider & Mute
+    this.cinemaVolumeSlider.addEventListener('input', (e) => {
+      const vol = parseFloat(e.target.value);
+      this.cinemaVideo.volume = vol;
+      this.cinemaVideo.muted = vol === 0;
+      this.updateCinemaVolumeUI();
+    });
+
+    this.cinemaVolumeBtn.addEventListener('click', () => {
+      this.cinemaVideo.muted = !this.cinemaVideo.muted;
+      this.updateCinemaVolumeUI();
+      this.showCinemaOsd(this.cinemaVideo.muted ? '🔇' : '🔊', this.cinemaVideo.muted ? 'Muted' : 'Volume ' + Math.round(this.cinemaVideo.volume * 100) + '%');
+    });
+
+    // Scrubber seeking
+    this.cinemaScrubberWrapper.addEventListener('click', (e) => {
+      const rect = this.cinemaScrubberWrapper.getBoundingClientRect();
+      const pos = (e.clientX - rect.left) / rect.width;
+      if (this.cinemaVideo.duration) {
+        this.cinemaVideo.currentTime = pos * this.cinemaVideo.duration;
+      }
+    });
+
+    // Time update & subtitles
+    this.cinemaVideo.addEventListener('timeupdate', () => {
+      this.updateCinemaTimeline();
+      this.updateCinemaSubtitles();
+    });
+
+    // Playback Speed
+    this.cinemaSpeedBtn.addEventListener('click', () => {
+      this.speedIndex = (this.speedIndex + 1) % this.speeds.length;
+      const speed = this.speeds[this.speedIndex];
+      this.cinemaVideo.playbackRate = speed;
+      this.cinemaSpeedBtn.textContent = speed + 'x';
+      this.showCinemaOsd('⚡', `Playback Speed: ${speed}x`);
+    });
+
+    // Next Episode
+    this.cinemaNextBtn.addEventListener('click', () => {
+      if (!this.movies || !this.movies.length) return;
+      const currentIndex = this.movies.findIndex(m => m.id === (this.activeCinemaMovie?.id));
+      const nextMovie = this.movies[(currentIndex + 1) % this.movies.length];
+      this.openCinemaPlayer(nextMovie.id);
+      this.showCinemaOsd('⏭', `Playing: ${nextMovie.title}`);
+    });
+
+    // Fullscreen Toggle
+    this.cinemaFullscreenBtn.addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        this.cinemaPlayer.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    });
+
+    // Audio & Subtitles Menu Toggle
+    this.cinemaAudioBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.cinemaAudioMenu.classList.toggle('open');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.cinema-audio-btn-wrapper')) {
+        this.cinemaAudioMenu.classList.remove('open');
+      }
+    });
+
+    // Audio Options Click
+    document.querySelectorAll('#cinema-audio-options .cinema-option-item').forEach(item => {
+      item.addEventListener('click', () => {
+        document.querySelectorAll('#cinema-audio-options .cinema-option-item').forEach(i => i.classList.remove('selected'));
+        item.classList.add('selected');
+        const track = item.getAttribute('data-audio-track');
+        this.currentAudioTrack = track;
+        const trackName = item.textContent.replace('✓', '').trim();
+        this.showCinemaOsd('🌐', `Audio: ${trackName}`);
+        
+        // Auto-switch subtitle language for dub immersion
+        if (track === 'hi-dub' && this.currentSubTrack !== 'off') {
+          this.setSubtitleTrack('hi');
+        } else if (track === 'en-orig' && this.currentSubTrack !== 'off') {
+          this.setSubtitleTrack('en');
         }
       });
+    });
 
-      let debounceTimeout;
-      searchInput.addEventListener('input', (e) => {
-        clearTimeout(debounceTimeout);
-        debounceTimeout = setTimeout(() => {
-          this.searchQuery = e.target.value.trim();
-          this.renderCurrentRoute();
-        }, 250);
+    // Subtitles Options Click
+    document.querySelectorAll('#cinema-subtitles-options .cinema-option-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const track = item.getAttribute('data-sub-track');
+        this.setSubtitleTrack(track);
+        const trackName = item.textContent.replace('✓', '').trim();
+        this.showCinemaOsd('💬', `Subtitles: ${trackName}`);
       });
-    }
+    });
 
-    // Category Nav Item Clicks
-    const navCategoryLinks = document.querySelectorAll('[data-category]');
-    navCategoryLinks.forEach(link => {
-      link.addEventListener('click', (e) => {
+    // Idle mouse auto-hiding
+    this.cinemaPlayer.addEventListener('mousemove', () => {
+      this.cinemaPlayer.classList.remove('idle');
+      clearTimeout(this.idleTimer);
+      this.idleTimer = setTimeout(() => {
+        if (!this.cinemaVideo.paused) {
+          this.cinemaPlayer.classList.add('idle');
+          this.cinemaAudioMenu.classList.remove('open');
+        }
+      }, 3500);
+    });
+
+    // Global Player Keyboard Shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (!this.cinemaPlayer.classList.contains('active')) return;
+      if (e.key === ' ' || e.key === 'k') {
         e.preventDefault();
-        const cat = link.getAttribute('data-category');
-        this.activeCategory = cat;
-        this.searchQuery = '';
-        this.renderCurrentRoute();
-      });
+        this.toggleCinemaPlay();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        this.cinemaVideo.currentTime = Math.max(0, this.cinemaVideo.currentTime - 10);
+        this.showCinemaOsd('↺ 10s', 'Rewind 10s');
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        this.cinemaVideo.currentTime = Math.min(this.cinemaVideo.duration || 0, this.cinemaVideo.currentTime + 10);
+        this.showCinemaOsd('↻ 10s', 'Forward 10s');
+      } else if (e.key === 'f') {
+        e.preventDefault();
+        this.cinemaFullscreenBtn.click();
+      } else if (e.key === 'm') {
+        e.preventDefault();
+        this.cinemaVolumeBtn.click();
+      } else if (e.key === 'Escape') {
+        this.closeCinemaPlayer();
+      }
     });
   }
 
+  openCinemaPlayer(movieId) {
+    const movie = this.movies.find(m => m.id === movieId);
+    if (!movie || !this.cinemaPlayer) return;
+
+    this.activeCinemaMovie = movie;
+
+    // Update metadata
+    document.getElementById('cinema-title').textContent = movie.title;
+    document.getElementById('cinema-episode-badge').textContent = movie.type === 'TV Series' ? 'S1:E1 "Pilot"' : movie.duration;
+
+    // Load stream and reset position
+    this.cinemaVideo.src = movie.videoUrl;
+    this.cinemaVideo.poster = movie.backdrop;
+    this.cinemaVideo.currentTime = 0;
+    this.cinemaVideo.volume = 0.85;
+    this.cinemaVideo.muted = false;
+    this.cinemaVolumeSlider.value = 0.85;
+    this.updateCinemaVolumeUI();
+
+    // Show player
+    this.cinemaPlayer.classList.add('active');
+    document.body.style.overflow = 'hidden';
+
+    // Play video
+    const playPromise = this.cinemaVideo.play();
+    if (playPromise !== undefined) {
+      playPromise.then(() => {
+        this.cinemaPlayIcon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+        this.showCinemaOsd('▶', `Now Playing: ${movie.title} • 4K Dolby Atmos`);
+      }).catch(() => {
+        this.cinemaPlayIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+      });
+    }
+
+    this.setSubtitleTrack('en');
+  }
+
+  closeCinemaPlayer() {
+    if (!this.cinemaPlayer) return;
+    this.cinemaVideo.pause();
+    this.cinemaVideo.currentTime = 0;
+    this.cinemaPlayer.classList.remove('active', 'idle');
+    document.body.style.overflow = '';
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {});
+    }
+  }
+
+  toggleCinemaPlay() {
+    if (this.cinemaVideo.paused) {
+      this.cinemaVideo.play();
+      this.cinemaPlayIcon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+      this.showCinemaOsd('▶', 'Play');
+    } else {
+      this.cinemaVideo.pause();
+      this.cinemaPlayIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+      this.showCinemaOsd('❚❚', 'Pause');
+    }
+  }
+
+  updateCinemaTimeline() {
+    if (!this.cinemaVideo.duration) return;
+    const ct = this.cinemaVideo.currentTime;
+    const dur = this.cinemaVideo.duration;
+    const pct = (ct / dur) * 100;
+    this.cinemaScrubberProgress.style.width = `${pct}%`;
+
+    const formatTime = (secs) => {
+      const m = Math.floor(secs / 60);
+      const s = Math.floor(secs % 60);
+      return `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+    };
+
+    this.cinemaTimeDisplay.textContent = `${formatTime(ct)} / ${formatTime(dur)}`;
+  }
+
+  updateCinemaSubtitles() {
+    if (this.currentSubTrack === 'off' || !this.activeCinemaMovie) {
+      this.cinemaSubtitles.classList.remove('active');
+      return;
+    }
+
+    const subtitlesList = this.activeCinemaMovie.subtitles?.[this.currentSubTrack] || this.activeCinemaMovie.subtitles?.en;
+    if (!subtitlesList || !subtitlesList.length) {
+      this.cinemaSubtitles.classList.remove('active');
+      return;
+    }
+
+    const ct = this.cinemaVideo.currentTime;
+    const cue = subtitlesList.find(s => ct >= s.time && ct < s.time + 3.8);
+
+    if (cue) {
+      this.cinemaSubtitles.textContent = cue.text;
+      this.cinemaSubtitles.classList.add('active');
+    } else {
+      this.cinemaSubtitles.classList.remove('active');
+    }
+  }
+
+  setSubtitleTrack(track) {
+    this.currentSubTrack = track;
+    document.querySelectorAll('#cinema-subtitles-options .cinema-option-item').forEach(i => {
+      i.classList.toggle('selected', i.getAttribute('data-sub-track') === track);
+    });
+    if (track === 'off') {
+      this.cinemaSubtitles.classList.remove('active');
+    }
+  }
+
+  updateCinemaVolumeUI() {
+    const isMuted = this.cinemaVideo.muted || this.cinemaVideo.volume === 0;
+    if (isMuted) {
+      this.cinemaVolumeIcon.innerHTML = '<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>';
+    } else {
+      this.cinemaVolumeIcon.innerHTML = '<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>';
+    }
+  }
+
+  showCinemaOsd(icon, text) {
+    if (!this.cinemaOsdPill) return;
+    document.getElementById('cinema-osd-icon').textContent = icon;
+    document.getElementById('cinema-osd-text').textContent = text;
+    this.cinemaOsdPill.classList.add('show');
+    clearTimeout(this.osdTimer);
+    this.osdTimer = setTimeout(() => {
+      this.cinemaOsdPill.classList.remove('show');
+    }, 2400);
+  }
+
+  /* ══════════════════════════════════════════════
+     GLOBAL EVENTS (Click Delegation)
+  ══════════════════════════════════════════════ */
   setupGlobalEvents() {
-    // Delegate clicks for Play, Info, Watchlist, Ratings across cards and billboards
     document.addEventListener('click', (e) => {
-      // 1. Play Button
+      // 1. Play Button -> Open Cinema Player directly
       const playBtn = e.target.closest('[data-play-id]');
       if (playBtn) {
-        e.stopPropagation();
         const id = playBtn.getAttribute('data-play-id');
-        this.openMovieModal(id, true);
+        this.openCinemaPlayer(id);
         return;
       }
 
-      // 2. Info Button
+      // 2. Info Button -> Open Modal
       const infoBtn = e.target.closest('[data-info-id]');
       if (infoBtn) {
-        e.stopPropagation();
         const id = infoBtn.getAttribute('data-info-id');
-        this.openMovieModal(id, false);
+        this.openMovieModal(id);
         return;
       }
 
-      // 3. Watchlist Toggle Button (CRUD)
+      // 3. Watchlist Toggle
       const listBtn = e.target.closest('[data-watchlist-id]');
       if (listBtn) {
         e.stopPropagation();
@@ -1075,22 +1378,22 @@ class NetflixApp {
         return;
       }
 
-      // 4. Rate Button
-      const rateBtn = e.target.closest('[data-rate-id]');
+      // 4. Rating Buttons
+      const rateBtn = e.target.closest('[data-rating-id]');
       if (rateBtn) {
         e.stopPropagation();
-        const id = rateBtn.getAttribute('data-rate-id');
-        const rating = rateBtn.getAttribute('data-rating');
-        this.rateMovie(id, rating);
+        const id = rateBtn.getAttribute('data-rating-id');
+        const val = rateBtn.getAttribute('data-rating-val');
+        this.rateMovie(id, val);
         return;
       }
     });
   }
 
   /* ══════════════════════════════════════════════
-     INTERACTIVE DETAIL MODAL & VIDEO PLAYER (<dialog>)
+     INTERACTIVE DETAIL MODAL (<dialog>)
   ══════════════════════════════════════════════ */
-  openMovieModal(movieId, autoPlay = false) {
+  openMovieModal(movieId) {
     const movie = this.movies.find(m => m.id === movieId);
     if (!movie) return;
 
@@ -1106,21 +1409,12 @@ class NetflixApp {
         <div class="modal-hero-vignette"></div>
         <button class="modal-close-btn" id="modal-close-btn" aria-label="Close dialog">✕</button>
 
-        <!-- Video Player Overlay (Revealed on Play) -->
-        <div class="modal-video-container" id="modal-video-container">
-          <button class="modal-video-close" id="modal-video-close" title="Exit player">✕</button>
-          <video id="modal-active-video" controls poster="${movie.backdrop}">
-            <source src="${movie.videoUrl}" type="video/mp4">
-            Your browser does not support the video tag.
-          </video>
-        </div>
-
         <div class="modal-hero-content">
           <h2 class="modal-title">${movie.title}</h2>
           <div class="modal-actions">
-            <button class="btn-billboard-play" id="modal-play-btn">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-              ${autoPlay ? 'Restart' : 'Play'}
+            <button class="btn-billboard-play" data-play-id="${movie.id}">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+              Play
             </button>
             <button class="btn-billboard-list ${isInList ? 'in-list' : ''}" data-watchlist-id="${movie.id}">
               ${isInList 
@@ -1138,7 +1432,7 @@ class NetflixApp {
             <span class="age-badge">${movie.ageRating}</span>
             <span style="color:#aaa;">${movie.duration}</span>
             <span class="quality-badge">${movie.quality}</span>
-            <span class="quality-badge" style="border-color:#555;">${movie.audio || '5.1'}</span>
+            <span class="quality-badge" style="border-color:#555;">${movie.audio || 'Dolby Atmos'}</span>
           </div>
           <p class="modal-synopsis">${movie.overview}</p>
         </div>
@@ -1178,52 +1472,15 @@ class NetflixApp {
 
     dialog.showModal();
 
-    // Close Button
     const closeBtn = document.getElementById('modal-close-btn');
-    closeBtn.addEventListener('click', () => {
-      this.stopModalVideo();
-      dialog.close();
-    });
+    closeBtn.addEventListener('click', () => dialog.close());
 
-    // Close on backdrop click
     dialog.addEventListener('click', (e) => {
       const rect = dialog.getBoundingClientRect();
       const isInDialog = (rect.top <= e.clientY && e.clientY <= rect.top + rect.height
         && rect.left <= e.clientX && e.clientX <= rect.left + rect.width);
-      if (!isInDialog) {
-        this.stopModalVideo();
-        dialog.close();
-      }
+      if (!isInDialog) dialog.close();
     });
-
-    // Video Player Trigger
-    const playBtn = document.getElementById('modal-play-btn');
-    const videoContainer = document.getElementById('modal-video-container');
-    const video = document.getElementById('modal-active-video');
-    const videoClose = document.getElementById('modal-video-close');
-
-    const startPlay = () => {
-      videoContainer.style.display = 'block';
-      video.play().catch(e => console.log('Autoplay prevented', e));
-    };
-
-    playBtn.addEventListener('click', startPlay);
-    videoClose.addEventListener('click', () => {
-      video.pause();
-      videoContainer.style.display = 'none';
-    });
-
-    if (autoPlay) {
-      setTimeout(startPlay, 100);
-    }
-  }
-
-  stopModalVideo() {
-    const video = document.getElementById('modal-active-video');
-    if (video) {
-      video.pause();
-      video.currentTime = 0;
-    }
   }
 
   /* ══════════════════════════════════════════════

@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════════════════════════
-   NETFLIX LANDING PAGE (UNAUTHENTICATED)
+   NETFLIX LANDING PAGE (AUTHENTIC INDIA EXPERIENCE)
 ══════════════════════════════════════════════════════════════ */
 
 /* Hero Banner */
@@ -11,50 +11,47 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 120px 20px 80px;
+  padding: 130px 24px 100px;
   background-image: 
-    linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.4) 60%, rgba(0, 0, 0, 0.8) 100%),
-    url('https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?auto=format&fit=crop&w=1920&q=80');
+    linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.5) 50%, rgba(0, 0, 0, 0.85) 100%),
+    radial-gradient(ellipse at center, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.85) 100%),
+    url('/assets/netflix-bg.jpg');
   background-size: cover;
-  background-position: center;
-  box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.9);
-}
-
-.landing-hero::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 100px;
-  background: linear-gradient(180deg, transparent, var(--netflix-black));
+  background-position: center top;
+  background-repeat: no-repeat;
+  overflow: hidden;
 }
 
 .landing-hero-content {
-  max-width: 950px;
+  max-width: 900px;
   z-index: 10;
+  margin: 0 auto;
 }
 
 .landing-title {
-  font-size: clamp(2.2rem, 5vw, 3.6rem);
+  font-size: clamp(2.4rem, 5.5vw, 4rem);
   font-weight: 900;
   line-height: 1.15;
   margin-bottom: 16px;
   letter-spacing: -0.5px;
+  color: #ffffff;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
 }
 
 .landing-subtitle {
-  font-size: clamp(1.2rem, 2.5vw, 1.5rem);
-  font-weight: 500;
+  font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+  font-weight: 600;
   margin-bottom: 24px;
-  color: var(--netflix-light-gray);
+  color: #ffffff;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
 }
 
 .landing-text {
-  font-size: clamp(1rem, 2vw, 1.2rem);
+  font-size: clamp(1rem, 2vw, 1.25rem);
   font-weight: 400;
   margin-bottom: 28px;
-  color: #fff;
+  color: #ffffff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
 }
 
 /* Email CTA Form */
@@ -63,7 +60,7 @@
   align-items: stretch;
   justify-content: center;
   gap: 10px;
-  max-width: 600px;
+  max-width: 620px;
   margin: 0 auto;
   flex-wrap: wrap;
 }
@@ -76,20 +73,21 @@
 
 .cta-input {
   width: 100%;
-  padding: 18px 16px 6px;
-  background: rgba(16, 16, 16, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 20px 16px 8px;
+  background: rgba(18, 18, 18, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 4px;
   color: #fff;
-  font-size: 1rem;
-  backdrop-filter: blur(5px);
+  font-size: 1.05rem;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   outline: none;
   transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 
 .cta-input:focus {
   border-color: #fff;
-  background: rgba(16, 16, 16, 0.9);
+  background: rgba(24, 24, 24, 0.95);
 }
 
 .cta-label {
@@ -97,7 +95,7 @@
   left: 16px;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--netflix-gray);
+  color: #b3b3b3;
   font-size: 1rem;
   pointer-events: none;
   transition: all 0.2s ease;
@@ -108,114 +106,274 @@
   top: 8px;
   transform: translateY(0);
   font-size: 0.75rem;
-  color: #b3b3b3;
+  color: #e5e5e5;
 }
 
 .btn-get-started {
   background-color: var(--netflix-red);
   color: #fff;
-  font-size: 1.3rem;
+  font-size: 1.4rem;
   font-weight: 700;
-  padding: 14px 28px;
+  padding: 14px 32px;
   border-radius: 4px;
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.1s ease;
+  transition: background-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
   white-space: nowrap;
 }
 
 .btn-get-started:hover {
   background-color: var(--netflix-red-hover);
   transform: scale(1.02);
+  box-shadow: 0 4px 20px rgba(229, 9, 20, 0.5);
 }
 
 .btn-get-started svg {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   fill: currentColor;
 }
 
-/* Feature Showcase Rows */
-.feature-section {
-  padding: 70px 4%;
-  border-bottom: 8px solid #232323;
-  background-color: var(--netflix-black);
+/* ══════════════════════════════════════════════════════════════
+   AUTHENTIC NETFLIX CURVED RED GLOW DIVIDER
+══════════════════════════════════════════════════════════════ */
+.landing-curve-wrapper {
+  position: relative;
+  width: 100%;
+  height: 48px;
+  overflow: hidden;
+  margin-top: -48px;
+  z-index: 10;
 }
 
-.feature-container {
-  max-width: 1100px;
+.landing-curve {
+  position: absolute;
+  left: -8%;
+  right: -8%;
+  top: 0;
+  height: 100%;
+  border-top: 4px solid #e50914;
+  border-radius: 50% 50% 0 0;
+  background: radial-gradient(50% 500% at 50% -420%, rgba(229, 9, 20, 0.45) 80%, rgba(20, 20, 20, 0) 100%), var(--netflix-black);
+  box-shadow: 0 -10px 30px rgba(229, 9, 20, 0.4);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   TRENDING NOW CAROUSEL (LANDING PAGE)
+══════════════════════════════════════════════════════════════ */
+.landing-trending-section {
+  padding: 50px 4% 60px;
+  max-width: 1280px;
   margin: 0 auto;
+}
+
+.trending-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 40px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
-.feature-container.reversed {
-  flex-direction: row-reverse;
-}
-
-.feature-text {
-  flex: 1;
-}
-
-.feature-title {
-  font-size: clamp(2rem, 3.5vw, 3rem);
+.trending-heading {
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
   font-weight: 800;
-  margin-bottom: 16px;
-  line-height: 1.2;
+  color: #fff;
 }
 
-.feature-desc {
-  font-size: clamp(1.1rem, 2vw, 1.4rem);
-  color: var(--netflix-light-gray);
-  line-height: 1.4;
-}
-
-.feature-media {
-  flex: 1;
-  position: relative;
+.trending-filters {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 10px;
 }
 
-.feature-media img {
-  max-width: 100%;
-  border-radius: 8px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+.trending-select {
+  background: rgba(22, 22, 22, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
 }
 
-.feature-tv-card {
+.landing-top10-container {
+  display: flex;
+  gap: 32px;
+  overflow-x: auto;
+  padding: 24px 10px 32px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.landing-top10-container::-webkit-scrollbar {
+  height: 6px;
+}
+.landing-top10-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.landing-top10-item {
   position: relative;
-  border: 4px solid #333;
-  border-radius: 12px;
-  overflow: hidden;
-  background: #000;
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.9);
+  flex: 0 0 200px;
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-.feature-tv-card img {
-  display: block;
+.landing-top10-item:hover {
+  transform: scale(1.06);
+  z-index: 5;
+}
+
+/* Large Silver Outline Number */
+.landing-rank-number {
+  position: absolute;
+  bottom: -15px;
+  left: -20px;
+  font-family: var(--netflix-headline-font);
+  font-size: 7.5rem;
+  font-weight: 900;
+  line-height: 1;
+  color: #000000;
+  -webkit-text-stroke: 4px #595959;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+  user-select: none;
+  pointer-events: none;
+  z-index: 2;
+  transition: -webkit-text-stroke 0.2s ease;
+}
+
+.landing-top10-item:hover .landing-rank-number {
+  -webkit-text-stroke: 4px #ffffff;
+}
+
+.landing-top10-poster-wrap {
+  position: relative;
   width: 100%;
-  height: auto;
+  aspect-ratio: 2/3;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
+  background: #181818;
 }
 
-/* FAQ Section */
-.faq-section {
-  padding: 80px 4%;
-  border-bottom: 8px solid #232323;
-  text-align: center;
-  max-width: 1100px;
+.landing-top10-poster {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.landing-poster-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 50%, rgba(0, 0, 0, 0.85) 100%);
+  display: flex;
+  align-items: flex-end;
+  padding: 12px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.landing-top10-item:hover .landing-poster-overlay {
+  opacity: 1;
+}
+
+.landing-play-pill {
+  background: #fff;
+  color: #000;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   "MORE REASONS TO JOIN" SECTION
+══════════════════════════════════════════════════════════════ */
+.reasons-section {
+  padding: 50px 4% 70px;
+  max-width: 1280px;
   margin: 0 auto;
 }
 
+.reasons-title {
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 800;
+  margin-bottom: 24px;
+  color: #fff;
+}
+
+.reasons-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px;
+}
+
+.reason-card {
+  position: relative;
+  background: linear-gradient(149deg, #192247 0%, #210e17 96%);
+  border-radius: 16px;
+  padding: 28px 24px 80px;
+  min-height: 280px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.reason-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7);
+}
+
+.reason-card-title {
+  font-size: 1.45rem;
+  font-weight: 700;
+  margin-bottom: 14px;
+  color: #ffffff;
+}
+
+.reason-card-desc {
+  font-size: 1rem;
+  color: #b3b3b3;
+  line-height: 1.45;
+}
+
+.reason-icon {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  width: 56px;
+  height: 56px;
+  fill: #e50914;
+  opacity: 0.9;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   FAQ ACCORDION SECTION
+══════════════════════════════════════════════════════════════ */
+.faq-section {
+  padding: 70px 4%;
+  max-width: 1100px;
+  margin: 0 auto;
+  text-align: center;
+}
+
 .faq-heading {
-  font-size: clamp(2rem, 4vw, 3rem);
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
   font-weight: 800;
   margin-bottom: 35px;
+  color: #fff;
 }
 
 .faq-list {
@@ -228,18 +386,18 @@
 
 .faq-item {
   background-color: #2d2d2d;
-  border-radius: 2px;
+  border-radius: 4px;
   overflow: hidden;
   transition: background-color 0.2s ease;
 }
 
 .faq-item:hover {
-  background-color: #414141;
+  background-color: #3d3d3d;
 }
 
 .faq-question {
   padding: 24px 30px;
-  font-size: 1.3rem;
+  font-size: 1.35rem;
   font-weight: 500;
   cursor: pointer;
   display: flex;
@@ -254,9 +412,10 @@
 }
 
 .faq-icon {
-  font-size: 2rem;
+  font-size: 2.2rem;
   font-weight: 300;
-  transition: transform 0.3s ease;
+  line-height: 1;
+  transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 details[open] .faq-icon {
@@ -266,31 +425,34 @@ details[open] .faq-icon {
 .faq-answer {
   padding: 0 30px 24px;
   border-top: 1px solid #141414;
-  font-size: 1.2rem;
+  font-size: 1.25rem;
   color: var(--netflix-light-gray);
   line-height: 1.5;
-  animation: fadeIn 0.3s ease;
+  animation: fadeIn 0.25s ease;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-5px); }
+  from { opacity: 0; transform: translateY(-4px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Landing Footer */
+/* ══════════════════════════════════════════════════════════════
+   OFFICIAL NETFLIX FOOTER
+══════════════════════════════════════════════════════════════ */
 .landing-footer {
-  padding: 70px 4% 50px;
+  padding: 60px 4% 50px;
   max-width: 1000px;
   margin: 0 auto;
-  color: var(--netflix-gray);
-  font-size: 0.88rem;
+  color: #b3b3b3;
+  font-size: 0.9rem;
 }
 
 .footer-top {
   margin-bottom: 30px;
 }
 
-.footer-top a:hover {
+.footer-top a {
+  color: #b3b3b3;
   text-decoration: underline;
 }
 
@@ -303,30 +465,37 @@ details[open] .faq-icon {
 }
 
 .footer-links-grid a {
-  color: var(--netflix-gray);
+  color: #b3b3b3;
+  text-decoration: underline;
   transition: color 0.2s ease;
 }
 
 .footer-links-grid a:hover {
   color: #fff;
-  text-decoration: underline;
+}
+
+.footer-lang-container {
+  margin-bottom: 24px;
 }
 
 .footer-country {
   font-size: 0.85rem;
-  color: var(--netflix-gray);
+  color: #737373;
 }
 
 @media (max-width: 768px) {
-  .feature-container,
-  .feature-container.reversed {
-    flex-direction: column;
-    text-align: center;
-  }
   .cta-email-form {
     flex-direction: column;
   }
   .btn-get-started {
     justify-content: center;
+  }
+  .landing-top10-item {
+    flex: 0 0 150px;
+  }
+  .landing-rank-number {
+    font-size: 5.5rem;
+    bottom: -10px;
+    left: -15px;
   }
 }
