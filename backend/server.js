@@ -315,15 +315,59 @@ function formatTmdbItem(item) {
   };
 }
 
-// 0. Dynamic Trailer Lookup (Fetches Official YouTube 4K/HD Trailer ID from TMDB if needed)
+// In-memory trailer cache for ultrafast instantaneous responses
+const trailerCache = new Map();
+
+// High-speed YouTube Trailer Scraper (Resolves HD Studio Trailer for any movie or TV series globally)
+async function searchYouTubeTrailer(query) {
+  if (!query) return null;
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 4000);
+    const res = await fetch(`https://www.youtube.com/results?search_query=${encodeURIComponent(query + ' official trailer')}`, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept-Language': 'en-US,en;q=0.9'
+      },
+      signal: controller.signal
+    });
+    clearTimeout(timeout);
+    if (res.ok) {
+      const html = await res.text();
+      const match = html.match(/"videoId":"([a-zA-Z0-9_-]{11})"/);
+      if (match && match[1]) {
+        return match[1];
+      }
+    }
+  } catch (err) {
+    // ignore
+  }
+  return null;
+}
+
+// 0. Dynamic Trailer Lookup (Fetches Official YouTube 4K/HD Trailer ID from Local, TMDB, or Live YouTube Search)
 app.get('/api/trailer/:id', async (req, res) => {
   const { id } = req.params;
+  const titleQuery = (req.query.title || '').trim();
   const rawId = id.replace('tmdb-', '');
   const isNumeric = /^\d+$/.test(rawId);
 
-  // Check local movies first
-  const localMovie = movies.find(m => m.id === id || String(m.tmdbId) === rawId);
+  const cacheKey = (titleQuery || id || rawId).toLowerCase();
+  if (trailerCache.has(cacheKey)) {
+    return res.json({
+      youtubeTrailerId: trailerCache.get(cacheKey),
+      videoUrl: 'https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4'
+    });
+  }
+
+  // 1. Check local catalog first
+  const localMovie = movies.find(m => 
+    m.id === id || 
+    String(m.tmdbId) === rawId || 
+    (titleQuery && m.title.toLowerCase() === titleQuery.toLowerCase())
+  );
   if (localMovie && localMovie.youtubeTrailerId) {
+    trailerCache.set(cacheKey, localMovie.youtubeTrailerId);
     return res.json({
       youtubeTrailerId: localMovie.youtubeTrailerId,
       videoUrl: localMovie.videoUrl,
@@ -332,18 +376,23 @@ app.get('/api/trailer/:id', async (req, res) => {
     });
   }
 
+  // 2. Try TMDB videos endpoint if numeric ID
   if (isNumeric) {
     try {
-      // Try movie endpoint first, then tv endpoint
-      let tmdbRes = await fetch(`https://api.themoviedb.org/3/movie/${rawId}/videos?api_key=${TMDB_API_KEY}`);
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 2500);
+      let tmdbRes = await fetch(`https://api.themoviedb.org/3/movie/${rawId}/videos?api_key=${TMDB_API_KEY}`, { signal: controller.signal });
       let data = tmdbRes.ok ? await tmdbRes.json() : null;
       if (!data || !data.results || !data.results.length) {
-        tmdbRes = await fetch(`https://api.themoviedb.org/3/tv/${rawId}/videos?api_key=${TMDB_API_KEY}`);
+        tmdbRes = await fetch(`https://api.themoviedb.org/3/tv/${rawId}/videos?api_key=${TMDB_API_KEY}`, { signal: controller.signal });
         data = tmdbRes.ok ? await tmdbRes.json() : null;
       }
+      clearTimeout(timeout);
       if (data && data.results && data.results.length) {
-        const trailer = data.results.find(v => v.site === 'YouTube' && (v.type === 'Trailer' || v.type === 'Teaser')) || data.results[0];
+        const trailer = data.results.find(v => v.site === 'YouTube' && (v.type === 'Trailer' || v.type === 'Teaser')) ||
+                        data.results.find(v => v.site === 'YouTube');
         if (trailer && trailer.key) {
+          trailerCache.set(cacheKey, trailer.key);
           return res.json({
             youtubeTrailerId: trailer.key,
             videoUrl: 'https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4'
@@ -351,11 +400,24 @@ app.get('/api/trailer/:id', async (req, res) => {
         }
       }
     } catch (err) {
-      // ignore
+      // ignore TMDB network errors
     }
   }
 
-  // Fallback to Stranger Things trailer
+  // 3. Live YouTube Scraper for exact title (Works for any live search movie/series globally)
+  const searchTitle = titleQuery || (localMovie ? localMovie.title : rawId);
+  if (searchTitle && searchTitle !== 'stranger-things') {
+    const ytId = await searchYouTubeTrailer(searchTitle);
+    if (ytId) {
+      trailerCache.set(cacheKey, ytId);
+      return res.json({
+        youtubeTrailerId: ytId,
+        videoUrl: 'https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4'
+      });
+    }
+  }
+
+  // 4. Default fallback to 4K Ultra HD Trailer
   return res.json({
     youtubeTrailerId: 'b9EkMc79ZSU',
     videoUrl: '/trailers/stranger-things.mp4'

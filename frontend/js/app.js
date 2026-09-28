@@ -2660,10 +2660,12 @@ class NetflixApp {
       // Show and load YouTube embed
       const ytId = this.activeCinemaMovie.youtubeTrailerId || 'b9EkMc79ZSU';
       if (this.cinemaYtFrame) {
-        const embedUrl = `https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&controls=1&rel=0&modestbranding=1&playsinline=1&enablejsapi=1`;
+        const originParam = window.location.origin ? `&origin=${encodeURIComponent(window.location.origin)}` : '';
+        const embedUrl = `https://www.youtube.com/embed/${ytId}?autoplay=1&mute=0&controls=1&rel=0&modestbranding=1&playsinline=1&enablejsapi=1${originParam}`;
         if (this.cinemaYtFrame.src !== embedUrl) {
           this.cinemaYtFrame.src = embedUrl;
         }
+        this.cinemaYtFrame.classList.add('active');
         this.cinemaYtFrame.style.display = 'block';
       }
       this.cinemaPlayer.classList.add('embed-active');
@@ -2672,6 +2674,7 @@ class NetflixApp {
       // Native Ultra HD Mode
       if (this.cinemaYtFrame) {
         this.cinemaYtFrame.src = '';
+        this.cinemaYtFrame.classList.remove('active');
         this.cinemaYtFrame.style.display = 'none';
       }
       this.cinemaPlayer.classList.remove('embed-active');
@@ -2697,20 +2700,40 @@ class NetflixApp {
         type: 'Movie',
         duration: 'Official Trailer',
         videoUrl: 'https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4',
-        youtubeTrailerId: 'b9EkMc79ZSU',
+        youtubeTrailerId: null,
         subtitles: { en: [{ time: 1, text: '[Official Studio Trailer]' }] }
       };
-      // Asynchronously fetch the actual YouTube trailer key for this TMDB item
-      fetch(`/api/trailer/${tmdbId}`)
+      this.movies.push(movie);
+    }
+    if (!movie || !this.cinemaPlayer) return;
+
+    this.activeCinemaMovie = movie;
+    this.activeCinemaMovieProgress = startSecs || 0;
+
+    // Dynamically fetch and guarantee official YouTube 4K/HD Trailer if not already present
+    if (!movie.youtubeTrailerId) {
+      const lookupId = movie.tmdbId ? String(movie.tmdbId) : (movie.id || '').replace('tmdb-', '');
+      fetch(`/api/trailer/${encodeURIComponent(lookupId)}?title=${encodeURIComponent(movie.title)}`)
         .then(r => r.json())
         .then(t => {
           if (t && t.youtubeTrailerId) {
             movie.youtubeTrailerId = t.youtubeTrailerId;
-            if (this.activeCinemaMovie && this.activeCinemaMovie.id === movieId && this.trailerMode === 'youtube') {
-              this.setTrailerMode('youtube');
+            if (this.activeCinemaMovie && this.activeCinemaMovie.id === movie.id) {
+              if (this.trailerMode === 'youtube' && this.cinemaYtFrame) {
+                const originParam = window.location.origin ? `&origin=${encodeURIComponent(window.location.origin)}` : '';
+                const embedUrl = `https://www.youtube.com/embed/${t.youtubeTrailerId}?autoplay=1&mute=0&controls=1&rel=0&modestbranding=1&playsinline=1&enablejsapi=1${originParam}`;
+                if (this.cinemaYtFrame.src !== embedUrl) {
+                  this.cinemaYtFrame.src = embedUrl;
+                }
+              }
+              if (this.cinemaYtLink) {
+                this.cinemaYtLink.href = `https://www.youtube.com/watch?v=${t.youtubeTrailerId}`;
+                this.cinemaYtLink.title = `Watch ${movie.title} official trailer on YouTube`;
+              }
             }
           }
-        }).catch(() => {});
+        })
+        .catch(() => {});
     }
     if (!movie || !this.cinemaPlayer) return;
 
@@ -2835,7 +2858,10 @@ class NetflixApp {
     if (this.trailerMode === 'youtube') {
       const ytId = this.activeCinemaMovie.youtubeTrailerId || 'b9EkMc79ZSU';
       if (this.cinemaYtFrame) {
-        this.cinemaYtFrame.src = `https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&controls=1&rel=0&modestbranding=1&playsinline=1&enablejsapi=1`;
+        const originParam = window.location.origin ? `&origin=${encodeURIComponent(window.location.origin)}` : '';
+        this.cinemaYtFrame.src = `https://www.youtube.com/embed/${ytId}?autoplay=1&mute=0&controls=1&rel=0&modestbranding=1&playsinline=1&enablejsapi=1${originParam}`;
+        this.cinemaYtFrame.classList.add('active');
+        this.cinemaYtFrame.style.display = 'block';
       }
     } else if (this.cinemaVideo) {
       this.cinemaVideo.currentTime = 0;
@@ -2855,6 +2881,7 @@ class NetflixApp {
     }
     if (this.cinemaYtFrame) {
       this.cinemaYtFrame.src = '';
+      this.cinemaYtFrame.classList.remove('active');
       this.cinemaYtFrame.style.display = 'none';
     }
     this.cinemaPlayer.classList.remove('embed-active', 'active', 'idle');

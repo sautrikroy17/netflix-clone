@@ -1534,11 +1534,19 @@ dialog#movie-detail-dialog::backdrop {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
+  min-width: 100vw;
+  min-height: 100vh;
   border: none;
   background: #000;
   z-index: 2;
+  display: none;
+}
+
+#netflix-cinema-player.embed-active .cinema-yt-frame,
+.cinema-yt-frame.active {
+  display: block !important;
 }
 
 
