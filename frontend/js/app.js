@@ -2294,28 +2294,12 @@ class NetflixApp {
     this.cinemaIssueCancel = document.getElementById('issue-cancel-btn');
 
     this.cinemaYtFrame = document.getElementById('cinema-yt-frame');
-    this.cinemaModeNative = document.getElementById('cinema-mode-native');
-    this.cinemaModeYt = document.getElementById('cinema-mode-yt');
     this.cinemaYtLink = document.getElementById('cinema-yt-link');
-    this.trailerMode = 'native'; // 'native' or 'youtube'
+    this.trailerMode = 'youtube';
     this.activeSeason = 1;
     this.activeEpisode = 1;
 
-    if (!this.cinemaPlayer || !this.cinemaVideo) return;
-
-    // Mode Selector: Trailer HD (Native) vs YouTube HD
-    if (this.cinemaModeNative) {
-      this.cinemaModeNative.addEventListener('click', (e) => {
-        e.stopPropagation();
-        this.setTrailerMode('native');
-      });
-    }
-    if (this.cinemaModeYt) {
-      this.cinemaModeYt.addEventListener('click', (e) => {
-        e.stopPropagation();
-        this.setTrailerMode('youtube');
-      });
-    }
+    if (!this.cinemaPlayer) return;
 
     // Native Video Automatic Fallback
     this.cinemaVideo.addEventListener('error', () => {
@@ -2645,48 +2629,30 @@ class NetflixApp {
     });
   }
 
-  setTrailerMode(mode) {
-    this.trailerMode = mode;
-    if (this.cinemaModeNative) this.cinemaModeNative.classList.toggle('active', mode === 'native');
-    if (this.cinemaModeYt) this.cinemaModeYt.classList.toggle('active', mode === 'youtube');
+  setTrailerMode(mode = 'youtube') {
+    this.trailerMode = 'youtube';
 
     if (!this.activeCinemaMovie) return;
 
-    if (mode === 'youtube') {
-      // Pause and hide native video
+    // Pause and hide native dummy video element
+    if (this.cinemaVideo) {
       this.cinemaVideo.pause();
       this.cinemaVideo.style.display = 'none';
-
-      // Show and load YouTube embed
-      const ytId = this.activeCinemaMovie.youtubeTrailerId || 'b9EkMc79ZSU';
-      if (this.cinemaYtFrame) {
-        const originParam = window.location.origin ? `&origin=${encodeURIComponent(window.location.origin)}` : '';
-        const embedUrl = `https://www.youtube.com/embed/${ytId}?autoplay=1&mute=0&controls=1&rel=0&modestbranding=1&playsinline=1&enablejsapi=1${originParam}`;
-        if (this.cinemaYtFrame.src !== embedUrl) {
-          this.cinemaYtFrame.src = embedUrl;
-        }
-        this.cinemaYtFrame.classList.add('active');
-        this.cinemaYtFrame.style.display = 'block';
-      }
-      this.cinemaPlayer.classList.add('embed-active');
-      this.showCinemaOsd('▶', `${this.activeCinemaMovie.title} • Official Studio Trailer`);
-    } else {
-      // Native Ultra HD Mode
-      if (this.cinemaYtFrame) {
-        this.cinemaYtFrame.src = '';
-        this.cinemaYtFrame.classList.remove('active');
-        this.cinemaYtFrame.style.display = 'none';
-      }
-      this.cinemaPlayer.classList.remove('embed-active');
-      this.cinemaVideo.style.display = 'block';
-
-      const streamSrc = this.getTrailerForMovie(this.activeCinemaMovie);
-      if (!this.cinemaVideo.src || !this.cinemaVideo.src.includes(streamSrc)) {
-        this.cinemaVideo.src = streamSrc;
-      }
-      this.cinemaVideo.play().catch(e => console.warn('Autoplay prevented:', e));
-      this.showCinemaOsd('⚡', `${this.activeCinemaMovie.title} • Ultra HD Trailer`);
     }
+
+    // Show and load YouTube embed with the real official studio trailer
+    const ytId = this.activeCinemaMovie.youtubeTrailerId || 'b9EkMc79ZSU';
+    if (this.cinemaYtFrame) {
+      const originParam = window.location.origin ? `&origin=${encodeURIComponent(window.location.origin)}` : '';
+      const embedUrl = `https://www.youtube.com/embed/${ytId}?autoplay=1&mute=0&controls=1&rel=0&modestbranding=1&playsinline=1&enablejsapi=1${originParam}`;
+      if (this.cinemaYtFrame.src !== embedUrl) {
+        this.cinemaYtFrame.src = embedUrl;
+      }
+      this.cinemaYtFrame.classList.add('active');
+      this.cinemaYtFrame.style.display = 'block';
+    }
+    this.cinemaPlayer.classList.add('embed-active');
+    this.showCinemaOsd('▶', `${this.activeCinemaMovie.title} • Official Studio Trailer`);
   }
 
   openCinemaPlayer(movieId, startSecs = 0, episodeNum = null) {
@@ -2815,11 +2781,8 @@ class NetflixApp {
     this.cinemaPlayer.classList.remove('idle');
     document.body.style.overflow = 'hidden';
 
-    // Does this title have an offline local trailer file?
-    const hasLocalTrailer = ['stranger-things', 'wednesday', 'interstellar', 'the-batman'].includes(movie.id);
-
-    // If it has an actual local trailer, start in native mode; otherwise, play the real official studio trailer via YouTube HD!
-    this.setTrailerMode(hasLocalTrailer ? 'native' : 'youtube');
+    // Always play the official studio YouTube 4K/HD trailer with full fidelity
+    this.setTrailerMode('youtube');
     if (startSecs && this.cinemaVideo) {
       this.cinemaVideo.currentTime = startSecs;
     }

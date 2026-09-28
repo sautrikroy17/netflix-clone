@@ -1463,46 +1463,26 @@ dialog#movie-detail-dialog::backdrop {
   gap: 12px;
 }
 
-/* Trailer Mode Selector (Netflix Native HD vs YouTube HD) */
-.cinema-mode-pills {
+/* Clean Official HD Trailer Badge */
+.cinema-trailer-badge {
   display: inline-flex;
   align-items: center;
+  gap: 8px;
   background: rgba(20, 20, 20, 0.78);
   border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 999px;
-  padding: 3px;
-  gap: 3px;
+  padding: 7px 16px;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.3px;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
   pointer-events: auto;
-}
-
-.cinema-mode-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: transparent;
-  border: none;
-  color: #ccc;
-  font-family: inherit;
-  font-size: 0.82rem;
-  font-weight: 700;
-  padding: 6px 14px;
-  border-radius: 999px;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
   white-space: nowrap;
-}
-
-.cinema-mode-pill:hover {
-  color: #fff;
-}
-
-.cinema-mode-pill.active {
-  background: #e50914;
-  color: #fff;
-  box-shadow: 0 0 14px rgba(229, 9, 20, 0.55);
 }
 
 /* YouTube HD Trailer Link */
