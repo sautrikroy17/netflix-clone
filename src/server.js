@@ -332,6 +332,134 @@ app.post('/api/ratings', authenticateToken, (req, res) => {
     return res.status(500).json({ error: 'Failed to update rating.' });
   }
 });
+/* ══════════════════════════════════════════════
+   PLAYBACK HISTORY & CONTINUE WATCHING (SQLite)
+══════════════════════════════════════════════ */
+app.get('/api/playback', authenticateToken, (req, res) => {
+  try {
+    const rows = db.prepare(`
+      SELECT movie_id, progress_seconds, duration_seconds, updated_at
+      FROM playback_history
+      WHERE user_id = ? AND completed = 0
+      ORDER BY updated_at DESC
+    `).all(req.user.userId);
+
+    const movieMap = {};
+    movies.forEach(m => { movieMap[m.id] = m; });
+
+    const items = rows.map(r => {
+      const movie = movieMap[r.movie_id];
+      if (!movie) return null;
+      const dur = r.duration_seconds > 0 ? r.duration_seconds : 180;
+      const pct = Math.min(95, Math.max(5, Math.round((r.progress_seconds / dur) * 100)));
+      return {
+        ...movie,
+        progressSeconds: r.progress_seconds,
+        durationSeconds: dur,
+        progressPercent: pct
+      };
+    }).filter(Boolean);
+
+    return res.json({ continueWatching: items });
+  } catch (error) {
+    console.error('Playback history fetch error:', error);
+    return res.status(500).json({ error: 'Failed to fetch playback history.' });
+  }
+});
+
+app.post('/api/playback/:movieId', authenticateToken, (req, res) => {
+  try {
+    const { movieId } = req.params;
+    const { progressSeconds = 0, durationSeconds = 0, completed = 0 } = req.body;
+
+    db.prepare(`
+      INSERT INTO playback_history (user_id, movie_id, progress_seconds, duration_seconds, completed, updated_at)
+      VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+      ON CONFLICT(user_id, movie_id) DO UPDATE SET
+        progress_seconds = excluded.progress_seconds,
+        duration_seconds = excluded.duration_seconds,
+        completed = excluded.completed,
+        updated_at = CURRENT_TIMESTAMP
+    `).run(req.user.userId, movieId, progressSeconds, durationSeconds, completed ? 1 : 0);
+
+    return res.json({ success: true, message: 'Playback progress saved.' });
+  } catch (error) {
+    console.error('Playback progress save error:', error);
+    return res.status(500).json({ error: 'Failed to save playback progress.' });
+  }
+});
+
+app.delete('/api/playback/:movieId', authenticateToken, (req, res) => {
+  try {
+    const { movieId } = req.params;
+    db.prepare('DELETE FROM playback_history WHERE user_id = ? AND movie_id = ?').run(req.user.userId, movieId);
+    return res.json({ success: true, message: 'Removed from continue watching.' });
+  } catch (error) {
+    return res.status(500).json({ error: 'Failed to remove playback item.' });
+  }
+});
+
+/* ══════════════════════════════════════════════
+   USER PREFERENCES & PROFILE MANAGEMENT
+══════════════════════════════════════════════ */
+app.get('/api/preferences', authenticateToken, (req, res) => {
+  try {
+    const pref = db.prepare('SELECT * FROM user_preferences WHERE user_id = ?').get(req.user.userId);
+    return res.json({
+      preferences: pref || { audio_language: 'en-orig', subtitle_language: 'en', playback_speed: 1.0 }
+    });
+  } catch (error) {
+    return res.status(500).json({ error: 'Failed to fetch preferences.' });
+  }
+});
+
+app.post('/api/preferences', authenticateToken, (req, res) => {
+  try {
+    const { audio_language, subtitle_language, playback_speed } = req.body;
+    db.prepare(`
+      INSERT INTO user_preferences (user_id, audio_language, subtitle_language, playback_speed, updated_at)
+      VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+      ON CONFLICT(user_id) DO UPDATE SET
+        audio_language = COALESCE(excluded.audio_language, user_preferences.audio_language),
+        subtitle_language = COALESCE(excluded.subtitle_language, user_preferences.subtitle_language),
+        playback_speed = COALESCE(excluded.playback_speed, user_preferences.playback_speed),
+        updated_at = CURRENT_TIMESTAMP
+    `).run(req.user.userId, audio_language || 'en-orig', subtitle_language || 'en', playback_speed || 1.0);
+
+    return res.json({ success: true, message: 'Preferences saved.' });
+  } catch (error) {
+    return res.status(500).json({ error: 'Failed to save preferences.' });
+  }
+});
+
+app.put('/api/auth/profile', authenticateToken, (req, res) => {
+  try {
+    const { name, plan } = req.body;
+    if (!name || !name.trim()) {
+      return res.status(400).json({ error: 'Name is required' });
+    }
+
+    db.prepare('UPDATE users SET name = ?, plan = COALESCE(?, plan) WHERE id = ?')
+      .run(name.trim(), plan || null, req.user.userId);
+
+    const updated = db.prepare('SELECT id, name, email, avatar, plan FROM users WHERE id = ?').get(req.user.userId);
+    return res.json({ user: updated, message: 'Profile updated successfully.' });
+  } catch (error) {
+    return res.status(500).json({ error: 'Failed to update profile.' });
+  }
+});
+
+app.post('/api/feedback', optionalAuth, (req, res) => {
+  try {
+    const { movieId, issueType, details } = req.body;
+    const userId = req.user ? req.user.userId : null;
+    db.prepare('INSERT INTO feedback (user_id, movie_id, issue_type, details) VALUES (?, ?, ?, ?)')
+      .run(userId, movieId || null, issueType || 'general', details || null);
+    return res.json({ success: true, message: 'Thank you for your feedback. Logged successfully.' });
+  } catch (error) {
+    return res.status(500).json({ error: 'Failed to log feedback.' });
+  }
+});
 
 /* ══════════════════════════════════════════════
    CLIENT-SIDE ROUTING FALLBACK

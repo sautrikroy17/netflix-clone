@@ -8,11 +8,14 @@ class NetflixApp {
     this.currentUser = null;
     this.movies = [];
     this.watchlist = [];
+    this.continueWatching = [];
     this.ratings = {};
     this.activeCategory = 'all';
+    this.activeLanguageFilter = 'all';
     this.searchQuery = '';
     this.selectedMovie = null;
     this.activeCinemaMovie = null;
+    this.activeEpisodeIndex = 0;
     this.currentSubTrack = 'en';
     this.currentAudioTrack = 'en-orig';
     this.isMuted = false;
@@ -20,6 +23,8 @@ class NetflixApp {
     this.speeds = [1, 1.25, 1.5, 0.75];
     this.speedIndex = 0;
     this.currentLang = 'en';
+    this.playbackThrottleTimer = null;
+    this.preferences = { audio_language: 'en-orig', subtitle_language: 'en', playback_speed: 1.0 };
 
     this.init();
   }
@@ -95,6 +100,8 @@ class NetflixApp {
         const data = await res.json();
         this.currentUser = data.user;
         await this.fetchWatchlist();
+        await this.fetchContinueWatching();
+        await this.fetchPreferences();
       } else {
         this.currentUser = null;
       }
@@ -123,6 +130,88 @@ class NetflixApp {
       }
     } catch (e) {
       console.error('Error fetching watchlist:', e);
+    }
+  }
+
+  async fetchContinueWatching() {
+    if (!this.currentUser) return;
+    try {
+      const res = await fetch('/api/playback');
+      if (res.ok) {
+        const data = await res.json();
+        this.continueWatching = data.continueWatching || [];
+      }
+    } catch (e) {
+      console.error('Error fetching playback history:', e);
+    }
+  }
+
+  async fetchPreferences() {
+    if (!this.currentUser) return;
+    try {
+      const res = await fetch('/api/preferences');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.preferences) {
+          this.preferences = data.preferences;
+          this.currentAudioTrack = data.preferences.audio_language || 'en-orig';
+          this.currentSubTrack = data.preferences.subtitle_language || 'en';
+        }
+      }
+    } catch (e) {
+      console.error('Error fetching preferences:', e);
+    }
+  }
+
+  async savePreferences(prefs) {
+    if (!this.currentUser) return;
+    try {
+      await fetch('/api/preferences', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(prefs)
+      });
+      Object.assign(this.preferences, prefs);
+    } catch (e) {}
+  }
+
+  async recordPlaybackProgress(movieId, progressSecs, durationSecs, completed = 0) {
+    if (!this.currentUser || !movieId) return;
+    try {
+      await fetch(`/api/playback/${movieId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          progressSeconds: Math.floor(progressSecs),
+          durationSeconds: Math.floor(durationSecs),
+          completed
+        })
+      });
+    } catch (e) {}
+  }
+
+  async removeContinueWatching(movieId) {
+    if (!this.currentUser) return;
+    try {
+      const res = await fetch(`/api/playback/${movieId}`, { method: 'DELETE' });
+      if (res.ok) {
+        this.continueWatching = this.continueWatching.filter(m => m.id !== movieId);
+        const card = document.querySelector(`[data-continue-card-id="${movieId}"]`);
+        if (card) {
+          card.style.transform = 'scale(0.8)';
+          card.style.opacity = '0';
+          setTimeout(() => {
+            card.remove();
+            if (this.continueWatching.length === 0) {
+              const row = document.getElementById('continue-watching-row');
+              if (row) row.remove();
+            }
+          }, 200);
+        }
+        this.showToast('Removed from Continue Watching', 'info');
+      }
+    } catch (e) {
+      this.showToast('Failed to remove item', 'error');
     }
   }
 
@@ -254,6 +343,69 @@ class NetflixApp {
 
   // 1. Authentic Netflix Landing Page (Unauthenticated)
   renderLandingPage() {
+    const isHi = this.currentLang === 'hi';
+    const t = isHi ? {
+      title: 'अनलिमिटेड फिल्में, टीवी शो और बहुत कुछ',
+      subtitle: 'मात्र ₹149 से शुरू। कभी भी रद्द करें।',
+      text: 'देखने के लिए तैयार हैं? अपनी सदस्यता बनाने या पुनः आरंभ करने के लिए अपना ईमेल दर्ज करें।',
+      emailLabel: 'ईमेल पता',
+      getStarted: 'शुरू करें',
+      signIn: 'साइन इन',
+      trendingNow: 'अभी ट्रेंडिंग में',
+      trendingOpt1: 'भारत • फिल्में और शो',
+      trendingOpt2: 'ग्लोबल • टॉप 10',
+      moreReasons: 'शामिल होने के और कारण',
+      reason1Title: 'अपने टीवी पर आनंद लें',
+      reason1Desc: 'स्मार्ट टीवी, प्लेस्टेशन, एक्सबॉक्स, क्रोमकास्ट, ऐप्पल टीवी, ब्लू-रे प्लेयर और अधिक पर देखें।',
+      reason2Title: 'ऑफ़लाइन देखने के लिए शो डाउनलोड करें',
+      reason2Desc: 'अपने पसंदीदा आसानी से सहेजें और कहीं भी कभी भी देखें।',
+      reason3Title: 'हर जगह देखें',
+      reason3Desc: 'बिना अतिरिक्त शुल्क के अपने फ़ोन, टैबलेट, लैपटॉप और टीवी पर असीमित फिल्में और टीवी शो स्ट्रीम करें।',
+      reason4Title: 'बच्चों के लिए प्रोफ़ाइल बनाएं',
+      reason4Desc: 'बच्चों को उनके पसंदीदा किरदारों के साथ रोमांचक सफर पर भेजें — सदस्यता के साथ बिल्कुल मुफ्त।',
+      faqTitle: 'अक्सर पूछे जाने वाले प्रश्न',
+      q1: 'नेटफ्लिक्स क्या है?',
+      a1: 'नेटफ्लिक्स एक स्ट्रीमिंग सेवा है जो हजारों इंटरनेट से जुड़े उपकरणों पर पुरस्कार विजेता टीवी शो, फिल्में, एनीमे, वृत्तचित्र और बहुत कुछ प्रदान करती है। आप बिना किसी विज्ञापन के जितना चाहें, जब चाहें देख सकते हैं।',
+      q2: 'नेटफ्लिक्स की कीमत कितनी है?',
+      a2: 'एक निश्चित मासिक शुल्क पर अपने स्मार्टफोन, टैबलेट, स्मार्ट टीवी, लैपटॉप या स्ट्रीमिंग डिवाइस पर नेटफ्लिक्स देखें। योजनाएं ₹149 से ₹649 प्रति माह तक हैं। कोई अतिरिक्त लागत नहीं, कोई अनुबंध नहीं।',
+      q3: 'मैं कहां देख सकता हूं?',
+      a3: 'कहीं भी, कभी भी देखें। अपने पर्सनल कंप्यूटर से netflix.com पर या नेटफ्लिक्स ऐप पेश करने वाले किसी भी इंटरनेट से जुड़े डिवाइस पर तुरंत देखने के लिए साइन इन करें।',
+      q4: 'मैं कैसे रद्द करूं?',
+      a4: 'नेटफ्लिक्स लचीला है। कोई कष्टप्रद अनुबंध नहीं है और कोई प्रतिबद्धता नहीं है। आप दो क्लिक में अपना खाता ऑनलाइन रद्द कर सकते हैं। कोई रद्दीकरण शुल्क नहीं है।',
+      q5: 'मैं नेटफ्लिक्स पर क्या देख सकता हूं?',
+      a5: 'नेटफ्लिक्स के पास फीचर फिल्मों, वृत्तचित्रों, टीवी शो, एनीमे, पुरस्कार विजेता नेटफ्लिक्स मूल और अधिक का एक व्यापक संग्रह है। जितना चाहें, कभी भी देखें।'
+    } : {
+      title: 'Unlimited movies, TV shows and more',
+      subtitle: 'Starts at ₹149. Cancel at any time.',
+      text: 'Ready to watch? Enter your email to create or restart your membership.',
+      emailLabel: 'Email address',
+      getStarted: 'Get Started',
+      signIn: 'Sign In',
+      trendingNow: 'Trending Now',
+      trendingOpt1: 'India • Movies & Shows',
+      trendingOpt2: 'Global • Top 10',
+      moreReasons: 'More Reasons to Join',
+      reason1Title: 'Enjoy on your TV',
+      reason1Desc: 'Watch on smart TVs, PlayStation, Xbox, Chromecast, Apple TV, Blu-ray players and more.',
+      reason2Title: 'Download shows to watch offline',
+      reason2Desc: 'Save your favourites easily and always have something to watch anywhere you go.',
+      reason3Title: 'Watch everywhere',
+      reason3Desc: 'Stream unlimited movies and TV shows on your phone, tablet, laptop, and TV without paying more.',
+      reason4Title: 'Create profiles for kids',
+      reason4Desc: 'Send children on adventures with their favourite characters in a space made just for them — free with membership.',
+      faqTitle: 'Frequently Asked Questions',
+      q1: 'What is Netflix?',
+      a1: 'Netflix is a streaming service that offers a wide variety of award-winning TV shows, movies, anime, documentaries and more on thousands of internet-connected devices. You can watch as much as you want, whenever you want, without a single advert – all for one low monthly price.',
+      q2: 'How much does Netflix cost?',
+      a2: 'Watch Netflix on your smartphone, tablet, Smart TV, laptop, or streaming device, all for one fixed monthly fee. Plans range from ₹149 to ₹649 a month. No extra costs, no contracts.',
+      q3: 'Where can I watch?',
+      a3: 'Watch anywhere, anytime. Sign in with your Netflix account to watch instantly on the web at netflix.com from your personal computer or on any internet-connected device that offers the Netflix app.',
+      q4: 'How do I cancel?',
+      a4: 'Netflix is flexible. There are no annoying contracts and no commitments. You can easily cancel your account online in two clicks. There are no cancellation fees – start or stop your account anytime.',
+      q5: 'What can I watch on Netflix?',
+      a5: 'Netflix has an extensive library of feature films, documentaries, TV shows, anime, award-winning Netflix originals, and more. Watch as much as you want, anytime you want.'
+    };
+
     const top10 = this.movies.slice(0, 10);
 
     return `
@@ -268,28 +420,28 @@ class NetflixApp {
           <div class="lang-picker-wrapper">
             <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
             <select class="lang-picker" id="landing-lang-picker">
-              <option value="en">English</option>
-              <option value="hi">हिन्दी</option>
+              <option value="en" ${!isHi ? 'selected' : ''}>English</option>
+              <option value="hi" ${isHi ? 'selected' : ''}>हिन्दी</option>
             </select>
           </div>
-          <button class="btn-primary-red" data-route="/login">Sign In</button>
+          <button class="btn-primary-red" data-route="/login">${t.signIn}</button>
         </div>
       </header>
 
       <!-- Hero Section (Dark poster wall with gradient vignette) -->
       <section class="landing-hero">
         <div class="landing-hero-content">
-          <h1 class="landing-title">Unlimited movies, TV shows and more</h1>
-          <p class="landing-subtitle">Starts at ₹149. Cancel at any time.</p>
-          <p class="landing-text">Ready to watch? Enter your email to create or restart your membership.</p>
+          <h1 class="landing-title">${t.title}</h1>
+          <p class="landing-subtitle">${t.subtitle}</p>
+          <p class="landing-text">${t.text}</p>
           
           <form class="cta-email-form" id="landing-cta-form">
             <div class="cta-input-wrapper">
               <input type="email" id="landing-email-input" class="cta-input" placeholder=" " required autocomplete="email" inputmode="email">
-              <label for="landing-email-input" class="cta-label">Email address</label>
+              <label for="landing-email-input" class="cta-label">${t.emailLabel}</label>
             </div>
             <button type="submit" class="btn-get-started">
-              Get Started
+              ${t.getStarted}
               <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
             </button>
           </form>
@@ -304,11 +456,11 @@ class NetflixApp {
       <!-- Trending Now Section on Landing Page -->
       <section class="landing-trending-section">
         <div class="trending-header">
-          <h2 class="trending-heading">Trending Now</h2>
+          <h2 class="trending-heading">${t.trendingNow}</h2>
           <div class="trending-filters">
             <select class="trending-select" id="landing-filter-select">
-              <option value="india">India &bull; Movies & Shows</option>
-              <option value="global">Global &bull; Top 10</option>
+              <option value="india">${t.trendingOpt1}</option>
+              <option value="global">${t.trendingOpt2}</option>
             </select>
           </div>
         </div>
@@ -330,26 +482,26 @@ class NetflixApp {
 
       <!-- More Reasons to Join 4-Card Showcase -->
       <section class="reasons-section">
-        <h2 class="reasons-title">More Reasons to Join</h2>
+        <h2 class="reasons-title">${t.moreReasons}</h2>
         <div class="reasons-grid">
           <div class="reason-card">
-            <h3 class="reason-card-title">Enjoy on your TV</h3>
-            <p class="reason-card-desc">Watch on smart TVs, PlayStation, Xbox, Chromecast, Apple TV, Blu-ray players and more.</p>
+            <h3 class="reason-card-title">${t.reason1Title}</h3>
+            <p class="reason-card-desc">${t.reason1Desc}</p>
             <svg class="reason-icon" viewBox="0 0 24 24"><path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.99-.9 1.99-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z"/></svg>
           </div>
           <div class="reason-card">
-            <h3 class="reason-card-title">Download shows to watch offline</h3>
-            <p class="reason-card-desc">Save your favourites easily and always have something to watch anywhere you go.</p>
+            <h3 class="reason-card-title">${t.reason2Title}</h3>
+            <p class="reason-card-desc">${t.reason2Desc}</p>
             <svg class="reason-icon" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
           </div>
           <div class="reason-card">
-            <h3 class="reason-card-title">Watch everywhere</h3>
-            <p class="reason-card-desc">Stream unlimited movies and TV shows on your phone, tablet, laptop, and TV without paying more.</p>
+            <h3 class="reason-card-title">${t.reason3Title}</h3>
+            <p class="reason-card-desc">${t.reason3Desc}</p>
             <svg class="reason-icon" viewBox="0 0 24 24"><path d="M4 6h18V4H4c-1.1 0-2 .9-2 2v11H0v3h14v-3H4V6zm19 2h-6c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h6c.55 0 1-.45 1-1V9c0-.55-.45-1-1-1zm-1 9h-4v-7h4v7z"/></svg>
           </div>
           <div class="reason-card">
-            <h3 class="reason-card-title">Create profiles for kids</h3>
-            <p class="reason-card-desc">Send children on adventures with their favourite characters in a space made just for them — free with membership.</p>
+            <h3 class="reason-card-title">${t.reason4Title}</h3>
+            <p class="reason-card-desc">${t.reason4Desc}</p>
             <svg class="reason-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5-9c.83 0 1.5-.67 1.5-1.5S7.83 8 7 8s-1.5.67-1.5 1.5S6.17 11 7 11zm10 0c.83 0 1.5-.67 1.5-1.5S17.83 8 17 8s-1.5.67-1.5 1.5.67 1.5 1.5 1.5zm-5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/></svg>
           </div>
         </div>
@@ -357,66 +509,56 @@ class NetflixApp {
 
       <!-- Frequently Asked Questions -->
       <section class="faq-section">
-        <h2 class="faq-heading">Frequently Asked Questions</h2>
+        <h2 class="faq-heading">${t.faqTitle}</h2>
         <div class="faq-list">
           <details class="faq-item" name="faq">
             <summary class="faq-question">
-              <span>What is Netflix?</span>
+              <span>${t.q1}</span>
               <span class="faq-icon">+</span>
             </summary>
-            <div class="faq-answer">
-              Netflix is a streaming service that offers a wide variety of award-winning TV shows, movies, anime, documentaries and more on thousands of internet-connected devices. You can watch as much as you want, whenever you want, without a single advert – all for one low monthly price.
-            </div>
+            <div class="faq-answer">${t.a1}</div>
           </details>
 
           <details class="faq-item" name="faq">
             <summary class="faq-question">
-              <span>How much does Netflix cost?</span>
+              <span>${t.q2}</span>
               <span class="faq-icon">+</span>
             </summary>
-            <div class="faq-answer">
-              Watch Netflix on your smartphone, tablet, Smart TV, laptop, or streaming device, all for one fixed monthly fee. Plans range from ₹149 to ₹649 a month. No extra costs, no contracts.
-            </div>
+            <div class="faq-answer">${t.a2}</div>
           </details>
 
           <details class="faq-item" name="faq">
             <summary class="faq-question">
-              <span>Where can I watch?</span>
+              <span>${t.q3}</span>
               <span class="faq-icon">+</span>
             </summary>
-            <div class="faq-answer">
-              Watch anywhere, anytime. Sign in with your Netflix account to watch instantly on the web at netflix.com from your personal computer or on any internet-connected device that offers the Netflix app.
-            </div>
+            <div class="faq-answer">${t.a3}</div>
           </details>
 
           <details class="faq-item" name="faq">
             <summary class="faq-question">
-              <span>How do I cancel?</span>
+              <span>${t.q4}</span>
               <span class="faq-icon">+</span>
             </summary>
-            <div class="faq-answer">
-              Netflix is flexible. There are no annoying contracts and no commitments. You can easily cancel your account online in two clicks. There are no cancellation fees – start or stop your account anytime.
-            </div>
+            <div class="faq-answer">${t.a4}</div>
           </details>
 
           <details class="faq-item" name="faq">
             <summary class="faq-question">
-              <span>What can I watch on Netflix?</span>
+              <span>${t.q5}</span>
               <span class="faq-icon">+</span>
             </summary>
-            <div class="faq-answer">
-              Netflix has an extensive library of feature films, documentaries, TV shows, anime, award-winning Netflix originals, and more. Watch as much as you want, anytime you want.
-            </div>
+            <div class="faq-answer">${t.a5}</div>
           </details>
         </div>
 
         <form class="cta-email-form" id="landing-bottom-cta">
           <div class="cta-input-wrapper">
             <input type="email" id="landing-email-bottom" class="cta-input" placeholder=" " required autocomplete="email">
-            <label for="landing-email-bottom" class="cta-label">Email address</label>
+            <label for="landing-email-bottom" class="cta-label">${t.emailLabel}</label>
           </div>
           <button type="submit" class="btn-get-started">
-            Get Started
+            ${t.getStarted}
             <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
           </button>
         </form>
@@ -446,8 +588,8 @@ class NetflixApp {
           <div class="lang-picker-wrapper">
             <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
             <select class="lang-picker">
-              <option value="en">English</option>
-              <option value="hi">हिन्दी</option>
+              <option value="en" ${!isHi ? 'selected' : ''}>English</option>
+              <option value="hi" ${isHi ? 'selected' : ''}>हिन्दी</option>
             </select>
           </div>
         </div>
@@ -472,6 +614,14 @@ class NetflixApp {
 
     const btmForm = document.getElementById('landing-bottom-cta');
     if (btmForm) btmForm.addEventListener('submit', (e) => handleCta(e, 'landing-email-bottom'));
+
+    // Language switchers
+    document.querySelectorAll('.lang-picker').forEach(picker => {
+      picker.addEventListener('change', (e) => {
+        this.currentLang = e.target.value;
+        this.renderCurrentRoute();
+      });
+    });
 
     // Landing Page Top 10 Click -> Play in Cinema Player
     document.querySelectorAll('[data-landing-play-id]').forEach(item => {
@@ -709,6 +859,18 @@ class NetflixApp {
     if (this.activeCategory === 'tv') displayedMovies = displayedMovies.filter(m => m.type === 'TV Series');
     if (this.activeCategory === 'movies') displayedMovies = displayedMovies.filter(m => m.type === 'Movie');
     if (this.activeCategory === 'mylist') displayedMovies = this.watchlist;
+    if (this.activeCategory === 'trending') displayedMovies = this.movies.filter(m => m.category === 'trending' || m.top10Rank);
+    if (this.activeCategory === 'languages') {
+      if (this.activeLanguageFilter === 'hi') {
+        displayedMovies = this.movies.filter(m => m.subtitles?.hi || m.title.includes('Sacred') || m.title.includes('Delhi') || m.id === 'stranger-things' || m.id === 'squid-game');
+      } else if (this.activeLanguageFilter === 'es') {
+        displayedMovies = this.movies.filter(m => m.id === 'money-heist' || m.genres.includes('Spanish Drama'));
+      } else if (this.activeLanguageFilter === 'ta' || this.activeLanguageFilter === 'te') {
+        displayedMovies = this.movies.filter(m => m.category === 'action' || m.category === 'trending');
+      } else if (this.activeLanguageFilter === 'en') {
+        displayedMovies = this.movies.filter(m => m.subtitles?.en);
+      }
+    }
 
     if (this.searchQuery) {
       const q = this.searchQuery.toLowerCase();
@@ -749,6 +911,9 @@ class NetflixApp {
               <li class="nav-item ${this.activeCategory === 'mylist' ? 'active' : ''}">
                 <a href="/mylist" data-category="mylist">My List (${this.watchlist.length})</a>
               </li>
+              <li class="nav-item ${this.activeCategory === 'languages' ? 'active' : ''}">
+                <a href="/browse" data-category="languages">Browse by Languages</a>
+              </li>
             </ul>
           </div>
 
@@ -762,6 +927,43 @@ class NetflixApp {
               ${this.searchQuery ? `<button class="search-clear-btn" id="search-clear-btn">✕</button>` : ''}
             </div>
 
+            <!-- Notification Bell -->
+            <div class="notification-wrapper" id="notification-wrapper">
+              <button class="notification-btn" id="notification-btn" aria-label="Notifications" title="Notifications">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                <span class="notification-badge">3</span>
+              </button>
+              <div class="notification-dropdown" id="notification-dropdown">
+                <div class="notification-header">
+                  <span>Notifications</span>
+                  <span style="font-size:0.75rem; color:var(--netflix-red); font-weight:normal;">3 New</span>
+                </div>
+                <div class="notification-list">
+                  <div class="notification-item" data-play-id="stranger-things">
+                    <img src="https://image.tmdb.org/t/p/w1280/56v2KjBlU4XaOv9rVYEQypROD7P.jpg" class="notification-thumb" alt="Stranger Things">
+                    <div class="notification-content">
+                      <div class="notification-title">Stranger Things Season 5: Official Teaser is here</div>
+                      <div class="notification-time">Just now &bull; Watch in 4K UHD</div>
+                    </div>
+                  </div>
+                  <div class="notification-item" data-play-id="interstellar">
+                    <img src="https://image.tmdb.org/t/p/w1280/xJHokMbljvjADYdit5fK5VQsXEG.jpg" class="notification-thumb" alt="Interstellar">
+                    <div class="notification-content">
+                      <div class="notification-title">New Arrival: Interstellar with Dolby Atmos</div>
+                      <div class="notification-time">1 hour ago &bull; Sci-Fi Blockbuster</div>
+                    </div>
+                  </div>
+                  <div class="notification-item" data-play-id="cyberpunk-edgerunners">
+                    <img src="https://image.tmdb.org/t/p/w1280/7GrDe84Q1Vd88g4A1Pq3gZJ3rF9.jpg" class="notification-thumb" alt="Cyberpunk">
+                    <div class="notification-content">
+                      <div class="notification-title">Recommended for You: Cyberpunk Edgerunners</div>
+                      <div class="notification-time">Yesterday &bull; 99% Match</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <!-- Profile Menu Dropdown -->
             <div class="profile-menu-wrapper" id="profile-menu-wrapper">
               <div class="profile-avatar-btn">
@@ -770,10 +972,11 @@ class NetflixApp {
               </div>
               <div class="profile-dropdown-menu" id="profile-dropdown">
                 <div class="profile-user-info">
-                  <div class="profile-user-name">${this.currentUser.name}</div>
-                  <div class="profile-user-plan">${this.currentUser.plan} &bull; 4K UHD</div>
+                  <div class="profile-user-name" id="dropdown-user-name">${this.currentUser.name}</div>
+                  <div class="profile-user-plan" id="dropdown-user-plan">${this.currentUser.plan} &bull; 4K UHD</div>
                 </div>
                 <a href="/mylist" data-route="/mylist">📋 My List (${this.watchlist.length})</a>
+                <button type="button" id="btn-open-account">⚙️ Account Settings</button>
                 <button type="button" id="btn-logout">🚪 Sign Out of Netflix</button>
               </div>
             </div>
@@ -790,7 +993,7 @@ class NetflixApp {
           </div>
         ` : `
           <!-- Hero Billboard Spotlight -->
-          ${this.activeCategory !== 'mylist' && featured.id ? `
+          ${this.activeCategory !== 'mylist' && this.activeCategory !== 'languages' && featured.id ? `
             <section class="billboard" style="background-image: url('${featured.backdrop}')">
               <div class="billboard-vignette"></div>
               <div class="billboard-content">
@@ -827,10 +1030,43 @@ class NetflixApp {
           ` : ''}
 
           <!-- Category Carousels Container -->
-          <main class="rows-container" style="${this.activeCategory === 'mylist' ? 'padding-top:100px;' : ''}">
+          <main class="rows-container" style="${this.activeCategory === 'mylist' || this.activeCategory === 'languages' ? 'padding-top:100px;' : ''}">
+
+            <!-- Browse by Languages Filter Bar -->
+            ${this.activeCategory === 'languages' ? `
+              <div style="padding: 20px 4% 10px;">
+                <h2 style="font-size: 1.8rem; margin-bottom: 16px;">Browse by Original Audio & Subtitles</h2>
+                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom: 24px;">
+                  <button class="lang-filter-pill ${this.activeLanguageFilter === 'all' ? 'active' : ''}" data-lang-filter="all">All Languages</button>
+                  <button class="lang-filter-pill ${this.activeLanguageFilter === 'hi' ? 'active' : ''}" data-lang-filter="hi">हिन्दी (Hindi Audio/Dubbed)</button>
+                  <button class="lang-filter-pill ${this.activeLanguageFilter === 'en' ? 'active' : ''}" data-lang-filter="en">English (Original Audio)</button>
+                  <button class="lang-filter-pill ${this.activeLanguageFilter === 'es' ? 'active' : ''}" data-lang-filter="es">Español (Spanish)</button>
+                  <button class="lang-filter-pill ${this.activeLanguageFilter === 'ta' ? 'active' : ''}" data-lang-filter="ta">தமிழ் (Tamil Dubbed)</button>
+                  <button class="lang-filter-pill ${this.activeLanguageFilter === 'te' ? 'active' : ''}" data-lang-filter="te">తెలుగు (Telugu Dubbed)</button>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px;">
+                  ${displayedMovies.map(m => this.renderMovieCard(m)).join('')}
+                </div>
+              </div>
+            ` : ''}
             
+            <!-- 0. Continue Watching Row (Direct from SQLite database) -->
+            ${this.continueWatching.length > 0 && this.activeCategory !== 'mylist' && this.activeCategory !== 'languages' ? `
+              <div class="category-row" id="continue-watching-row">
+                <div class="category-header">
+                  <h2 class="category-title">
+                    <span>Continue Watching for ${this.currentUser.name}</span>
+                    <span style="font-size:0.8rem; font-weight:normal; color:#888;">(Resumes at saved timestamp)</span>
+                  </h2>
+                </div>
+                <div class="movie-slider">
+                  ${this.continueWatching.map(m => this.renderContinueWatchingCard(m)).join('')}
+                </div>
+              </div>
+            ` : ''}
+
             <!-- 1. My List Row (Persisted in SQLite database) -->
-            ${this.watchlist.length > 0 ? `
+            ${this.watchlist.length > 0 && this.activeCategory !== 'languages' ? `
               <div class="category-row">
                 <div class="category-header">
                   <h2 class="category-title">
@@ -850,7 +1086,7 @@ class NetflixApp {
               </div>
             ` : '')}
 
-            ${this.activeCategory !== 'mylist' ? `
+            ${this.activeCategory !== 'mylist' && this.activeCategory !== 'languages' ? `
               <!-- 2. Trending Now Row -->
               <div class="category-row">
                 <div class="category-header">
@@ -911,6 +1147,32 @@ class NetflixApp {
     `;
   }
 
+  renderContinueWatchingCard(movie) {
+    const dur = movie.durationSeconds || 180;
+    const prog = movie.progressSeconds || 0;
+    const remaining = Math.max(1, Math.round((dur - prog) / 60));
+    const pct = movie.progressPercent || Math.min(95, Math.max(5, Math.round((prog / dur) * 100)));
+
+    return `
+      <div class="continue-card" data-continue-card-id="${movie.id}">
+        <div class="continue-media-wrap" data-continue-play-id="${movie.id}" data-continue-start="${prog}">
+          <img src="${movie.backdrop}" alt="${movie.title}" class="continue-img" loading="lazy">
+          <div class="continue-play-overlay">
+            <div class="continue-play-bubble">▶</div>
+          </div>
+          <button class="continue-remove-btn" data-remove-continue-id="${movie.id}" title="Remove from Continue Watching">✕</button>
+        </div>
+        <div class="continue-progress-bar-bg">
+          <div class="continue-progress-bar-fill" style="width: ${pct}%"></div>
+        </div>
+        <div class="continue-info-bar">
+          <span class="continue-title">${movie.title}</span>
+          <span class="continue-badge">${remaining}m left</span>
+        </div>
+      </div>
+    `;
+  }
+
   renderMovieCard(movie) {
     const isInList = this.watchlist.some(m => m.id === movie.id);
     const userRating = this.ratings[movie.id] || 'none';
@@ -963,6 +1225,40 @@ class NetflixApp {
     `;
   }
 
+  getEpisodesForMovie(movie) {
+    if (movie.episodes && movie.episodes.length) return movie.episodes;
+    return [
+      {
+        episodeNum: 1,
+        title: 'Chapter One: The Awakening',
+        duration: '48m',
+        thumb: movie.backdrop,
+        synopsis: `An unexpected revelation thrusts the main characters into uncharted and perilous territory as mysterious events unfold.`
+      },
+      {
+        episodeNum: 2,
+        title: 'Chapter Two: Into the Unknown',
+        duration: '52m',
+        thumb: movie.poster,
+        synopsis: 'As clues emerge, tensions escalate between factions while secret motives are laid bare and danger draws nearer.'
+      },
+      {
+        episodeNum: 3,
+        title: 'Chapter Three: The Point of No Return',
+        duration: '50m',
+        thumb: movie.backdrop,
+        synopsis: 'A high-stakes confrontation leads to unexpected alliances and a devastating discovery that changes everything.'
+      },
+      {
+        episodeNum: 4,
+        title: 'Chapter Four: The Reckoning',
+        duration: '58m',
+        thumb: movie.backdrop,
+        synopsis: 'Everything hangs in the balance as final moves are made in a relentless, thrilling battle against time.'
+      }
+    ];
+  }
+
   attachBrowseEvents() {
     // Header scroll background change
     const header = document.getElementById('browse-header');
@@ -983,6 +1279,14 @@ class NetflixApp {
         const cat = btn.getAttribute('data-category');
         this.activeCategory = cat;
         this.searchQuery = '';
+        this.renderCurrentRoute();
+      });
+    });
+
+    // Language Filter Pills (on Browse by Languages view)
+    document.querySelectorAll('[data-lang-filter]').forEach(pill => {
+      pill.addEventListener('click', () => {
+        this.activeLanguageFilter = pill.getAttribute('data-lang-filter');
         this.renderCurrentRoute();
       });
     });
@@ -1016,6 +1320,24 @@ class NetflixApp {
       }
     }
 
+    // Notification Dropdown Toggle
+    const notifBtn = document.getElementById('notification-btn');
+    const notifMenu = document.getElementById('notification-dropdown');
+    if (notifBtn && notifMenu) {
+      notifBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        notifMenu.classList.toggle('show');
+        const profMenu = document.getElementById('profile-dropdown');
+        if (profMenu) profMenu.classList.remove('show');
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('#notification-wrapper')) {
+          notifMenu.classList.remove('show');
+        }
+      });
+    }
+
     // Profile Dropdown Toggle
     const profileWrap = document.getElementById('profile-menu-wrapper');
     const profileMenu = document.getElementById('profile-dropdown');
@@ -1023,11 +1345,71 @@ class NetflixApp {
       profileWrap.addEventListener('click', (e) => {
         e.stopPropagation();
         profileMenu.classList.toggle('show');
+        if (notifMenu) notifMenu.classList.remove('show');
       });
 
       document.addEventListener('click', () => {
         profileMenu.classList.remove('show');
       });
+    }
+
+    // Account Settings Modal Dialog
+    const accountBtn = document.getElementById('btn-open-account');
+    const accountDialog = document.getElementById('account-settings-dialog');
+    const accountForm = document.getElementById('account-settings-form');
+    const accountClose = document.getElementById('account-modal-close');
+    const accountCancel = document.getElementById('account-cancel-btn');
+    const nameInput = document.getElementById('account-name-input');
+    const emailDisplay = document.getElementById('account-email-display');
+    const planSelect = document.getElementById('account-plan-select');
+
+    if (accountBtn && accountDialog) {
+      accountBtn.addEventListener('click', () => {
+        if (nameInput) nameInput.value = this.currentUser.name || '';
+        if (emailDisplay) emailDisplay.value = this.currentUser.email || '';
+        if (planSelect && this.currentUser.plan) {
+          Array.from(planSelect.options).forEach(opt => {
+            if (opt.value.includes(this.currentUser.plan) || opt.text.includes(this.currentUser.plan)) {
+              opt.selected = true;
+            }
+          });
+        }
+        accountDialog.showModal();
+      });
+
+      const closeAccountModal = () => accountDialog.close();
+      if (accountClose) accountClose.addEventListener('click', closeAccountModal);
+      if (accountCancel) accountCancel.addEventListener('click', closeAccountModal);
+
+      if (accountForm) {
+        accountForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const newName = nameInput.value.trim();
+          const newPlan = planSelect.value;
+          try {
+            const res = await fetch('/api/auth/profile', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ name: newName, plan: newPlan })
+            });
+            if (res.ok) {
+              const data = await res.json();
+              this.currentUser.name = data.user.name;
+              this.currentUser.plan = data.user.plan;
+              const nameEl = document.getElementById('dropdown-user-name');
+              const planEl = document.getElementById('dropdown-user-plan');
+              if (nameEl) nameEl.textContent = this.currentUser.name;
+              if (planEl) planEl.textContent = `${this.currentUser.plan} • 4K UHD`;
+              accountDialog.close();
+              this.showToast('Account profile updated successfully!', 'success');
+            } else {
+              this.showToast('Failed to update profile.', 'error');
+            }
+          } catch (err) {
+            this.showToast('Error saving profile changes.', 'error');
+          }
+        });
+      }
     }
 
     // Logout
@@ -1063,6 +1445,15 @@ class NetflixApp {
     this.cinemaRewindBtn = document.getElementById('cinema-rewind-btn');
     this.cinemaFullscreenBtn = document.getElementById('cinema-fullscreen-btn');
     this.cinemaNextBtn = document.getElementById('cinema-next-btn');
+    this.cinemaEpisodesBtn = document.getElementById('cinema-episodes-btn');
+    this.cinemaEpisodesDrawer = document.getElementById('cinema-episodes-drawer');
+    this.cinemaEpisodesList = document.getElementById('cinema-episodes-list');
+    this.cinemaEpisodesClose = document.getElementById('episodes-drawer-close');
+    this.cinemaFlagBtn = document.getElementById('cinema-flag-btn');
+    this.cinemaIssueDialog = document.getElementById('cinema-issue-dialog');
+    this.cinemaIssueForm = document.getElementById('issue-modal-form');
+    this.cinemaIssueClose = document.getElementById('issue-modal-close');
+    this.cinemaIssueCancel = document.getElementById('issue-cancel-btn');
 
     if (!this.cinemaPlayer || !this.cinemaVideo) return;
 
@@ -1072,6 +1463,55 @@ class NetflixApp {
 
     // Back button
     this.cinemaBackBtn.addEventListener('click', () => this.closeCinemaPlayer());
+
+    // Episodes Drawer Toggle
+    if (this.cinemaEpisodesBtn && this.cinemaEpisodesDrawer) {
+      this.cinemaEpisodesBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.cinemaEpisodesDrawer.classList.toggle('open');
+      });
+      if (this.cinemaEpisodesClose) {
+        this.cinemaEpisodesClose.addEventListener('click', () => {
+          this.cinemaEpisodesDrawer.classList.remove('open');
+        });
+      }
+    }
+
+    // Report Issue Dialog
+    if (this.cinemaFlagBtn && this.cinemaIssueDialog) {
+      this.cinemaFlagBtn.addEventListener('click', () => {
+        this.cinemaVideo.pause();
+        this.cinemaIssueDialog.showModal();
+      });
+
+      const closeIssue = () => this.cinemaIssueDialog.close();
+      if (this.cinemaIssueClose) this.cinemaIssueClose.addEventListener('click', closeIssue);
+      if (this.cinemaIssueCancel) this.cinemaIssueCancel.addEventListener('click', closeIssue);
+
+      if (this.cinemaIssueForm) {
+        this.cinemaIssueForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const issueType = this.cinemaIssueForm.querySelector('input[name="issueType"]:checked')?.value || 'general';
+          const details = document.getElementById('issue-details-input')?.value || '';
+          try {
+            await fetch('/api/feedback', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                movieId: this.activeCinemaMovie?.id,
+                issueType,
+                details
+              })
+            });
+            this.cinemaIssueDialog.close();
+            this.showToast('Issue reported. Our video engineering team is reviewing it.', 'success');
+            this.cinemaVideo.play().catch(() => {});
+          } catch (err) {
+            this.cinemaIssueDialog.close();
+          }
+        });
+      }
+    }
 
     // Rewind & Fast Forward (10s)
     this.cinemaRewindBtn.addEventListener('click', () => {
@@ -1120,6 +1560,7 @@ class NetflixApp {
       this.cinemaVideo.playbackRate = speed;
       this.cinemaSpeedBtn.textContent = speed + 'x';
       this.showCinemaOsd('⚡', `Playback Speed: ${speed}x`);
+      this.savePreferences({ playback_speed: speed });
     });
 
     // Next Episode
@@ -1161,6 +1602,7 @@ class NetflixApp {
         this.currentAudioTrack = track;
         const trackName = item.textContent.replace('✓', '').trim();
         this.showCinemaOsd('🌐', `Audio: ${trackName}`);
+        this.savePreferences({ audio_language: track });
         
         // Auto-switch subtitle language for dub immersion
         if (track === 'hi-dub' && this.currentSubTrack !== 'off') {
@@ -1178,6 +1620,7 @@ class NetflixApp {
         this.setSubtitleTrack(track);
         const trackName = item.textContent.replace('✓', '').trim();
         this.showCinemaOsd('💬', `Subtitles: ${trackName}`);
+        this.savePreferences({ subtitle_language: track });
       });
     });
 
@@ -1213,26 +1656,79 @@ class NetflixApp {
       } else if (e.key === 'm') {
         e.preventDefault();
         this.cinemaVolumeBtn.click();
+      } else if (e.key === 'e') {
+        e.preventDefault();
+        if (this.cinemaEpisodesBtn) this.cinemaEpisodesBtn.click();
       } else if (e.key === 'Escape') {
-        this.closeCinemaPlayer();
+        if (this.cinemaEpisodesDrawer?.classList.contains('open')) {
+          this.cinemaEpisodesDrawer.classList.remove('open');
+        } else {
+          this.closeCinemaPlayer();
+        }
       }
     });
   }
 
-  openCinemaPlayer(movieId) {
+  openCinemaPlayer(movieId, startSecs = 0, episodeNum = null) {
     const movie = this.movies.find(m => m.id === movieId);
     if (!movie || !this.cinemaPlayer) return;
 
     this.activeCinemaMovie = movie;
+    const episodes = this.getEpisodesForMovie(movie);
+    this.activeEpisodeIndex = 0;
+    if (episodeNum) {
+      const idx = episodes.findIndex(e => e.episodeNum === episodeNum);
+      if (idx !== -1) this.activeEpisodeIndex = idx;
+    }
+    const currentEp = episodes[this.activeEpisodeIndex];
 
     // Update metadata
     document.getElementById('cinema-title').textContent = movie.title;
-    document.getElementById('cinema-episode-badge').textContent = movie.type === 'TV Series' ? 'S1:E1 "Pilot"' : movie.duration;
+    document.getElementById('cinema-episode-badge').textContent = movie.type === 'TV Series' 
+      ? `S1:E${currentEp.episodeNum} "${currentEp.title}"`
+      : movie.duration;
 
-    // Load stream and reset position
+    // Show or hide episodes button
+    if (this.cinemaEpisodesBtn) {
+      this.cinemaEpisodesBtn.style.display = movie.type === 'TV Series' ? 'inline-flex' : 'none';
+    }
+
+    // Populate Episodes Drawer
+    if (this.cinemaEpisodesList) {
+      this.cinemaEpisodesList.innerHTML = episodes.map((ep, idx) => `
+        <div class="episode-item ${idx === this.activeEpisodeIndex ? 'active' : ''}" data-play-ep-num="${ep.episodeNum}">
+          <div class="episode-thumb-wrap">
+            <img src="${ep.thumb || movie.backdrop}" alt="${ep.title}" class="episode-thumb" loading="lazy">
+            <div class="episode-thumb-play">▶</div>
+          </div>
+          <div class="episode-info">
+            <div class="episode-title-row">
+              <span class="episode-num-title">${ep.episodeNum}. ${ep.title}</span>
+              <span class="episode-duration">${ep.duration}</span>
+            </div>
+            <p class="episode-desc">${ep.synopsis}</p>
+          </div>
+        </div>
+      `).join('');
+
+      const titleEl = document.getElementById('episodes-drawer-title');
+      const seasonEl = document.getElementById('episodes-drawer-season');
+      if (titleEl) titleEl.textContent = movie.title;
+      if (seasonEl) seasonEl.textContent = `Season 1 (${episodes.length} Episodes)`;
+
+      this.cinemaEpisodesList.querySelectorAll('[data-play-ep-num]').forEach(item => {
+        item.addEventListener('click', () => {
+          const epNum = parseInt(item.getAttribute('data-play-ep-num'), 10);
+          if (this.cinemaEpisodesDrawer) this.cinemaEpisodesDrawer.classList.remove('open');
+          this.playEpisode(epNum);
+        });
+      });
+    }
+
+    // Load stream and seek position
     this.cinemaVideo.src = movie.videoUrl;
     this.cinemaVideo.poster = movie.backdrop;
-    this.cinemaVideo.currentTime = 0;
+    this.cinemaVideo.currentTime = startSecs || 0;
     this.cinemaVideo.volume = 0.85;
     this.cinemaVideo.muted = false;
     this.cinemaVolumeSlider.value = 0.85;
@@ -1253,14 +1749,54 @@ class NetflixApp {
       });
     }
 
-    this.setSubtitleTrack('en');
+    // Progress throttling: saves to SQLite database every 4 seconds
+    clearInterval(this.playbackThrottleTimer);
+    this.playbackThrottleTimer = setInterval(() => {
+      if (!this.cinemaVideo.paused && this.cinemaVideo.duration > 0) {
+        const ct = this.cinemaVideo.currentTime;
+        const dur = this.cinemaVideo.duration;
+        const isCompleted = ct >= dur * 0.95 ? 1 : 0;
+        this.recordPlaybackProgress(movie.id, ct, dur, isCompleted);
+      }
+    }, 4000);
+
+    this.setSubtitleTrack(this.preferences.subtitle_language || 'en');
+  }
+
+  playEpisode(epNum) {
+    if (!this.activeCinemaMovie) return;
+    const episodes = this.getEpisodesForMovie(this.activeCinemaMovie);
+    const epIdx = episodes.findIndex(e => e.episodeNum === epNum);
+    if (epIdx === -1) return;
+
+    this.activeEpisodeIndex = epIdx;
+    const ep = episodes[epIdx];
+    document.getElementById('cinema-episode-badge').textContent = `S1:E${ep.episodeNum} "${ep.title}"`;
+    this.cinemaVideo.currentTime = 0;
+    this.cinemaVideo.play();
+    this.showCinemaOsd('▶', `Playing Episode ${ep.episodeNum}: ${ep.title}`);
+    
+    if (this.cinemaEpisodesList) {
+      this.cinemaEpisodesList.querySelectorAll('.episode-item').forEach((item, idx) => {
+        item.classList.toggle('active', idx === epIdx);
+      });
+    }
   }
 
   closeCinemaPlayer() {
     if (!this.cinemaPlayer) return;
+    clearInterval(this.playbackThrottleTimer);
+    if (this.activeCinemaMovie && this.cinemaVideo.duration > 0) {
+      const ct = this.cinemaVideo.currentTime;
+      const dur = this.cinemaVideo.duration;
+      const isCompleted = ct >= dur * 0.95 ? 1 : 0;
+      this.recordPlaybackProgress(this.activeCinemaMovie.id, ct, dur, isCompleted);
+      this.fetchContinueWatching();
+    }
     this.cinemaVideo.pause();
     this.cinemaVideo.currentTime = 0;
     this.cinemaPlayer.classList.remove('active', 'idle');
+    if (this.cinemaEpisodesDrawer) this.cinemaEpisodesDrawer.classList.remove('open');
     document.body.style.overflow = '';
     if (document.fullscreenElement) {
       document.exitFullscreen().catch(() => {});
@@ -1276,6 +1812,9 @@ class NetflixApp {
       this.cinemaVideo.pause();
       this.cinemaPlayIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
       this.showCinemaOsd('❚❚', 'Pause');
+      if (this.activeCinemaMovie && this.cinemaVideo.duration > 0) {
+        this.recordPlaybackProgress(this.activeCinemaMovie.id, this.cinemaVideo.currentTime, this.cinemaVideo.duration, 0);
+      }
     }
   }
 
@@ -1361,7 +1900,25 @@ class NetflixApp {
         return;
       }
 
-      // 2. Info Button -> Open Modal
+      // 2. Continue Watching Play Click -> Resume at saved timestamp
+      const contPlay = e.target.closest('[data-continue-play-id]');
+      if (contPlay && !e.target.closest('[data-remove-continue-id]')) {
+        const id = contPlay.getAttribute('data-continue-play-id');
+        const startSecs = parseFloat(contPlay.getAttribute('data-continue-start') || '0');
+        this.openCinemaPlayer(id, startSecs);
+        return;
+      }
+
+      // 3. Continue Watching Remove Button
+      const removeBtn = e.target.closest('[data-remove-continue-id]');
+      if (removeBtn) {
+        e.stopPropagation();
+        const id = removeBtn.getAttribute('data-remove-continue-id');
+        this.removeContinueWatching(id);
+        return;
+      }
+
+      // 4. Info Button -> Open Modal
       const infoBtn = e.target.closest('[data-info-id]');
       if (infoBtn) {
         const id = infoBtn.getAttribute('data-info-id');
@@ -1369,7 +1926,7 @@ class NetflixApp {
         return;
       }
 
-      // 3. Watchlist Toggle
+      // 5. Watchlist Toggle
       const listBtn = e.target.closest('[data-watchlist-id]');
       if (listBtn) {
         e.stopPropagation();
@@ -1378,7 +1935,7 @@ class NetflixApp {
         return;
       }
 
-      // 4. Rating Buttons
+      // 6. Rating Buttons
       const rateBtn = e.target.closest('[data-rating-id]');
       if (rateBtn) {
         e.stopPropagation();

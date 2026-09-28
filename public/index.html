@@ -108,6 +108,11 @@
             <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
           </button>
 
+          <!-- Episodes List Drawer Trigger -->
+          <button class="cinema-btn" id="cinema-episodes-btn" title="Episodes & Info (E)">
+            <svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
+          </button>
+
           <!-- Audio & Subtitles Menu Trigger -->
           <div class="cinema-audio-btn-wrapper">
             <button class="cinema-btn" id="cinema-audio-btn" title="Audio & Subtitles">
@@ -151,7 +156,93 @@
         </div>
       </div>
     </footer>
+
+    <!-- Slide-over Episodes Drawer -->
+    <aside class="cinema-episodes-drawer" id="cinema-episodes-drawer">
+      <div class="episodes-drawer-header">
+        <div class="episodes-drawer-title-group">
+          <h3 id="episodes-drawer-title">Stranger Things</h3>
+          <span class="episodes-drawer-subtitle" id="episodes-drawer-season">Season 1</span>
+        </div>
+        <button class="episodes-drawer-close" id="episodes-drawer-close" title="Close episodes">✕</button>
+      </div>
+      <div class="episodes-list" id="cinema-episodes-list">
+        <!-- Rendered dynamically -->
+      </div>
+    </aside>
+
+    <!-- Report Issue Modal Dialog -->
+    <dialog class="cinema-issue-dialog" id="cinema-issue-dialog">
+      <div class="issue-modal-header">
+        <h3>Report a Problem</h3>
+        <button class="issue-modal-close" id="issue-modal-close">✕</button>
+      </div>
+      <form id="issue-modal-form" class="issue-modal-form">
+        <p class="issue-modal-desc">What issue are you experiencing with this video?</p>
+        <div class="issue-radio-group">
+          <label class="issue-radio-label">
+            <input type="radio" name="issueType" value="audio_sync" checked>
+            <span>Audio out of sync or distorted</span>
+          </label>
+          <label class="issue-radio-label">
+            <input type="radio" name="issueType" value="subtitles">
+            <span>Subtitles missing or incorrect translation</span>
+          </label>
+          <label class="issue-radio-label">
+            <input type="radio" name="issueType" value="buffering">
+            <span>Video buffering, stuttering, or slow to load</span>
+          </label>
+          <label class="issue-radio-label">
+            <input type="radio" name="issueType" value="quality">
+            <span>Poor video quality / not playing in HD</span>
+          </label>
+          <label class="issue-radio-label">
+            <input type="radio" name="issueType" value="other">
+            <span>Other issue</span>
+          </label>
+        </div>
+        <textarea id="issue-details-input" class="issue-textarea" placeholder="Optional details (e.g., at what timestamp does this happen?)" rows="3"></textarea>
+        <div class="issue-modal-actions">
+          <button type="button" class="btn-issue-cancel" id="issue-cancel-btn">Cancel</button>
+          <button type="submit" class="btn-issue-submit">Submit Feedback</button>
+        </div>
+      </form>
+    </dialog>
   </div>
+
+  <!-- User Account Settings Modal Dialog -->
+  <dialog class="account-settings-dialog" id="account-settings-dialog">
+    <div class="account-modal-header">
+      <div class="account-modal-title-group">
+        <img src="/assets/netflix-logo.svg" alt="Netflix" class="account-modal-logo">
+        <h2>Account Settings</h2>
+      </div>
+      <button class="account-modal-close" id="account-modal-close">✕</button>
+    </div>
+    <form id="account-settings-form" class="account-modal-form">
+      <div class="account-form-row">
+        <label for="account-name-input">Profile Name</label>
+        <input type="text" id="account-name-input" class="account-input" required>
+      </div>
+      <div class="account-form-row">
+        <label for="account-email-display">Email Address</label>
+        <input type="email" id="account-email-display" class="account-input" readonly disabled>
+      </div>
+      <div class="account-form-row">
+        <label for="account-plan-select">Membership Plan</label>
+        <select id="account-plan-select" class="account-select">
+          <option value="Mobile - ₹149/month (480p)">Mobile &bull; ₹149/mo (480p SD)</option>
+          <option value="Basic - ₹199/month (720p)">Basic &bull; ₹199/mo (720p HD)</option>
+          <option value="Standard - ₹499/month (1080p)">Standard &bull; ₹499/mo (1080p Full HD)</option>
+          <option value="Premium Ultra HD - ₹649/month (4K+HDR)">Premium Ultra HD &bull; ₹649/mo (4K UHD + Dolby Atmos)</option>
+        </select>
+      </div>
+      <div class="account-modal-actions">
+        <button type="button" class="btn-account-cancel" id="account-cancel-btn">Cancel</button>
+        <button type="submit" class="btn-account-save">Save Changes</button>
+      </div>
+    </form>
+  </dialog>
 
   <!-- Application Logic -->
   <script src="/js/app.js"></script>
