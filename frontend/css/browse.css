@@ -1521,6 +1521,35 @@ dialog#movie-detail-dialog::backdrop {
   100% { transform: scale(0.9); opacity: 0.8; }
 }
 
+#cinema-top-episodes-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(20, 20, 20, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all 0.2s ease;
+}
+
+#cinema-top-episodes-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: #ffffff;
+  transform: scale(1.04);
+}
+
+#cinema-top-episodes-btn svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
 .cinema-embed-frame {
   position: absolute;
   top: 0;

@@ -2294,13 +2294,13 @@ class NetflixApp {
     this.cinemaIssueCancel = document.getElementById('issue-cancel-btn');
 
     this.cinemaEmbedFrame = document.getElementById('cinema-embed-frame');
-    this.activeStreamSource = 'native';
+    this.activeStreamSource = 'autoembed';
     this.activeSeason = 1;
     this.activeEpisode = 1;
 
     if (!this.cinemaPlayer || !this.cinemaVideo) return;
 
-    // Stream switcher buttons (Fast Ultra HD, Server 2, Server 3)
+    // Stream switcher buttons (Server 1: AutoEmbed HD, Server 2: VidLink, Server 3: MultiStream, Server 4: SmashyStream)
     document.querySelectorAll('.stream-pill').forEach(pill => {
       pill.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -2318,17 +2318,25 @@ class NetflixApp {
       this.cinemaBackBtn.addEventListener('click', () => this.closeCinemaPlayer());
     }
 
-    // Episodes Drawer Toggle
-    if (this.cinemaEpisodesBtn && this.cinemaEpisodesDrawer) {
-      this.cinemaEpisodesBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
+    // Episodes Drawer Toggle (from both bottom bar and top bar)
+    const toggleEpisodesDrawer = (e) => {
+      if (e) e.stopPropagation();
+      if (this.cinemaEpisodesDrawer) {
         this.cinemaEpisodesDrawer.classList.toggle('open');
-      });
-      if (this.cinemaEpisodesClose) {
-        this.cinemaEpisodesClose.addEventListener('click', () => {
-          this.cinemaEpisodesDrawer.classList.remove('open');
-        });
       }
+    };
+
+    if (this.cinemaEpisodesBtn) {
+      this.cinemaEpisodesBtn.addEventListener('click', toggleEpisodesDrawer);
+    }
+    const topEpBtn = document.getElementById('cinema-top-episodes-btn');
+    if (topEpBtn) {
+      topEpBtn.addEventListener('click', toggleEpisodesDrawer);
+    }
+    if (this.cinemaEpisodesClose) {
+      this.cinemaEpisodesClose.addEventListener('click', () => {
+        this.cinemaEpisodesDrawer.classList.remove('open');
+      });
     }
 
     // Report Issue Dialog
@@ -2678,13 +2686,22 @@ class NetflixApp {
       });
     }
 
+    // Show or hide episodes button in bottom bar and top bar
+    if (this.cinemaEpisodesBtn) {
+      this.cinemaEpisodesBtn.style.display = movie.type === 'TV Series' ? 'inline-flex' : 'none';
+    }
+    const topEpBtn = document.getElementById('cinema-top-episodes-btn');
+    if (topEpBtn) {
+      topEpBtn.style.display = movie.type === 'TV Series' ? 'inline-flex' : 'none';
+    }
+
     // Show player
     this.cinemaPlayer.classList.add('active');
     this.cinemaPlayer.classList.remove('idle');
     document.body.style.overflow = 'hidden';
 
-    // Activate Fast Ultra HD Super Smooth Native Engine by default
-    this.switchStreamSource(this.activeStreamSource || 'native', startSecs);
+    // Activate Full HD Movie & TV Series Streaming Engine (Defaults to Server 1: AutoEmbed HD)
+    this.switchStreamSource(this.activeStreamSource || 'autoembed', startSecs);
 
     // Record initial playback progress to SQLite database
     this.recordPlaybackProgress(movie.id, Math.max(60, startSecs || 60), 7200, 0);
@@ -2714,51 +2731,12 @@ class NetflixApp {
     const season = this.activeSeason || 1;
     const episode = this.activeEpisode || 1;
 
-    if (source === 'native') {
-      // ═══════════════════════════════════════════════════════════
-      // FAST ULTRA HD NATIVE ENGINE (SUPER SMOOTH, ZERO-LAG)
-      // ═══════════════════════════════════════════════════════════
-      this.cinemaPlayer.classList.remove('embed-active');
-      if (this.cinemaEmbedFrame) {
-        this.cinemaEmbedFrame.src = '';
-        this.cinemaEmbedFrame.style.display = 'none';
-      }
-
-      this.cinemaVideo.style.display = 'block';
-      const targetVideoUrl = movie.videoUrl || movie.backupVideoUrl || '/trailers/stranger-things.mp4';
-
-      if (!this.cinemaVideo.src || !this.cinemaVideo.src.includes(targetVideoUrl)) {
-        this.cinemaVideo.src = targetVideoUrl;
-        this.cinemaVideo.preload = 'auto';
-        this.cinemaVideo.load();
-      }
-
-      if (startSecs > 0) {
-        this.cinemaVideo.currentTime = startSecs;
-      }
-
-      const playPromise = this.cinemaVideo.play();
-      if (playPromise !== undefined) {
-        playPromise.then(() => {
-          if (this.cinemaPlayIcon) {
-            this.cinemaPlayIcon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
-          }
-        }).catch(() => {
-          if (this.cinemaPlayIcon) {
-            this.cinemaPlayIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
-          }
-        });
-      }
-
-      this.showCinemaOsd('⚡', `${movie.title} • Fast Ultra HD (Super Smooth)`);
-      this.updateCinemaTimeline();
-      this.updateCinemaSubtitles();
-      return;
-    }
-
-    // External Embed Mirrors (Server 2 & Server 3)
+    // Stop and hide background video to avoid dual audio or bandwidth waste
     this.cinemaVideo.pause();
+    this.cinemaVideo.removeAttribute('src');
+    this.cinemaVideo.load();
     this.cinemaVideo.style.display = 'none';
+
     this.cinemaPlayer.classList.add('embed-active');
 
     if (this.cinemaEmbedFrame) {
@@ -2766,17 +2744,27 @@ class NetflixApp {
       let streamUrl = '';
       let serverLabel = '';
 
-      if (source === 'vidsrc') {
-        serverLabel = 'Server 2 (AutoStream Mirror)';
+      if (source === 'vidlink') {
+        serverLabel = 'Server 2: VidLink 4K Ultra';
+        streamUrl = isTV
+          ? `https://vidlink.pro/tv/${tmdbId}/${season}/${episode}?primaryColor=e50914&secondaryColor=ffffff&iconColor=e50914&autoplay=true`
+          : `https://vidlink.pro/movie/${tmdbId}?primaryColor=e50914&secondaryColor=ffffff&iconColor=e50914&autoplay=true`;
+      } else if (source === 'multiembed') {
+        serverLabel = 'Server 3: MultiStream VIP';
+        streamUrl = isTV
+          ? `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1&s=${season}&e=${episode}`
+          : `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1`;
+      } else if (source === 'smashy') {
+        serverLabel = 'Server 4: SmashyStream VIP';
+        streamUrl = isTV
+          ? `https://embed.smashystream.com/playere.php?tmdb=${tmdbId}&season=${season}&episode=${episode}`
+          : `https://embed.smashystream.com/playere.php?tmdb=${tmdbId}`;
+      } else {
+        // Default: Server 1: AutoEmbed HD (Cloudflare Ultra Fast Multi-CDN)
+        serverLabel = 'Server 1: AutoEmbed HD';
         streamUrl = isTV
           ? `https://autoembed.co/tv/tmdb/${tmdbId}-${season}-${episode}`
           : `https://autoembed.co/movie/tmdb/${tmdbId}`;
-      } else {
-        // embedpro
-        serverLabel = 'Server 3 (VIP Mirror)';
-        streamUrl = isTV
-          ? `https://2embed.skin/embedtv/${tmdbId}&s=${season}&e=${episode}`
-          : `https://2embed.skin/embed/${tmdbId}`;
       }
 
       if (this.cinemaEmbedFrame.src !== streamUrl) {
@@ -2804,7 +2792,7 @@ class NetflixApp {
       });
     }
 
-    this.switchStreamSource(this.activeStreamSource || 'native');
+    this.switchStreamSource(this.activeStreamSource || 'autoembed');
   }
 
   closeCinemaPlayer() {

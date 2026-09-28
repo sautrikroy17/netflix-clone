@@ -36,7 +36,7 @@
 
   <!-- Dedicated Netflix Fullscreen Cinema Player -->
   <div id="netflix-cinema-player">
-    <iframe id="cinema-embed-frame" class="cinema-embed-frame" src="" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="origin" loading="eager" style="display:none; width:100%; height:100%; border:none; position:absolute; top:0; left:0; z-index:2; background:#000;"></iframe>
+    <iframe id="cinema-embed-frame" class="cinema-embed-frame" src="" allowfullscreen allow="autoplay; fullscreen; encrypted-media; picture-in-picture; accelerometer; gyroscope; clipboard-write; web-share" referrerpolicy="no-referrer-when-downgrade" loading="eager" style="display:none; width:100%; height:100%; border:none; position:absolute; top:0; left:0; z-index:2; background:#000;"></iframe>
     <video id="cinema-video" class="cinema-video-element" playsinline preload="auto"></video>
 
     <!-- Top Bar -->
@@ -58,18 +58,26 @@
 
       <!-- Server / Stream Switcher -->
       <div class="cinema-stream-selector" id="cinema-stream-selector">
-        <button type="button" class="stream-pill active" id="btn-stream-native" data-source="native" title="Fast Ultra HD (Super Smooth Native Engine)">
-          <span class="live-dot"></span> Fast Ultra HD
+        <button type="button" class="stream-pill active" id="btn-stream-autoembed" data-source="autoembed" title="Server 1: AutoEmbed HD (Full Movie / Show 1080p)">
+          <span class="live-dot"></span> Server 1 (AutoEmbed HD)
         </button>
-        <button type="button" class="stream-pill" id="btn-stream-vidsrc" data-source="vidsrc" title="Server 2 (AutoStream Mirror)">
-          Server 2
+        <button type="button" class="stream-pill" id="btn-stream-vidlink" data-source="vidlink" title="Server 2: VidLink Ultra (4K / 1080p Multi-Sub)">
+          Server 2 (VidLink 4K)
         </button>
-        <button type="button" class="stream-pill" id="btn-stream-embedpro" data-source="embedpro" title="Server 3 (VIP Mirror)">
-          Server 3
+        <button type="button" class="stream-pill" id="btn-stream-multiembed" data-source="multiembed" title="Server 3: MultiStream VIP (Zero-Buffer Mirror)">
+          Server 3 (MultiStream VIP)
+        </button>
+        <button type="button" class="stream-pill" id="btn-stream-smashy" data-source="smashy" title="Server 4: SmashyStream (Fast Edge)">
+          Server 4 (SmashyStream)
         </button>
       </div>
 
       <div class="cinema-top-right">
+        <!-- Top bar Episodes Drawer button for series -->
+        <button class="cinema-btn" id="cinema-top-episodes-btn" title="Episodes & Info (E)">
+          <svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
+          <span class="cinema-top-btn-label">Episodes</span>
+        </button>
         <button class="cinema-btn" id="cinema-flag-btn" title="Report issue">
           <svg viewBox="0 0 24 24"><path d="M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6z"/></svg>
         </button>
