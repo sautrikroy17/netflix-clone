@@ -648,6 +648,87 @@ dialog#movie-detail-dialog::backdrop {
   gap: 12px;
 }
 
+/* NetMirror Stream Switcher */
+.cinema-stream-selector {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(20, 20, 20, 0.85);
+  padding: 4px 6px;
+  border-radius: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+}
+
+.stream-pill {
+  background: transparent;
+  border: none;
+  color: #bbb;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.stream-pill:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.stream-pill.active {
+  background: var(--netflix-red);
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: 0 2px 12px rgba(229, 9, 20, 0.55);
+}
+
+.live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #46d369;
+  display: inline-block;
+  box-shadow: 0 0 6px #46d369;
+  animation: pulseLiveDot 1.5s infinite;
+}
+
+@keyframes pulseLiveDot {
+  0% { transform: scale(0.9); opacity: 0.8; }
+  50% { transform: scale(1.25); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0.8; }
+}
+
+.cinema-embed-frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: #000;
+  z-index: 2;
+}
+
+/* When embed is active, adjust bottom controls bar */
+#netflix-cinema-player.embed-active .cinema-bottom-bar,
+#netflix-cinema-player.embed-active .cinema-stage {
+  display: none !important;
+}
+
+#netflix-cinema-player.embed-active .cinema-top-bar {
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.7) 70%, transparent 100%);
+  pointer-events: auto;
+  z-index: 100;
+}
+
 /* Center Stage & Subtitles */
 .cinema-stage {
   position: relative;

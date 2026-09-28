@@ -1517,7 +1517,21 @@ class NetflixApp {
     this.cinemaIssueClose = document.getElementById('issue-modal-close');
     this.cinemaIssueCancel = document.getElementById('issue-cancel-btn');
 
+    this.cinemaEmbedFrame = document.getElementById('cinema-embed-frame');
+    this.activeStreamSource = 'netmirror';
+    this.activeSeason = 1;
+    this.activeEpisode = 1;
+
     if (!this.cinemaPlayer || !this.cinemaVideo) return;
+
+    // Stream switcher buttons (NetMirror, VidSrc, Cinema 4K)
+    document.querySelectorAll('.stream-pill').forEach(pill => {
+      pill.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const src = pill.getAttribute('data-source');
+        this.switchStreamSource(src);
+      });
+    });
 
     // Video play/pause events
     this.cinemaPlayBtn.addEventListener('click', () => this.toggleCinemaPlay());
@@ -1817,64 +1831,126 @@ class NetflixApp {
     this.cinemaPlayer.classList.add('active');
     document.body.style.overflow = 'hidden';
 
-    // Play video
-    const playPromise = this.cinemaVideo.play();
-    if (playPromise !== undefined) {
-      playPromise.then(() => {
-        this.cinemaPlayIcon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
-        this.showCinemaOsd('▶', `Now Playing: ${movie.title} • 4K Dolby Atmos`);
-      }).catch(() => {
-        this.cinemaPlayIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
-      });
-    }
+    // Activate selected stream source (NetMirror full movie/show, Server 2, or Cinema 4K Lab)
+    this.switchStreamSource(this.activeStreamSource || 'netmirror');
 
     // Progress throttling: saves to SQLite database every 4 seconds
     clearInterval(this.playbackThrottleTimer);
     this.playbackThrottleTimer = setInterval(() => {
-      if (!this.cinemaVideo.paused && this.cinemaVideo.duration > 0) {
+      if (this.activeStreamSource === 'cinema' && !this.cinemaVideo.paused && this.cinemaVideo.duration > 0) {
         const ct = this.cinemaVideo.currentTime;
         const dur = this.cinemaVideo.duration;
         const isCompleted = ct >= dur * 0.95 ? 1 : 0;
         this.recordPlaybackProgress(movie.id, ct, dur, isCompleted);
+      } else if (this.activeStreamSource !== 'cinema' && this.activeCinemaMovie) {
+        this.recordPlaybackProgress(movie.id, 120, 3600, 0);
       }
     }, 4000);
 
     this.setSubtitleTrack(this.preferences.subtitle_language || 'en');
   }
 
+  switchStreamSource(source) {
+    this.activeStreamSource = source;
+
+    // Update pill active classes
+    document.querySelectorAll('.stream-pill').forEach(pill => {
+      pill.classList.toggle('active', pill.getAttribute('data-source') === source);
+    });
+
+    if (!this.activeCinemaMovie) return;
+    const movie = this.activeCinemaMovie;
+    const tmdbId = movie.tmdbId || 66732;
+    const isTV = movie.type === 'TV Series';
+    const season = this.activeSeason || 1;
+    const episode = this.activeEpisode || 1;
+
+    if (source === 'netmirror') {
+      this.cinemaPlayer.classList.add('embed-active');
+      this.cinemaVideo.pause();
+      this.cinemaVideo.style.display = 'none';
+      if (this.cinemaEmbedFrame) {
+        this.cinemaEmbedFrame.style.display = 'block';
+        if (isTV) {
+          this.cinemaEmbedFrame.src = `https://vidlink.pro/tv/${tmdbId}/${season}/${episode}?autoplay=true`;
+        } else {
+          this.cinemaEmbedFrame.src = `https://vidlink.pro/movie/${tmdbId}?autoplay=true`;
+        }
+      }
+      this.showCinemaOsd('🎬', `Streaming Full ${isTV ? 'Episode' : 'Movie'}: ${movie.title} (NetMirror HD)`);
+    } else if (source === 'vidsrc') {
+      this.cinemaPlayer.classList.add('embed-active');
+      this.cinemaVideo.pause();
+      this.cinemaVideo.style.display = 'none';
+      if (this.cinemaEmbedFrame) {
+        this.cinemaEmbedFrame.style.display = 'block';
+        if (isTV) {
+          this.cinemaEmbedFrame.src = `https://vidsrc.pm/embed/tv/${tmdbId}/${season}/${episode}`;
+        } else {
+          this.cinemaEmbedFrame.src = `https://vidsrc.pm/embed/movie/${tmdbId}`;
+        }
+      }
+      this.showCinemaOsd('⚡', `Server 2 (VidSrc VIP): ${movie.title}`);
+    } else if (source === 'cinema') {
+      this.cinemaPlayer.classList.remove('embed-active');
+      if (this.cinemaEmbedFrame) {
+        this.cinemaEmbedFrame.style.display = 'none';
+        this.cinemaEmbedFrame.src = '';
+      }
+      this.cinemaVideo.style.display = 'block';
+      this.cinemaVideo.play().catch(() => {});
+      this.showCinemaOsd('🔥', `Cinema 4K Lab: ${movie.title} (Dolby Atmos & Subtitles)`);
+    }
+  }
+
   playEpisode(epNum) {
     if (!this.activeCinemaMovie) return;
+    this.activeEpisode = epNum;
     const episodes = this.getEpisodesForMovie(this.activeCinemaMovie);
     const epIdx = episodes.findIndex(e => e.episodeNum === epNum);
-    if (epIdx === -1) return;
+    if (epIdx !== -1) {
+      this.activeEpisodeIndex = epIdx;
+      const ep = episodes[epIdx];
+      const badge = document.getElementById('cinema-episode-badge');
+      if (badge) badge.textContent = `S1:E${ep.episodeNum} "${ep.title}"`;
+    }
 
-    this.activeEpisodeIndex = epIdx;
-    const ep = episodes[epIdx];
-    document.getElementById('cinema-episode-badge').textContent = `S1:E${ep.episodeNum} "${ep.title}"`;
-    this.cinemaVideo.currentTime = 0;
-    this.cinemaVideo.play();
-    this.showCinemaOsd('▶', `Playing Episode ${ep.episodeNum}: ${ep.title}`);
-    
     if (this.cinemaEpisodesList) {
       this.cinemaEpisodesList.querySelectorAll('.episode-item').forEach((item, idx) => {
         item.classList.toggle('active', idx === epIdx);
       });
+    }
+
+    if (this.activeStreamSource === 'netmirror' || this.activeStreamSource === 'vidsrc') {
+      this.switchStreamSource(this.activeStreamSource);
+    } else {
+      this.cinemaVideo.currentTime = 0;
+      this.cinemaVideo.play().catch(() => {});
+      this.showCinemaOsd('▶', `Playing Episode ${epNum}`);
     }
   }
 
   closeCinemaPlayer() {
     if (!this.cinemaPlayer) return;
     clearInterval(this.playbackThrottleTimer);
-    if (this.activeCinemaMovie && this.cinemaVideo.duration > 0) {
-      const ct = this.cinemaVideo.currentTime;
-      const dur = this.cinemaVideo.duration;
-      const isCompleted = ct >= dur * 0.95 ? 1 : 0;
-      this.recordPlaybackProgress(this.activeCinemaMovie.id, ct, dur, isCompleted);
+    if (this.activeCinemaMovie) {
+      if (this.activeStreamSource === 'cinema' && this.cinemaVideo.duration > 0) {
+        const ct = this.cinemaVideo.currentTime;
+        const dur = this.cinemaVideo.duration;
+        const isCompleted = ct >= dur * 0.95 ? 1 : 0;
+        this.recordPlaybackProgress(this.activeCinemaMovie.id, ct, dur, isCompleted);
+      } else {
+        this.recordPlaybackProgress(this.activeCinemaMovie.id, 120, 3600, 0);
+      }
       this.fetchContinueWatching();
     }
+    if (this.cinemaEmbedFrame) {
+      this.cinemaEmbedFrame.src = '';
+      this.cinemaEmbedFrame.style.display = 'none';
+    }
+    this.cinemaPlayer.classList.remove('embed-active', 'active', 'idle');
     this.cinemaVideo.pause();
     this.cinemaVideo.currentTime = 0;
-    this.cinemaPlayer.classList.remove('active', 'idle');
     if (this.cinemaEpisodesDrawer) this.cinemaEpisodesDrawer.classList.remove('open');
     document.body.style.overflow = '';
     if (document.fullscreenElement) {
