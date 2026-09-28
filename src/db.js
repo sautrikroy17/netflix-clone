@@ -60,7 +60,18 @@ db.exec(`
     audio_language TEXT DEFAULT 'en-orig',
     subtitle_language TEXT DEFAULT 'en',
     playback_speed REAL DEFAULT 1.0,
+    video_quality TEXT DEFAULT 'auto',
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+
+  CREATE TABLE IF NOT EXISTS profiles (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    name TEXT NOT NULL,
+    avatar TEXT NOT NULL,
+    is_kids INTEGER DEFAULT 0,
+    favorite_genres TEXT DEFAULT '["Trending","Action","Sci-Fi"]',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
 
   CREATE TABLE IF NOT EXISTS feedback (
@@ -72,6 +83,20 @@ db.exec(`
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
 `);
+
+// Safe migrations to add profile_id column if not exists
+try {
+  db.exec("ALTER TABLE watchlist ADD COLUMN profile_id INTEGER REFERENCES profiles(id) ON DELETE CASCADE");
+} catch (e) {}
+try {
+  db.exec("ALTER TABLE ratings ADD COLUMN profile_id INTEGER REFERENCES profiles(id) ON DELETE CASCADE");
+} catch (e) {}
+try {
+  db.exec("ALTER TABLE playback_history ADD COLUMN profile_id INTEGER REFERENCES profiles(id) ON DELETE CASCADE");
+} catch (e) {}
+try {
+  db.exec("ALTER TABLE user_preferences ADD COLUMN video_quality TEXT DEFAULT 'auto'");
+} catch (e) {}
 
 // Seed default demo user if not present
 const checkDemo = db.prepare('SELECT id FROM users WHERE email = ?').get('demo@netflix.com');
@@ -124,6 +149,41 @@ if (!checkPlayback) {
     VALUES (?, ?, ?, ?)
   `);
   addPref.run(demoUserId, 'hi-dub', 'en', 1.0);
+}
+
+// Seed demo profiles if none exist
+const checkProfiles = db.prepare('SELECT id FROM profiles WHERE user_id = ?').all(demoUserId);
+if (!checkProfiles || checkProfiles.length === 0) {
+  const addProfile = db.prepare(`
+    INSERT INTO profiles (user_id, name, avatar, is_kids, favorite_genres)
+    VALUES (?, ?, ?, ?, ?)
+  `);
+
+  addProfile.run(
+    demoUserId,
+    'Sautrik',
+    'https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png',
+    0,
+    JSON.stringify(['Trending', 'Action', 'Sci-Fi', 'Indian Mega Blockbusters'])
+  );
+
+  addProfile.run(
+    demoUserId,
+    'Kids',
+    'https://occ-0-2794-2219.1.nflxso.net/dnm/api/v6/vN7bi_My87NPKvsBoib006Llxzg/AAAABfjwdaqrqnvWi0qcfMlW0hOWAA2YKukqGE4vd5vDxZGCBm2CQGfkZWGxD77dStW69G09918.png?r=fcd',
+    1,
+    JSON.stringify(['Animation', 'Family', 'Anime', 'Adventure'])
+  );
+
+  addProfile.run(
+    demoUserId,
+    'Cinema Buff',
+    'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
+    0,
+    JSON.stringify(['Crime Thriller', 'Mind-Bending', 'Period Piece', 'Drama'])
+  );
+
+  console.log('✅ Default profiles seeded for demo user: Sautrik, Kids, Cinema Buff');
 }
 
 module.exports = db;

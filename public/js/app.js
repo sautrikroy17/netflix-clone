@@ -24,7 +24,12 @@ class NetflixApp {
     this.speedIndex = 0;
     this.currentLang = 'en';
     this.playbackThrottleTimer = null;
-    this.preferences = { audio_language: 'en-orig', subtitle_language: 'en', playback_speed: 1.0 };
+    this.preferences = { audio_language: 'en-orig', subtitle_language: 'en', playback_speed: 1.0, video_quality: 'auto' };
+    this.profiles = [];
+    this.activeProfile = null;
+    this.activeGenreFilter = 'all';
+    this.currentQuality = 'auto';
+    this.hoverPreviewTimeout = null;
 
     this.init();
   }
@@ -32,6 +37,9 @@ class NetflixApp {
   async init() {
     this.setupRouter();
     await this.checkAuthSession();
+    if (this.currentUser) {
+      await this.fetchProfiles();
+    }
     await this.fetchMovies();
     this.setupCinemaPlayer();
     this.renderCurrentRoute();
@@ -79,6 +87,14 @@ class NetflixApp {
       if (this.currentUser) return this.navigate('/browse');
       appEl.innerHTML = this.renderSignupPage();
       this.attachSignupEvents();
+    } else if (path === '/switch-profile') {
+      if (!this.currentUser) return this.navigate('/login');
+      appEl.innerHTML = this.renderProfilesScreen();
+      this.attachProfilesScreenEvents();
+    } else if (path === '/switch-profile') {
+      if (!this.currentUser) return this.navigate('/login');
+      appEl.innerHTML = this.renderProfilesScreen();
+      this.attachProfilesScreenEvents();
     } else if (path === '/browse' || path === '/mylist' || (path === '/' && this.currentUser)) {
       if (!this.currentUser) return this.navigate('/login');
       if (path === '/mylist') this.activeCategory = 'mylist';
@@ -95,12 +111,65 @@ class NetflixApp {
   /* ══════════════════════════════════════════════
      API SERVICE & AUTHENTICATION
   ══════════════════════════════════════════════ */
+
+  async fetchProfiles() {
+    if (!this.currentUser) return;
+    try {
+      const res = await fetch('/api/profiles');
+      if (res.ok) {
+        const data = await res.json();
+        this.profiles = data.profiles || [];
+        const savedId = localStorage.getItem('netflix_active_profile_id');
+        const match = this.profiles.find(p => p.id == savedId);
+        this.activeProfile = match || this.profiles[0] || null;
+        if (this.activeProfile) {
+          localStorage.setItem('netflix_active_profile_id', this.activeProfile.id);
+        }
+      }
+    } catch (e) {
+      console.error('Error fetching profiles:', e);
+    }
+  }
+
+  async switchProfile(profileId) {
+    const prof = this.profiles.find(p => p.id == profileId);
+    if (!prof) return;
+    this.activeProfile = prof;
+    localStorage.setItem('netflix_active_profile_id', prof.id);
+    this.showToast(`Switched to profile: ${prof.name}`, 'info');
+    await this.fetchMovies();
+    await this.fetchWatchlist();
+    await this.fetchContinueWatching();
+    this.navigate('/browse');
+  }
+
+  async createProfile(name, avatar, isKids, favoriteGenres) {
+    try {
+      const res = await fetch('/api/profiles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, avatar, isKids, favoriteGenres })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        this.profiles.push(data.profile);
+        this.showToast(`Profile "${name}" created successfully!`, 'success');
+        await this.switchProfile(data.profile.id);
+        return true;
+      }
+    } catch (e) {
+      this.showToast('Failed to create profile', 'error');
+    }
+    return false;
+  }
+
   async checkAuthSession() {
     try {
       const res = await fetch('/api/auth/me');
       if (res.ok) {
         const data = await res.json();
         this.currentUser = data.user;
+        await this.fetchProfiles();
         await this.fetchWatchlist();
         await this.fetchContinueWatching();
         await this.fetchPreferences();
@@ -888,6 +957,15 @@ class NetflixApp {
       }
     }
 
+    // Genre Filter in TV Shows / Movies view
+    if (this.activeGenreFilter && this.activeGenreFilter !== 'all') {
+      const gf = this.activeGenreFilter.toLowerCase();
+      displayedMovies = displayedMovies.filter(m => 
+        m.genres.some(g => g.toLowerCase().includes(gf)) ||
+        (gf === 'indian' && ['rrr', 'leo', 'jawan', 'animal', 'kalki-2898-ad', 'kgf-chapter-2', 'salaar', 'baahubali-2', 'dangal', 'three-idiots', 'vikram', 'kantara', 'pushpa-the-rise', 'dunki'].includes(m.id))
+      );
+    }
+
     if (this.searchQuery) {
       const q = this.searchQuery.toLowerCase();
       displayedMovies = this.movies.filter(m => 
@@ -897,14 +975,20 @@ class NetflixApp {
       );
     }
 
-    const trending = this.movies.filter(m => m.category === 'trending' || m.top10Rank);
-    const top10 = this.movies.filter(m => m.top10Rank && m.top10Rank >= 1 && m.top10Rank <= 10).sort((a, b) => a.top10Rank - b.top10Rank).slice(0, 10);
+    // Category lists for rows
+    const topShows = this.movies.filter(m => m.type === 'TV Series' && (m.top10Rank || ['stranger-things','squid-game','wednesday','money-heist','arcane','peaky-blinders','breaking-bad','dark','narcos','better-call-saul'].includes(m.id))).slice(0, 10);
     const newOnNetflix = this.movies.filter(m => m.year === '2024' || m.year === '2023');
+    const yourNextWatch = this.movies.filter(m => m.matchScore >= 95).slice(0, 10);
+    const topMovies = this.movies.filter(m => m.type === 'Movie' && (m.top10Rank || ['rrr','leo','jawan','animal','kalki-2898-ad','kgf-chapter-2','interstellar','inception','the-dark-knight','oppenheimer'].includes(m.id))).slice(0, 10);
+    const topPicks = this.movies.filter(m => ['narcos', 'interstellar', 'cyberpunk-edgerunners', 'dune-part-two', 'all-of-us-are-dead', 'the-witcher'].includes(m.id) || m.matchScore >= 96);
+    const usThrillers = this.movies.filter(m => m.genres.some(g => ['crime', 'thriller', 'mystery'].some(kw => g.toLowerCase().includes(kw))));
+    const grittyShows = this.movies.filter(m => m.type === 'TV Series' && (m.genres.some(g => ['crime', 'drama', 'action'].some(kw => g.toLowerCase().includes(kw))) || ['breaking-bad', 'better-call-saul', 'narcos', 'peaky-blinders', 'dark'].includes(m.id)));
     const indianHits = this.movies.filter(m => ['rrr', 'leo', 'jawan', 'animal', 'kalki-2898-ad', 'kgf-chapter-2', 'salaar', 'baahubali-2', 'dangal', 'three-idiots', 'vikram', 'kantara', 'pushpa-the-rise', 'dunki'].includes(m.id));
     const scifi = this.movies.filter(m => m.genres.some(g => g.toLowerCase().includes('sci-fi') || g.toLowerCase().includes('cyberpunk') || g.toLowerCase().includes('multiverse')));
-    const action = this.movies.filter(m => m.genres.some(g => g.toLowerCase().includes('action') || g.toLowerCase().includes('thriller')));
-    const drama = this.movies.filter(m => m.genres.some(g => g.toLowerCase().includes('drama') || g.toLowerCase().includes('crime') || g.toLowerCase().includes('biography')));
     const anime = this.movies.filter(m => m.genres.some(g => g.toLowerCase().includes('anime') || g.toLowerCase().includes('animation')));
+
+    const activeAvatar = this.activeProfile?.avatar || 'https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png';
+    const activeProfileName = this.activeProfile?.name || this.currentUser.name || 'Home';
 
     return `
       <div class="browse-container">
@@ -946,22 +1030,22 @@ class NetflixApp {
               ${this.searchQuery ? `<button class="search-clear-btn" id="search-clear-btn">✕</button>` : ''}
             </div>
 
-            <!-- Notification Bell -->
+            <!-- Notification Bell with Badge 12 (Matching Screenshot 1 & 2) -->
             <div class="notification-wrapper" id="notification-wrapper">
               <button class="notification-btn" id="notification-btn" aria-label="Notifications" title="Notifications">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-                <span class="notification-badge">3</span>
+                <span class="notification-badge">12</span>
               </button>
               <div class="notification-dropdown" id="notification-dropdown">
                 <div class="notification-header">
                   <span>Notifications</span>
-                  <span style="font-size:0.75rem; color:var(--netflix-red); font-weight:normal;">3 New</span>
+                  <span style="font-size:0.75rem; color:var(--netflix-red); font-weight:normal;">12 New</span>
                 </div>
                 <div class="notification-list">
                   <div class="notification-item" data-play-id="stranger-things">
                     <img src="https://image.tmdb.org/t/p/w1280/56v2KjBlU4XaOv9rVYEQypROD7P.jpg" class="notification-thumb" alt="Stranger Things">
                     <div class="notification-content">
-                      <div class="notification-title">Stranger Things Season 5: Official Teaser is here</div>
+                      <div class="notification-title">Stranger Things Season 5: Official Teaser is live</div>
                       <div class="notification-time">Just now &bull; Watch in 4K UHD</div>
                     </div>
                   </div>
@@ -983,17 +1067,39 @@ class NetflixApp {
               </div>
             </div>
 
-            <!-- Profile Menu Dropdown -->
+            <!-- Profile Menu Dropdown with Switcher -->
             <div class="profile-menu-wrapper" id="profile-menu-wrapper">
               <div class="profile-avatar-btn">
-                <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80" alt="Profile Avatar" class="profile-img">
+                <img src="${activeAvatar}" alt="Profile Avatar" class="profile-img">
                 <span class="profile-caret">▼</span>
               </div>
               <div class="profile-dropdown-menu" id="profile-dropdown">
                 <div class="profile-user-info">
-                  <div class="profile-user-name" id="dropdown-user-name">${this.currentUser.name}</div>
+                  <div class="profile-user-name" id="dropdown-user-name">${activeProfileName}</div>
                   <div class="profile-user-plan" id="dropdown-user-plan">${this.currentUser.plan} &bull; 4K UHD</div>
                 </div>
+
+                <!-- Multi-Profile Switcher List -->
+                ${this.profiles.length > 0 ? `
+                  <div style="padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.1); display:flex; flex-direction:column; gap:4px;">
+                    ${this.profiles.map(p => `
+                      <div class="profile-switch-item ${this.activeProfile?.id === p.id ? 'active' : ''}" data-switch-profile-id="${p.id}" style="display:flex; align-items:center; gap:10px; padding:6px 14px; cursor:pointer; font-size:0.88rem; transition:background 0.15s ease;">
+                        <img src="${p.avatar}" alt="${p.name}" style="width:26px; height:26px; border-radius:4px; object-fit:cover;">
+                        <span style="flex:1;">${p.name}${p.is_kids ? ' <span style="font-size:0.75rem; color:#f5a623;">(Kids)</span>' : ''}</span>
+                        ${this.activeProfile?.id === p.id ? '<span style="color:var(--netflix-red); font-size:0.8rem;">●</span>' : ''}
+                      </div>
+                    `).join('')}
+                    <div class="profile-switch-item" id="nav-add-profile-btn" style="display:flex; align-items:center; gap:10px; padding:6px 14px; cursor:pointer; font-size:0.88rem;">
+                      <span style="width:26px; height:26px; border-radius:4px; background:#333; display:flex; align-items:center; justify-content:center; font-weight:bold;">+</span>
+                      <span>Add Profile</span>
+                    </div>
+                    <a href="/switch-profile" data-route="/switch-profile" style="display:flex; align-items:center; gap:10px; padding:6px 14px; cursor:pointer; font-size:0.88rem; color:#bbb; text-decoration:none;">
+                      <span style="width:26px; height:26px; display:flex; align-items:center; justify-content:center;">👥</span>
+                      <span>Who's Watching?</span>
+                    </a>
+                  </div>
+                ` : ''}
+
                 <a href="/mylist" data-route="/mylist">📋 My List (${this.watchlist.length})</a>
                 <button type="button" id="btn-open-account">⚙️ Account Settings</button>
                 <button type="button" id="btn-logout">🚪 Sign Out of Netflix</button>
@@ -1001,6 +1107,31 @@ class NetflixApp {
             </div>
           </div>
         </header>
+
+        <!-- Sticky Category Subnav for TV Shows & Movies -->
+        ${(this.activeCategory === 'tv' || this.activeCategory === 'movies') && !this.searchQuery ? `
+          <div class="category-subnav">
+            <div class="category-subnav-left">
+              <h1 class="category-subnav-title">${this.activeCategory === 'tv' ? 'TV Shows' : 'Movies'}</h1>
+              <div class="genre-dropdown-wrapper">
+                <button class="genre-dropdown-btn" id="category-genre-dropdown-btn">
+                  <span>${this.activeGenreFilter === 'all' ? 'Genres' : this.activeGenreFilter}</span>
+                  <span style="font-size:0.75rem;">▾</span>
+                </button>
+                <div class="genre-dropdown-menu" id="category-genre-dropdown-menu">
+                  <div class="genre-menu-item ${this.activeGenreFilter === 'all' ? 'active' : ''}" data-genre-val="all">All Genres</div>
+                  <div class="genre-menu-item ${this.activeGenreFilter === 'Action' ? 'active' : ''}" data-genre-val="Action">Action & Adventure</div>
+                  <div class="genre-menu-item ${this.activeGenreFilter === 'Sci-Fi' ? 'active' : ''}" data-genre-val="Sci-Fi">Sci-Fi & Fantasy</div>
+                  <div class="genre-menu-item ${this.activeGenreFilter === 'Crime' ? 'active' : ''}" data-genre-val="Crime">Crime Thrillers & Mysteries</div>
+                  <div class="genre-menu-item ${this.activeGenreFilter === 'Drama' ? 'active' : ''}" data-genre-val="Drama">Gritty TV Shows & Dramas</div>
+                  <div class="genre-menu-item ${this.activeGenreFilter === 'Indian' ? 'active' : ''}" data-genre-val="Indian">Indian Mega Blockbusters</div>
+                  <div class="genre-menu-item ${this.activeGenreFilter === 'Anime' ? 'active' : ''}" data-genre-val="Anime">Anime & Animation</div>
+                  <div class="genre-menu-item ${this.activeGenreFilter === 'Comedy' ? 'active' : ''}" data-genre-val="Comedy">Comedies</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ` : ''}
 
         <!-- Search Results View -->
         ${this.searchQuery ? `
@@ -1074,13 +1205,15 @@ class NetflixApp {
               <div class="category-row" id="continue-watching-row">
                 <div class="category-header">
                   <h2 class="category-title">
-                    <span>Continue Watching for ${this.currentUser.name}</span>
+                    <span>Continue Watching for ${activeProfileName}</span>
                     <span style="font-size:0.8rem; font-weight:normal; color:#888;">(Resumes at saved timestamp)</span>
                   </h2>
                 </div>
+                <button class="slider-arrow slider-arrow-left" aria-label="Previous">‹</button>
                 <div class="movie-slider">
                   ${this.continueWatching.map(m => this.renderContinueWatchingCard(m)).join('')}
                 </div>
+                <button class="slider-arrow slider-arrow-right" aria-label="Next">›</button>
               </div>
             ` : ''}
 
@@ -1093,9 +1226,11 @@ class NetflixApp {
                     <span style="font-size:0.8rem; font-weight:normal; color:#888;">(${this.watchlist.length} items)</span>
                   </h2>
                 </div>
+                <button class="slider-arrow slider-arrow-left" aria-label="Previous">‹</button>
                 <div class="movie-slider">
                   ${this.watchlist.map(m => this.renderMovieCard(m)).join('')}
                 </div>
+                <button class="slider-arrow slider-arrow-right" aria-label="Next">›</button>
               </div>
             ` : (this.activeCategory === 'mylist' ? `
               <div style="padding: 40px 4%; text-align:center;">
@@ -1109,104 +1244,141 @@ class NetflixApp {
               <div style="padding: 20px 4% 30px;">
                 <h2 style="font-size: 1.8rem; margin-bottom: 20px; font-weight: 700;">
                   ${this.activeCategory === 'tv' ? '📺 TV Shows & Global Series' : '🎬 Hollywood & Indian Blockbuster Movies'}
-                  <span style="font-size: 0.9rem; font-weight: normal; color: #888;">(${displayedMovies.length} titles)</span>
+                  <span style="font-size: 0.9rem; font-weight: normal; color: #888;">(${displayedMovies.length} titles${this.activeGenreFilter !== 'all' ? ' &bull; ' + this.activeGenreFilter : ''})</span>
                 </h2>
                 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px;">
                   ${displayedMovies.map(m => this.renderMovieCard(m)).join('')}
                 </div>
               </div>
             ` : (this.activeCategory !== 'mylist' && this.activeCategory !== 'languages' ? `
-              <!-- 2. Trending Now Row -->
+              <!-- 2. Top 10 Shows in India Today (Screenshot 1 Exact) -->
               <div class="category-row">
                 <div class="category-header">
-                  <h2 class="category-title">Trending Now</h2>
+                  <h2 class="category-title">Top 10 Shows in India Today</h2>
                 </div>
+                <button class="slider-arrow slider-arrow-left" aria-label="Previous">‹</button>
                 <div class="movie-slider">
-                  ${trending.map(m => this.renderMovieCard(m)).join('')}
+                  ${topShows.map(m => this.renderTop10Card(m)).join('')}
                 </div>
+                <button class="slider-arrow slider-arrow-right" aria-label="Next">›</button>
               </div>
 
-              <!-- 3. Top 10 in India Today Row -->
-              <div class="category-row">
-                <div class="category-header">
-                  <h2 class="category-title">Top 10 in India Today</h2>
-                </div>
-                <div class="movie-slider">
-                  ${top10.map(m => this.renderTop10Card(m)).join('')}
-                </div>
-              </div>
-
-              <!-- 4. New on Netflix Row -->
+              <!-- 3. New on Netflix (Screenshot 1 Exact) -->
               <div class="category-row">
                 <div class="category-header">
                   <h2 class="category-title">New on Netflix</h2>
                 </div>
+                <button class="slider-arrow slider-arrow-left" aria-label="Previous">‹</button>
                 <div class="movie-slider">
                   ${newOnNetflix.map(m => this.renderMovieCard(m)).join('')}
                 </div>
+                <button class="slider-arrow slider-arrow-right" aria-label="Next">›</button>
               </div>
 
-              <!-- 5. Indian Mega Blockbusters -->
+              <!-- 4. Your Next Watch (Screenshot 1 Exact) -->
+              <div class="category-row">
+                <div class="category-header">
+                  <h2 class="category-title">Your Next Watch</h2>
+                </div>
+                <button class="slider-arrow slider-arrow-left" aria-label="Previous">‹</button>
+                <div class="movie-slider">
+                  ${yourNextWatch.map(m => this.renderMovieCard(m)).join('')}
+                </div>
+                <button class="slider-arrow slider-arrow-right" aria-label="Next">›</button>
+              </div>
+
+              <!-- 5. Top 10 Movies in India Today (Screenshot 2 Exact) -->
+              <div class="category-row">
+                <div class="category-header">
+                  <h2 class="category-title">Top 10 Movies in India Today</h2>
+                </div>
+                <button class="slider-arrow slider-arrow-left" aria-label="Previous">‹</button>
+                <div class="movie-slider">
+                  ${topMovies.map(m => this.renderTop10Card(m)).join('')}
+                </div>
+                <button class="slider-arrow slider-arrow-right" aria-label="Next">›</button>
+              </div>
+
+              <!-- 6. Today's Top Picks for You (Screenshot 2 Exact) -->
+              <div class="category-row">
+                <div class="category-header">
+                  <h2 class="category-title">Today's Top Picks for You</h2>
+                </div>
+                <button class="slider-arrow slider-arrow-left" aria-label="Previous">‹</button>
+                <div class="movie-slider">
+                  ${topPicks.map(m => this.renderMovieCard(m)).join('')}
+                </div>
+                <button class="slider-arrow slider-arrow-right" aria-label="Next">›</button>
+              </div>
+
+              <!-- 7. US TV Thrillers & Mysteries (Screenshot 2 Exact) -->
+              <div class="category-row">
+                <div class="category-header">
+                  <h2 class="category-title">US TV Thrillers & Mysteries</h2>
+                </div>
+                <button class="slider-arrow slider-arrow-left" aria-label="Previous">‹</button>
+                <div class="movie-slider">
+                  ${usThrillers.map(m => this.renderMovieCard(m)).join('')}
+                </div>
+                <button class="slider-arrow slider-arrow-right" aria-label="Next">›</button>
+              </div>
+
+              <!-- 8. Gritty TV Shows (Screenshot 2 Exact) -->
+              <div class="category-row">
+                <div class="category-header">
+                  <h2 class="category-title">Gritty TV Shows</h2>
+                </div>
+                <button class="slider-arrow slider-arrow-left" aria-label="Previous">‹</button>
+                <div class="movie-slider">
+                  ${grittyShows.map(m => this.renderMovieCard(m)).join('')}
+                </div>
+                <button class="slider-arrow slider-arrow-right" aria-label="Next">›</button>
+              </div>
+
+              <!-- 9. Indian Mega Blockbusters -->
               <div class="category-row">
                 <div class="category-header">
                   <h2 class="category-title">Indian Mega Blockbusters & Cinema</h2>
                 </div>
+                <button class="slider-arrow slider-arrow-left" aria-label="Previous">‹</button>
                 <div class="movie-slider">
                   ${indianHits.map(m => this.renderMovieCard(m)).join('')}
                 </div>
+                <button class="slider-arrow slider-arrow-right" aria-label="Next">›</button>
               </div>
 
-              <!-- 5. Sci-Fi & Mind-Bending Row -->
+              <!-- 10. Sci-Fi & Mind-Bending -->
               <div class="category-row">
                 <div class="category-header">
                   <h2 class="category-title">Blockbuster Sci-Fi & Mind-Bending</h2>
                 </div>
+                <button class="slider-arrow slider-arrow-left" aria-label="Previous">‹</button>
                 <div class="movie-slider">
                   ${scifi.map(m => this.renderMovieCard(m)).join('')}
                 </div>
+                <button class="slider-arrow slider-arrow-right" aria-label="Next">›</button>
               </div>
 
-              <!-- 6. Action & Adrenaline Thrillers Row -->
+              <!-- 11. Anime & Animation -->
               <div class="category-row">
                 <div class="category-header">
-                  <h2 class="category-title">Action & Adrenaline Thrillers</h2>
+                  <h2 class="category-title">Anime & Global Animation</h2>
                 </div>
-                <div class="movie-slider">
-                  ${action.map(m => this.renderMovieCard(m)).join('')}
-                </div>
-              </div>
-
-              <!-- 7. Critically Acclaimed Dramas & Masterpieces -->
-              <div class="category-row">
-                <div class="category-header">
-                  <h2 class="category-title">Critically Acclaimed Dramas & Masterpieces</h2>
-                </div>
-                <div class="movie-slider">
-                  ${drama.map(m => this.renderMovieCard(m)).join('')}
-                </div>
-              </div>
-
-              <!-- 8. Anime & Animation -->
-              <div class="category-row">
-                <div class="category-header">
-                  <h2 class="category-title">Anime & Animation</h2>
-                </div>
+                <button class="slider-arrow slider-arrow-left" aria-label="Previous">‹</button>
                 <div class="movie-slider">
                   ${anime.map(m => this.renderMovieCard(m)).join('')}
                 </div>
+                <button class="slider-arrow slider-arrow-right" aria-label="Next">›</button>
               </div>
             ` : '')}
 
           </main>
         `}
-
-        <!-- Interactive Movie Detail Modal Dialog (<dialog>) -->
-        <dialog class="movie-modal" id="movie-detail-dialog"></dialog>
       </div>
     `;
   }
 
-  renderContinueWatchingCard(movie) {
+    renderContinueWatchingCard(movie) {
     const dur = movie.durationSeconds || 180;
     const prog = movie.progressSeconds || 0;
     const remaining = Math.max(1, Math.round((dur - prog) / 60));
@@ -1236,11 +1408,28 @@ class NetflixApp {
     const isInList = this.watchlist.some(m => m.id === movie.id);
     const userRating = this.ratings[movie.id] || 'none';
 
+    // Badges calculation matching user's screenshots
+    const isTop10 = movie.top10Rank || ['stranger-things','squid-game','wednesday','money-heist','rrr','leo','jawan','animal','kalki-2898-ad','kgf-chapter-2'].includes(movie.id);
+    const isNewSeason = movie.year === '2024';
+    const isRecentlyAdded = movie.year === '2023' || movie.id === 'arcane' || movie.id === 'cyberpunk-edgerunners';
+    const isNewEpisode = movie.type === 'TV Series' && !isNewSeason && !isRecentlyAdded;
+
     return `
       <div class="movie-card" data-card-id="${movie.id}">
+        ${isTop10 ? `<div class="card-badge-top-left">TOP 10</div>` : ''}
+        ${isNewSeason ? `<div class="card-badge-bottom">New Season</div>` : (isRecentlyAdded ? `<div class="card-badge-bottom">Recently added</div>` : (isNewEpisode ? `<div class="card-badge-bottom">New Episode &bull; Watch Now</div>` : ''))}
+        
         <img src="${movie.backdrop}" alt="${movie.title}" loading="lazy" class="movie-card-thumb" onerror="this.onerror=null; this.src='https://image.tmdb.org/t/p/w1280/56v2KjBlU4XaOv9rVYEQypROD7P.jpg';">
+
+        <!-- Netflix Popout Hover Preview Card (Screenshot 4 Pixel-Perfect Replica) -->
         <div class="movie-card-hover-box">
-          <div class="hover-content">
+          <div class="hover-media-section">
+            <span class="hover-n-logo">N</span>
+            <img src="${movie.backdrop}" alt="${movie.title}" class="hover-media-img" onerror="this.onerror=null; this.src='https://image.tmdb.org/t/p/w1280/56v2KjBlU4XaOv9rVYEQypROD7P.jpg';">
+            <video class="hover-preview-video" muted loop playsinline preload="none" data-src="${movie.videoUrl || movie.backupVideoUrl || ''}"></video>
+            <button class="hover-sound-btn" data-hover-sound-id="${movie.id}" title="Toggle Sound">🔇</button>
+          </div>
+          <div class="hover-details-section">
             <div class="hover-actions-row">
               <div class="hover-left-btns">
                 <button class="card-btn card-btn-play" data-play-id="${movie.id}" title="Play in HD with Audio">▶</button>
@@ -1252,9 +1441,10 @@ class NetflixApp {
               <button class="card-btn card-btn-info" data-info-id="${movie.id}" title="Episode info & more">⌄</button>
             </div>
             <div class="hover-meta-row">
-              <span class="match-score">${movie.matchScore}% Match</span>
+              <span class="hover-meta-type">${movie.type === 'TV Series' ? 'Series' : 'Movie'}</span>
               <span class="age-badge">${movie.ageRating}</span>
-              <span class="quality-badge">${movie.quality}</span>
+              <span style="color:#aaa;">${movie.duration}</span>
+              <span class="dolby-badge">Dolby VISION</span>
             </div>
             <div class="hover-genres">${movie.genres.slice(0, 3).join(' • ')}</div>
           </div>
@@ -1283,36 +1473,68 @@ class NetflixApp {
     `;
   }
 
-  getEpisodesForMovie(movie) {
-    if (movie.episodes && movie.episodes.length) return movie.episodes;
+  getEpisodesForMovie(movie, season = 1) {
+    if (season === 2) {
+      return [
+        {
+          episodeNum: 1,
+          title: 'Chapter One: Shadows in the Dark',
+          duration: '54m',
+          thumb: movie.backdrop,
+          synopsis: 'As a new school year begins, strange occurrences whisper through the town, signaling the return of an ancient danger.'
+        },
+        {
+          episodeNum: 2,
+          title: 'Chapter Two: The Hidden Frequency',
+          duration: '49m',
+          thumb: movie.poster,
+          synopsis: 'Secret transmissions are intercepted as alliances shift and an old enemy emerges from the darkest shadows.'
+        },
+        {
+          episodeNum: 3,
+          title: 'Chapter Three: The Hive Mind',
+          duration: '56m',
+          thumb: movie.backdrop,
+          synopsis: 'A terrifying revelation links the victims together in an inescapable psychological trap that threatens everyone.'
+        },
+        {
+          episodeNum: 4,
+          title: 'Chapter Four: The Gatekeeper',
+          duration: '62m',
+          thumb: movie.backdrop,
+          synopsis: 'Everything hangs by a thread as the brave survivors stage a daring last stand to close the dimensional breach.'
+        }
+      ];
+    }
+
     return [
       {
         episodeNum: 1,
         title: 'Chapter One: The Awakening',
         duration: '48m',
         thumb: movie.backdrop,
-        synopsis: `An unexpected revelation thrusts the main characters into uncharted and perilous territory as mysterious events unfold.`
+        synopsis: 'An unexpected disappearance triggers a high-stakes search, revealing secret government experiments and unnatural forces.'
       },
       {
         episodeNum: 2,
         title: 'Chapter Two: Into the Unknown',
         duration: '52m',
         thumb: movie.poster,
-        synopsis: 'As clues emerge, tensions escalate between factions while secret motives are laid bare and danger draws nearer.'
+        synopsis: 'Strange clues guide the investigation while a mysterious girl with extraordinary abilities offers desperate help.'
       },
       {
         episodeNum: 3,
         title: 'Chapter Three: The Point of No Return',
         duration: '50m',
         thumb: movie.backdrop,
-        synopsis: 'A high-stakes confrontation leads to unexpected alliances and a devastating discovery that changes everything.'
+        synopsis: 'Tensions peak when underground forces break into the surface, turning hunters into the hunted in a pulse-pounding chase.'
       },
       {
         episodeNum: 4,
-        title: 'Chapter Four: The Reckoning',
+        title: 'Chapter Four: The Final Stand',
         duration: '58m',
         thumb: movie.backdrop,
-        synopsis: 'Everything hangs in the balance as final moves are made in a relentless, thrilling battle against time.'
+        synopsis: 'Heroes unite across lines of conflict in an epic showdown to protect their families from total annihilation.'
       }
     ];
   }
@@ -1574,6 +1796,138 @@ class NetflixApp {
         this.handleLogout();
       });
     }
+
+    // Netflix Hover Card Video Preview (Screenshot 4)
+    document.querySelectorAll('.movie-card').forEach(card => {
+      let hoverTimer = null;
+      const video = card.querySelector('.hover-preview-video');
+      const soundBtn = card.querySelector('.hover-sound-btn');
+
+      card.addEventListener('mouseenter', () => {
+        hoverTimer = setTimeout(() => {
+          if (video && video.getAttribute('data-src')) {
+            if (!video.src) {
+              video.src = video.getAttribute('data-src');
+            }
+            video.muted = true;
+            video.play().catch(() => {});
+          }
+        }, 320); // 320ms Netflix hover intent
+      });
+
+      card.addEventListener('mouseleave', () => {
+        clearTimeout(hoverTimer);
+        if (video) {
+          video.pause();
+          try { video.currentTime = 0; } catch (e) {}
+        }
+      });
+
+      if (soundBtn && video) {
+        soundBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          video.muted = !video.muted;
+          soundBtn.textContent = video.muted ? '🔇' : '🔊';
+        });
+      }
+    });
+
+    // Category Carousel Slider Arrows
+    document.querySelectorAll('.category-row').forEach(row => {
+      const slider = row.querySelector('.movie-slider');
+      const leftArrow = row.querySelector('.slider-arrow-left');
+      const rightArrow = row.querySelector('.slider-arrow-right');
+
+      if (slider && leftArrow) {
+        leftArrow.addEventListener('click', (e) => {
+          e.stopPropagation();
+          slider.scrollBy({ left: -(slider.clientWidth * 0.75), behavior: 'smooth' });
+        });
+      }
+      if (slider && rightArrow) {
+        rightArrow.addEventListener('click', (e) => {
+          e.stopPropagation();
+          slider.scrollBy({ left: (slider.clientWidth * 0.75), behavior: 'smooth' });
+        });
+      }
+    });
+
+    // Category Subnav Genres Dropdown
+    const genreBtn = document.getElementById('category-genre-dropdown-btn');
+    const genreMenu = document.getElementById('category-genre-dropdown-menu');
+    if (genreBtn && genreMenu) {
+      genreBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        genreMenu.classList.toggle('open');
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.genre-dropdown-wrapper')) {
+          genreMenu.classList.remove('open');
+        }
+      });
+
+      document.querySelectorAll('.genre-menu-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const genre = item.getAttribute('data-genre-val');
+          this.activeGenreFilter = genre;
+          genreMenu.classList.remove('open');
+          this.renderCurrentRoute();
+        });
+      });
+    }
+
+    // Profile Switcher click
+    document.querySelectorAll('[data-switch-profile-id]').forEach(el => {
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = el.getAttribute('data-switch-profile-id');
+        this.switchProfile(id);
+      });
+    });
+
+    const navAddProfileBtn = document.getElementById('nav-add-profile-btn');
+    const profileDialog = document.getElementById('profile-modal-dialog');
+    const profileClose = document.getElementById('profile-modal-close');
+    const profileCancel = document.getElementById('profile-cancel-btn');
+    const profileForm = document.getElementById('profile-modal-form');
+
+    if (navAddProfileBtn && profileDialog) {
+      navAddProfileBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (profileMenu) profileMenu.classList.remove('show');
+        profileDialog.showModal();
+      });
+    }
+
+    if (profileClose && profileDialog) {
+      profileClose.addEventListener('click', () => profileDialog.close());
+    }
+    if (profileCancel && profileDialog) {
+      profileCancel.addEventListener('click', () => profileDialog.close());
+    }
+
+    // Avatar picker in Add Profile Dialog
+    document.querySelectorAll('#avatar-options-grid .avatar-option').forEach(img => {
+      img.addEventListener('click', () => {
+        document.querySelectorAll('#avatar-options-grid .avatar-option').forEach(i => i.classList.remove('selected'));
+        img.classList.add('selected');
+      });
+    });
+
+    if (profileForm) {
+      profileForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('profile-name-input')?.value.trim();
+        const selAvatar = document.querySelector('#avatar-options-grid .avatar-option.selected')?.getAttribute('data-avatar-url') || 'https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png';
+        const isKids = document.getElementById('profile-kids-checkbox')?.checked || false;
+        const genres = Array.from(document.querySelectorAll('#profile-genres-group input:checked')).map(cb => cb.value);
+
+        if (!name) return;
+        await this.createProfile(name, selAvatar, isKids, genres);
+        profileDialog.close();
+      });
+    }
   }
 
   /* ══════════════════════════════════════════════
@@ -1795,6 +2149,92 @@ class NetflixApp {
       });
     });
 
+    // Direct Subtitles Toggle Button (CC)
+    const subToggleBtn = document.getElementById('cinema-subtitles-toggle-btn');
+    if (subToggleBtn) {
+      subToggleBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (this.currentSubTrack === 'off') {
+          this.setSubtitleTrack('en');
+          this.showCinemaOsd('💬', 'Subtitles: English [CC]');
+          this.savePreferences({ subtitle_language: 'en' });
+        } else {
+          this.setSubtitleTrack('off');
+          this.showCinemaOsd('💬', 'Subtitles: Off');
+          this.savePreferences({ subtitle_language: 'off' });
+        }
+      });
+    }
+
+    // Direct Close Button on Subtitle Container (✕)
+    const subCloseBtn = document.getElementById('cinema-subtitles-close-btn');
+    if (subCloseBtn) {
+      subCloseBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.setSubtitleTrack('off');
+        this.showCinemaOsd('💬', 'Subtitles: Closed');
+        this.savePreferences({ subtitle_language: 'off' });
+      });
+    }
+
+    // Video Quality Selector Flyout
+    const qualityBtn = document.getElementById('cinema-quality-btn');
+    const qualityMenu = document.getElementById('cinema-quality-menu');
+    const qualityLabel = document.getElementById('cinema-quality-label');
+
+    if (qualityBtn && qualityMenu) {
+      qualityBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        qualityMenu.classList.toggle('open');
+        this.cinemaAudioMenu?.classList.remove('open');
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('#cinema-quality-wrapper')) {
+          qualityMenu.classList.remove('open');
+        }
+      });
+
+      document.querySelectorAll('#cinema-quality-options .cinema-option-item').forEach(item => {
+        item.addEventListener('click', () => {
+          document.querySelectorAll('#cinema-quality-options .cinema-option-item').forEach(i => i.classList.remove('selected'));
+          item.classList.add('selected');
+          const q = item.getAttribute('data-quality');
+          this.currentQuality = q;
+          qualityMenu.classList.remove('open');
+
+          const labels = {
+            'auto': '4K UHD',
+            '4k': '4K UHD',
+            '1080p': '1080p FHD',
+            '720p': '720p HD',
+            '480p': '480p SD'
+          };
+          if (qualityLabel) qualityLabel.textContent = labels[q] || '4K UHD';
+
+          const qualityNames = {
+            'auto': 'Auto (Best 4K)',
+            '4k': '4K Ultra HD (2160p)',
+            '1080p': 'Full HD (1080p)',
+            '720p': 'HD (720p)',
+            '480p': 'Data Saver (480p)'
+          };
+          this.showCinemaOsd('⚡', `Quality: ${qualityNames[q] || q} - Zero Buffering`);
+          this.savePreferences({ video_quality: q });
+        });
+      });
+    }
+
+    // Fast Buffering & Zero-Lag Spinner
+    const spinner = document.getElementById('cinema-loading-spinner');
+    if (spinner && this.cinemaVideo) {
+      this.cinemaVideo.addEventListener('waiting', () => spinner.classList.add('active'));
+      this.cinemaVideo.addEventListener('seeking', () => spinner.classList.add('active'));
+      this.cinemaVideo.addEventListener('playing', () => spinner.classList.remove('active'));
+      this.cinemaVideo.addEventListener('canplay', () => spinner.classList.remove('active'));
+      this.cinemaVideo.addEventListener('seeked', () => spinner.classList.remove('active'));
+    }
+
     // Idle mouse auto-hiding
     this.cinemaPlayer.addEventListener('mousemove', () => {
       this.cinemaPlayer.classList.remove('idle');
@@ -1827,6 +2267,10 @@ class NetflixApp {
       } else if (e.key === 'm') {
         e.preventDefault();
         this.cinemaVolumeBtn.click();
+      } else if (e.key === 'c' || e.key === 'C') {
+        e.preventDefault();
+        const toggleBtn = document.getElementById('cinema-subtitles-toggle-btn');
+        if (toggleBtn) toggleBtn.click();
       } else if (e.key === 'e') {
         e.preventDefault();
         if (this.cinemaEpisodesBtn) this.cinemaEpisodesBtn.click();
@@ -2112,6 +2556,11 @@ class NetflixApp {
     document.querySelectorAll('#cinema-subtitles-options .cinema-option-item').forEach(i => {
       i.classList.toggle('selected', i.getAttribute('data-sub-track') === track);
     });
+    const subToggleBtn = document.getElementById('cinema-subtitles-toggle-btn');
+    if (subToggleBtn) {
+      subToggleBtn.classList.toggle('active', track !== 'off');
+      subToggleBtn.title = track === 'off' ? 'Turn on Subtitles (C)' : 'Close / Turn off Subtitles (C)';
+    }
     if (track === 'off') {
       this.cinemaSubtitles.classList.remove('active');
     }
@@ -2233,10 +2682,14 @@ class NetflixApp {
     if (!dialog) return;
 
     const isInList = this.watchlist.some(m => m.id === movie.id);
-    const similar = this.movies.filter(m => m.id !== movie.id && m.genres.some(g => movie.genres.includes(g))).slice(0, 3);
+    const similar = this.movies.filter(m => m.id !== movie.id && m.genres.some(g => movie.genres.includes(g))).slice(0, 6);
+    const isSeries = movie.type === 'TV Series';
+    const s1Episodes = this.getEpisodesForMovie(movie, 1);
+    const s2Episodes = this.getEpisodesForMovie(movie, 2);
 
     dialog.innerHTML = `
       <div class="modal-header-hero" style="background-image: url('${movie.backdrop}')">
+        <video class="modal-hero-video" autoplay muted loop playsinline src="${movie.videoUrl || movie.backupVideoUrl || ''}"></video>
         <div class="modal-hero-vignette"></div>
         <button class="modal-close-btn" id="modal-close-btn" aria-label="Close dialog">✕</button>
 
@@ -2252,6 +2705,8 @@ class NetflixApp {
                 ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> In My List`
                 : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> My List`}
             </button>
+            <button class="card-btn card-btn-thumb" data-rating-id="${movie.id}" data-rating-val="like" title="I like this">👍</button>
+            <button class="hover-sound-btn" id="modal-hero-sound-btn" style="position:static; margin-left:auto; width:36px; height:36px; font-size:1rem;" title="Toggle sound">🔇</button>
           </div>
         </div>
       </div>
@@ -2281,36 +2736,131 @@ class NetflixApp {
         </div>
       </div>
 
-      <!-- More Like This Grid -->
-      <div style="padding: 0 35px 35px;">
-        <h3 style="font-size:1.3rem; margin-bottom:16px;">More Like This</h3>
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:14px;">
-          ${similar.map(s => `
-            <div class="movie-card" data-info-id="${s.id}" style="aspect-ratio:16/9;">
-              <img src="${s.backdrop}" alt="${s.title}" loading="lazy">
-              <div class="movie-card-overlay">
-                <div class="movie-card-title">${s.title}</div>
-                <div class="movie-card-info">
-                  <span class="match-score">${s.matchScore}%</span>
-                  <span class="age-badge">${s.ageRating}</span>
+      <!-- Episodes Section (Only for TV Series) -->
+      ${isSeries ? `
+        <div class="modal-episodes-section">
+          <div class="modal-episodes-header">
+            <h3 class="modal-episodes-title">Episodes</h3>
+            <select class="modal-season-select" id="modal-season-select">
+              <option value="1">Season 1 (${s1Episodes.length} Episodes)</option>
+              <option value="2">Season 2 (${s2Episodes.length} Episodes)</option>
+            </select>
+          </div>
+          <div class="modal-episodes-list" id="modal-episodes-list">
+            ${s1Episodes.map(ep => `
+              <div class="modal-episode-row" data-play-id="${movie.id}" data-episode-num="${ep.episodeNum}">
+                <div class="episode-num">${ep.episodeNum}</div>
+                <div class="episode-thumb-wrap">
+                  <img src="${ep.thumb}" alt="${ep.title}" loading="lazy">
+                  <div class="episode-play-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><polygon points="8 5 19 12 8 19 8 5"/></svg>
+                  </div>
                 </div>
+                <div class="episode-info">
+                  <div class="episode-top-line">
+                    <div class="episode-title">${ep.title}</div>
+                    <div class="episode-duration">${ep.duration}</div>
+                  </div>
+                  <p class="episode-desc">${ep.synopsis}</p>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      ` : ''}
+
+      <!-- More Like This Grid -->
+      <div class="modal-similar-section">
+        <h3 style="font-size:1.4rem; font-weight:700; margin-bottom:18px;">More Like This</h3>
+        <div class="modal-similar-grid">
+          ${similar.map(s => `
+            <div class="similar-card" data-play-id="${s.id}">
+              <div class="similar-thumb-wrap">
+                <img src="${s.backdrop}" alt="${s.title}" loading="lazy" onerror="this.onerror=null; this.src='https://image.tmdb.org/t/p/w1280/56v2KjBlU4XaOv9rVYEQypROD7P.jpg';">
+                <button class="similar-add-btn" data-watchlist-id="${s.id}" title="Add to My List">+</button>
+              </div>
+              <div class="similar-content">
+                <div class="similar-meta-row">
+                  <span class="match-score">${s.matchScore}% Match</span>
+                  <span class="age-badge">${s.ageRating}</span>
+                  <span style="color:#aaa;">${s.year}</span>
+                </div>
+                <p class="similar-synopsis">${s.overview}</p>
               </div>
             </div>
           `).join('')}
+        </div>
+      </div>
+
+      <!-- About Section -->
+      <div style="padding: 10px 40px 40px; border-top: 1px solid rgba(255,255,255,0.1);">
+        <h3 style="font-size:1.3rem; margin-bottom:16px;">About <strong>${movie.title}</strong></h3>
+        <div style="font-size:0.88rem; line-height:1.7; color:#a3a3a3;">
+          <p><b style="color:#777;">Creators:</b> <span style="color:#fff;">${movie.creator || 'Global Studios'}</span></p>
+          <p><b style="color:#777;">Cast:</b> <span style="color:#fff;">${movie.cast.join(', ')}</span></p>
+          <p><b style="color:#777;">Genres:</b> <span style="color:#fff;">${movie.genres.join(', ')}</span></p>
+          <p><b style="color:#777;">Maturity Rating:</b> <span class="age-badge" style="color:#fff; margin-left:4px;">${movie.ageRating}</span> Recommended for audiences aged ${movie.ageRating.includes('18+') ? '18 and above' : '16 and above'}.</p>
         </div>
       </div>
     `;
 
     dialog.showModal();
 
+    // Sound toggle in modal
+    const heroVid = dialog.querySelector('.modal-hero-video');
+    const heroSoundBtn = document.getElementById('modal-hero-sound-btn');
+    if (heroVid && heroSoundBtn) {
+      heroSoundBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        heroVid.muted = !heroVid.muted;
+        heroSoundBtn.textContent = heroVid.muted ? '🔇' : '🔊';
+      });
+    }
+
+    // Season selector change
+    const seasonSelect = document.getElementById('modal-season-select');
+    const epList = document.getElementById('modal-episodes-list');
+    if (seasonSelect && epList) {
+      seasonSelect.addEventListener('change', () => {
+        const season = parseInt(seasonSelect.value);
+        const eps = this.getEpisodesForMovie(movie, season);
+        epList.innerHTML = eps.map(ep => `
+          <div class="modal-episode-row" data-play-id="${movie.id}" data-episode-num="${ep.episodeNum}">
+            <div class="episode-num">${ep.episodeNum}</div>
+            <div class="episode-thumb-wrap">
+              <img src="${ep.thumb}" alt="${ep.title}" loading="lazy">
+              <div class="episode-play-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><polygon points="8 5 19 12 8 19 8 5"/></svg>
+              </div>
+            </div>
+            <div class="episode-info">
+              <div class="episode-top-line">
+                <div class="episode-title">${ep.title}</div>
+                <div class="episode-duration">${ep.duration}</div>
+              </div>
+              <p class="episode-desc">${ep.synopsis}</p>
+            </div>
+          </div>
+        `).join('');
+      });
+    }
+
     const closeBtn = document.getElementById('modal-close-btn');
-    closeBtn.addEventListener('click', () => dialog.close());
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        if (heroVid) heroVid.pause();
+        dialog.close();
+      });
+    }
 
     dialog.addEventListener('click', (e) => {
       const rect = dialog.getBoundingClientRect();
       const isInDialog = (rect.top <= e.clientY && e.clientY <= rect.top + rect.height
         && rect.left <= e.clientX && e.clientX <= rect.left + rect.width);
-      if (!isInDialog) dialog.close();
+      if (!isInDialog) {
+        if (heroVid) heroVid.pause();
+        dialog.close();
+      }
     });
   }
 

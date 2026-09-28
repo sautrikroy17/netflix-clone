@@ -186,9 +186,23 @@ app.post('/api/auth/logout', (req, res) => {
 ══════════════════════════════════════════════ */
 
 app.get('/api/movies', optionalAuth, (req, res) => {
-  const { category, search } = req.query;
+  const { category, search, isKids, profileId } = req.query;
+  const pId = profileId || req.headers['x-profile-id'] || null;
 
   let result = [...movies];
+
+  let profileKids = isKids === 'true' || isKids === '1';
+  if (!profileKids && pId && req.user) {
+    try {
+      const prof = db.prepare('SELECT is_kids FROM profiles WHERE id = ? AND user_id = ?').get(pId, req.user.userId);
+      if (prof && prof.is_kids) profileKids = true;
+    } catch (e) {}
+  }
+
+  if (profileKids) {
+    // Strictly filter out 18+ content for Kids profile
+    result = result.filter(m => !m.ageRating.includes('18+') && !m.ageRating.includes('R '));
+  }
 
   if (category && category !== 'all') {
     result = result.filter(m => m.category === category || m.genres.some(g => g.toLowerCase().includes(category.toLowerCase())));
@@ -206,16 +220,24 @@ app.get('/api/movies', optionalAuth, (req, res) => {
 
   // If user is authenticated, attach their watchlist & rating flags from SQLite
   if (req.user) {
-    const watchlistIds = db.prepare('SELECT movie_id FROM watchlist WHERE user_id = ?').all(req.user.userId).map(r => r.movie_id);
-    const ratings = db.prepare('SELECT movie_id, rating FROM ratings WHERE user_id = ?').all(req.user.userId);
-    const ratingMap = {};
-    ratings.forEach(r => { ratingMap[r.movie_id] = r.rating; });
+    try {
+      const watchlistRows = pId 
+        ? db.prepare('SELECT movie_id FROM watchlist WHERE user_id = ? AND (profile_id = ? OR profile_id IS NULL)').all(req.user.userId, pId)
+        : db.prepare('SELECT movie_id FROM watchlist WHERE user_id = ?').all(req.user.userId);
+      const watchlistIds = watchlistRows.map(r => r.movie_id);
 
-    result = result.map(m => ({
-      ...m,
-      inWatchlist: watchlistIds.includes(m.id),
-      userRating: ratingMap[m.id] || null
-    }));
+      const ratings = pId
+        ? db.prepare('SELECT movie_id, rating FROM ratings WHERE user_id = ? AND (profile_id = ? OR profile_id IS NULL)').all(req.user.userId, pId)
+        : db.prepare('SELECT movie_id, rating FROM ratings WHERE user_id = ?').all(req.user.userId);
+      const ratingMap = {};
+      ratings.forEach(r => { ratingMap[r.movie_id] = r.rating; });
+
+      result = result.map(m => ({
+        ...m,
+        inWatchlist: watchlistIds.includes(m.id),
+        userRating: ratingMap[m.id] || null
+      }));
+    } catch (e) {}
   }
 
   return res.json({ movies: result });
@@ -329,15 +351,26 @@ app.get('/api/tmdb/trending', async (req, res) => {
    (Fulfills mandatory DB persistence requirement)
 ══════════════════════════════════════════════ */
 
-// 1. Read Watchlist
+// 1. Read Watchlist (Profile-Aware)
 app.get('/api/watchlist', authenticateToken, (req, res) => {
   try {
-    const rows = db.prepare(`
-      SELECT movie_id, added_at 
-      FROM watchlist 
-      WHERE user_id = ? 
-      ORDER BY added_at DESC
-    `).all(req.user.userId);
+    const profileId = req.query.profileId || req.headers['x-profile-id'] || null;
+    let rows;
+    if (profileId) {
+      rows = db.prepare(`
+        SELECT movie_id, added_at 
+        FROM watchlist 
+        WHERE user_id = ? AND (profile_id = ? OR profile_id IS NULL)
+        ORDER BY added_at DESC
+      `).all(req.user.userId, profileId);
+    } else {
+      rows = db.prepare(`
+        SELECT movie_id, added_at 
+        FROM watchlist 
+        WHERE user_id = ? 
+        ORDER BY added_at DESC
+      `).all(req.user.userId);
+    }
 
     const movieMap = {};
     movies.forEach(m => { movieMap[m.id] = m; });
@@ -358,7 +391,7 @@ app.get('/api/watchlist', authenticateToken, (req, res) => {
 
 // 2. Create Watchlist Item (Add to My List)
 app.post('/api/watchlist', authenticateToken, (req, res) => {
-  const { movieId } = req.body;
+  const { movieId, profileId } = req.body;
   if (!movieId) {
     return res.status(400).json({ error: 'movieId is required' });
   }
@@ -369,7 +402,8 @@ app.post('/api/watchlist', authenticateToken, (req, res) => {
   }
 
   try {
-    db.prepare('INSERT OR IGNORE INTO watchlist (user_id, movie_id) VALUES (?, ?)').run(req.user.userId, movieId);
+    const pId = profileId || req.headers['x-profile-id'] || null;
+    db.prepare('INSERT OR IGNORE INTO watchlist (user_id, movie_id, profile_id) VALUES (?, ?, ?)').run(req.user.userId, movieId, pId);
     return res.status(201).json({ message: 'Added to My List', movieId, inWatchlist: true });
   } catch (error) {
     console.error('Add watchlist error:', error);
@@ -380,9 +414,15 @@ app.post('/api/watchlist', authenticateToken, (req, res) => {
 // 3. Delete Watchlist Item (Remove from My List)
 app.delete('/api/watchlist/:movieId', authenticateToken, (req, res) => {
   const { movieId } = req.params;
+  const pId = req.query.profileId || req.headers['x-profile-id'] || null;
 
   try {
-    const result = db.prepare('DELETE FROM watchlist WHERE user_id = ? AND movie_id = ?').run(req.user.userId, movieId);
+    let result;
+    if (pId) {
+      result = db.prepare('DELETE FROM watchlist WHERE user_id = ? AND movie_id = ? AND (profile_id = ? OR profile_id IS NULL)').run(req.user.userId, movieId, pId);
+    } else {
+      result = db.prepare('DELETE FROM watchlist WHERE user_id = ? AND movie_id = ?').run(req.user.userId, movieId);
+    }
     return res.json({ message: 'Removed from My List', movieId, inWatchlist: false, changes: result.changes });
   } catch (error) {
     console.error('Remove watchlist error:', error);
@@ -392,22 +432,23 @@ app.delete('/api/watchlist/:movieId', authenticateToken, (req, res) => {
 
 // 4. Rate Movie (Thumbs up / Thumbs down)
 app.post('/api/ratings', authenticateToken, (req, res) => {
-  const { movieId, rating } = req.body;
+  const { movieId, rating, profileId } = req.body;
 
   if (!movieId || !['like', 'dislike', 'none'].includes(rating)) {
     return res.status(400).json({ error: 'Invalid movie or rating' });
   }
 
   try {
+    const pId = profileId || req.headers['x-profile-id'] || null;
     if (rating === 'none') {
       db.prepare('DELETE FROM ratings WHERE user_id = ? AND movie_id = ?').run(req.user.userId, movieId);
       return res.json({ message: 'Rating removed', rating: null });
     } else {
       db.prepare(`
-        INSERT INTO ratings (user_id, movie_id, rating, updated_at) 
-        VALUES (?, ?, ?, CURRENT_TIMESTAMP)
-        ON CONFLICT(user_id, movie_id) DO UPDATE SET rating = excluded.rating, updated_at = CURRENT_TIMESTAMP
-      `).run(req.user.userId, movieId, rating);
+        INSERT INTO ratings (user_id, movie_id, rating, profile_id, updated_at) 
+        VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+        ON CONFLICT(user_id, movie_id) DO UPDATE SET rating = excluded.rating, profile_id = COALESCE(excluded.profile_id, ratings.profile_id), updated_at = CURRENT_TIMESTAMP
+      `).run(req.user.userId, movieId, rating, pId);
       return res.json({ message: 'Rating saved', rating });
     }
   } catch (error) {
@@ -415,17 +456,29 @@ app.post('/api/ratings', authenticateToken, (req, res) => {
     return res.status(500).json({ error: 'Failed to update rating.' });
   }
 });
+
 /* ══════════════════════════════════════════════
    PLAYBACK HISTORY & CONTINUE WATCHING (SQLite)
 ══════════════════════════════════════════════ */
 app.get('/api/playback', authenticateToken, (req, res) => {
   try {
-    const rows = db.prepare(`
-      SELECT movie_id, progress_seconds, duration_seconds, updated_at
-      FROM playback_history
-      WHERE user_id = ? AND completed = 0
-      ORDER BY updated_at DESC
-    `).all(req.user.userId);
+    const profileId = req.query.profileId || req.headers['x-profile-id'] || null;
+    let rows;
+    if (profileId) {
+      rows = db.prepare(`
+        SELECT movie_id, progress_seconds, duration_seconds, updated_at
+        FROM playback_history
+        WHERE user_id = ? AND completed = 0 AND (profile_id = ? OR profile_id IS NULL)
+        ORDER BY updated_at DESC
+      `).all(req.user.userId, profileId);
+    } else {
+      rows = db.prepare(`
+        SELECT movie_id, progress_seconds, duration_seconds, updated_at
+        FROM playback_history
+        WHERE user_id = ? AND completed = 0
+        ORDER BY updated_at DESC
+      `).all(req.user.userId);
+    }
 
     const movieMap = {};
     movies.forEach(m => { movieMap[m.id] = m; });
@@ -453,17 +506,19 @@ app.get('/api/playback', authenticateToken, (req, res) => {
 app.post('/api/playback/:movieId', authenticateToken, (req, res) => {
   try {
     const { movieId } = req.params;
-    const { progressSeconds = 0, durationSeconds = 0, completed = 0 } = req.body;
+    const { progressSeconds = 0, durationSeconds = 0, completed = 0, profileId } = req.body;
+    const pId = profileId || req.headers['x-profile-id'] || null;
 
     db.prepare(`
-      INSERT INTO playback_history (user_id, movie_id, progress_seconds, duration_seconds, completed, updated_at)
-      VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+      INSERT INTO playback_history (user_id, movie_id, progress_seconds, duration_seconds, completed, profile_id, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
       ON CONFLICT(user_id, movie_id) DO UPDATE SET
         progress_seconds = excluded.progress_seconds,
         duration_seconds = excluded.duration_seconds,
         completed = excluded.completed,
+        profile_id = COALESCE(excluded.profile_id, playback_history.profile_id),
         updated_at = CURRENT_TIMESTAMP
-    `).run(req.user.userId, movieId, progressSeconds, durationSeconds, completed ? 1 : 0);
+    `).run(req.user.userId, movieId, progressSeconds, durationSeconds, completed ? 1 : 0, pId);
 
     return res.json({ success: true, message: 'Playback progress saved.' });
   } catch (error) {
@@ -489,7 +544,7 @@ app.get('/api/preferences', authenticateToken, (req, res) => {
   try {
     const pref = db.prepare('SELECT * FROM user_preferences WHERE user_id = ?').get(req.user.userId);
     return res.json({
-      preferences: pref || { audio_language: 'en-orig', subtitle_language: 'en', playback_speed: 1.0 }
+      preferences: pref || { audio_language: 'en-orig', subtitle_language: 'en', playback_speed: 1.0, video_quality: 'auto' }
     });
   } catch (error) {
     return res.status(500).json({ error: 'Failed to fetch preferences.' });
@@ -498,16 +553,17 @@ app.get('/api/preferences', authenticateToken, (req, res) => {
 
 app.post('/api/preferences', authenticateToken, (req, res) => {
   try {
-    const { audio_language, subtitle_language, playback_speed } = req.body;
+    const { audio_language, subtitle_language, playback_speed, video_quality } = req.body;
     db.prepare(`
-      INSERT INTO user_preferences (user_id, audio_language, subtitle_language, playback_speed, updated_at)
-      VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+      INSERT INTO user_preferences (user_id, audio_language, subtitle_language, playback_speed, video_quality, updated_at)
+      VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
       ON CONFLICT(user_id) DO UPDATE SET
         audio_language = COALESCE(excluded.audio_language, user_preferences.audio_language),
         subtitle_language = COALESCE(excluded.subtitle_language, user_preferences.subtitle_language),
         playback_speed = COALESCE(excluded.playback_speed, user_preferences.playback_speed),
+        video_quality = COALESCE(excluded.video_quality, user_preferences.video_quality),
         updated_at = CURRENT_TIMESTAMP
-    `).run(req.user.userId, audio_language || 'en-orig', subtitle_language || 'en', playback_speed || 1.0);
+    `).run(req.user.userId, audio_language || 'en-orig', subtitle_language || 'en', playback_speed || 1.0, video_quality || 'auto');
 
     return res.json({ success: true, message: 'Preferences saved.' });
   } catch (error) {
@@ -529,6 +585,132 @@ app.put('/api/auth/profile', authenticateToken, (req, res) => {
     return res.json({ user: updated, message: 'Profile updated successfully.' });
   } catch (error) {
     return res.status(500).json({ error: 'Failed to update profile.' });
+  }
+});
+
+/* ══════════════════════════════════════════════
+   PROFILES CRUD (Who's Watching? Multi-Profile Engine)
+══════════════════════════════════════════════ */
+app.get('/api/profiles', authenticateToken, (req, res) => {
+  try {
+    let rows = db.prepare('SELECT * FROM profiles WHERE user_id = ? ORDER BY id ASC').all(req.user.userId);
+
+    // If no profiles exist yet, auto-seed default + kids profiles
+    if (!rows || rows.length === 0) {
+      const u = db.prepare('SELECT name, avatar FROM users WHERE id = ?').get(req.user.userId);
+      const mainName = (u && u.name) ? u.name : 'Primary';
+      const mainAvatar = 'https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png';
+
+      const insert = db.prepare(`
+        INSERT INTO profiles (user_id, name, avatar, is_kids, favorite_genres)
+        VALUES (?, ?, ?, ?, ?)
+      `);
+
+      insert.run(req.user.userId, mainName, mainAvatar, 0, JSON.stringify(['Trending', 'Action', 'Sci-Fi']));
+      insert.run(req.user.userId, 'Kids', 'https://occ-0-2794-2219.1.nflxso.net/dnm/api/v6/vN7bi_My87NPKvsBoib006Llxzg/AAAABfjwdaqrqnvWi0qcfMlW0hOWAA2YKukqGE4vd5vDxZGCBm2CQGfkZWGxD77dStW69G09918.png?r=fcd', 1, JSON.stringify(['Animation', 'Family', 'Anime']));
+
+      rows = db.prepare('SELECT * FROM profiles WHERE user_id = ? ORDER BY id ASC').all(req.user.userId);
+    }
+
+    const profiles = rows.map(r => ({
+      ...r,
+      isKids: !!r.is_kids,
+      favoriteGenres: (() => {
+        try { return JSON.parse(r.favorite_genres); } catch (e) { return ['Trending', 'Action']; }
+      })()
+    }));
+
+    return res.json({ profiles });
+  } catch (error) {
+    console.error('Profiles fetch error:', error);
+    return res.status(500).json({ error: 'Failed to fetch profiles.' });
+  }
+});
+
+app.post('/api/profiles', authenticateToken, (req, res) => {
+  try {
+    const { name, avatar, isKids = false, favoriteGenres = [] } = req.body;
+    if (!name || !name.trim()) {
+      return res.status(400).json({ error: 'Profile name is required.' });
+    }
+
+    const avatarUrl = avatar || 'https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png';
+    const genresJson = JSON.stringify(favoriteGenres.length ? favoriteGenres : ['Trending', 'Action', 'Sci-Fi']);
+
+    const result = db.prepare(`
+      INSERT INTO profiles (user_id, name, avatar, is_kids, favorite_genres)
+      VALUES (?, ?, ?, ?, ?)
+    `).run(req.user.userId, name.trim(), avatarUrl, isKids ? 1 : 0, genresJson);
+
+    const newProfile = db.prepare('SELECT * FROM profiles WHERE id = ?').get(result.lastInsertRowid);
+    return res.status(201).json({
+      message: 'Profile created successfully!',
+      profile: {
+        ...newProfile,
+        isKids: !!newProfile.is_kids,
+        favoriteGenres: JSON.parse(newProfile.favorite_genres)
+      }
+    });
+  } catch (error) {
+    console.error('Create profile error:', error);
+    return res.status(500).json({ error: 'Failed to create profile.' });
+  }
+});
+
+app.put('/api/profiles/:id', authenticateToken, (req, res) => {
+  try {
+    const profileId = req.params.id;
+    const { name, avatar, isKids, favoriteGenres } = req.body;
+
+    const existing = db.prepare('SELECT * FROM profiles WHERE id = ? AND user_id = ?').get(profileId, req.user.userId);
+    if (!existing) {
+      return res.status(404).json({ error: 'Profile not found.' });
+    }
+
+    const newName = name ? name.trim() : existing.name;
+    const newAvatar = avatar || existing.avatar;
+    const newKids = isKids !== undefined ? (isKids ? 1 : 0) : existing.is_kids;
+    const newGenres = favoriteGenres ? JSON.stringify(favoriteGenres) : existing.favorite_genres;
+
+    db.prepare(`
+      UPDATE profiles 
+      SET name = ?, avatar = ?, is_kids = ?, favorite_genres = ?
+      WHERE id = ? AND user_id = ?
+    `).run(newName, newAvatar, newKids, newGenres, profileId, req.user.userId);
+
+    const updated = db.prepare('SELECT * FROM profiles WHERE id = ?').get(profileId);
+    return res.json({
+      message: 'Profile updated successfully!',
+      profile: {
+        ...updated,
+        isKids: !!updated.is_kids,
+        favoriteGenres: JSON.parse(updated.favorite_genres)
+      }
+    });
+  } catch (error) {
+    console.error('Update profile error:', error);
+    return res.status(500).json({ error: 'Failed to update profile.' });
+  }
+});
+
+app.delete('/api/profiles/:id', authenticateToken, (req, res) => {
+  try {
+    const profileId = req.params.id;
+    const totalCount = db.prepare('SELECT COUNT(*) as count FROM profiles WHERE user_id = ?').get(req.user.userId).count;
+
+    if (totalCount <= 1) {
+      return res.status(400).json({ error: 'You must have at least one profile.' });
+    }
+
+    const result = db.prepare('DELETE FROM profiles WHERE id = ? AND user_id = ?').run(profileId, req.user.userId);
+    if (result.changes === 0) {
+      return res.status(404).json({ error: 'Profile not found.' });
+    }
+
+    return res.json({ message: 'Profile deleted successfully.' });
+  } catch (error) {
+    console.error('Delete profile error:', error);
+    return res.status(500).json({ error: 'Failed to delete profile.' });
   }
 });
 

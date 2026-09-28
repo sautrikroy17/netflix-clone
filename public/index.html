@@ -66,11 +66,17 @@
 
     <!-- Center Stage (Subtitles & OSD) -->
     <div class="cinema-stage">
+      <div class="cinema-loading-spinner" id="cinema-loading-spinner">
+        <div class="netflix-spinner-ring"></div>
+      </div>
       <div class="cinema-osd-pill" id="cinema-osd-pill">
         <span id="cinema-osd-icon">🔊</span>
         <span id="cinema-osd-text">Audio: Hindi [Dubbed] (5.1)</span>
       </div>
-      <div class="cinema-subtitles-container" id="cinema-subtitles"></div>
+      <div class="cinema-subtitles-container" id="cinema-subtitles">
+        <span class="cinema-subtitles-text" id="cinema-subtitles-text"></span>
+        <button class="cinema-subtitles-close-btn" id="cinema-subtitles-close-btn" title="Close / Turn off Subtitles">✕</button>
+      </div>
     </div>
 
     <!-- Bottom Controls Bar -->
@@ -124,6 +130,11 @@
             <svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
           </button>
 
+          <!-- Direct Subtitles Toggle Button (Close / Open Subtitles) -->
+          <button class="cinema-btn active" id="cinema-subtitles-toggle-btn" title="Close / Turn off Subtitles (C)">
+            <span style="font-weight:900; font-size:0.75rem; border:1.5px solid currentColor; padding:1px 4px; border-radius:2px; letter-spacing:0.5px;">CC</span>
+          </button>
+
           <!-- Audio & Subtitles Menu Trigger -->
           <div class="cinema-audio-btn-wrapper">
             <button class="cinema-btn" id="cinema-audio-btn" title="Audio & Subtitles">
@@ -148,12 +159,29 @@
               <div class="cinema-menu-col">
                 <div class="cinema-menu-col-title">Subtitles</div>
                 <ul class="cinema-menu-options" id="cinema-subtitles-options">
-                  <li class="cinema-option-item" data-sub-track="off">Off</li>
+                  <li class="cinema-option-item" data-sub-track="off">🚫 Off (Close Subtitles)</li>
                   <li class="cinema-option-item selected" data-sub-track="en">English [CC]</li>
                   <li class="cinema-option-item" data-sub-track="hi">Hindi</li>
                   <li class="cinema-option-item" data-sub-track="es">Spanish</li>
                 </ul>
               </div>
+            </div>
+          </div>
+
+          <!-- Video Quality Selector Flyout -->
+          <div class="cinema-audio-btn-wrapper" id="cinema-quality-wrapper">
+            <button class="cinema-speed-btn" id="cinema-quality-btn" title="Streaming Quality">
+              <span id="cinema-quality-label">4K UHD</span>
+            </button>
+            <div class="cinema-quality-menu" id="cinema-quality-menu">
+              <div class="cinema-menu-col-title" style="padding: 10px 14px 6px; font-size: 0.82rem; color: #aaa; text-transform: uppercase;">Video Quality</div>
+              <ul class="cinema-menu-options" id="cinema-quality-options">
+                <li class="cinema-option-item selected" data-quality="auto">Auto (Best Available)</li>
+                <li class="cinema-option-item" data-quality="4k">4K Ultra HD (2160p)</li>
+                <li class="cinema-option-item" data-quality="1080p">Full HD (1080p)</li>
+                <li class="cinema-option-item" data-quality="720p">High Definition (720p)</li>
+                <li class="cinema-option-item" data-quality="480p">Data Saver (480p)</li>
+              </ul>
             </div>
           </div>
 
@@ -251,6 +279,57 @@
       <div class="account-modal-actions">
         <button type="button" class="btn-account-cancel" id="account-cancel-btn">Cancel</button>
         <button type="submit" class="btn-account-save">Save Changes</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Add / Edit Profile Modal Dialog -->
+  <dialog class="profile-modal-dialog" id="profile-modal-dialog">
+    <div class="account-modal-header">
+      <div class="account-modal-title-group">
+        <img src="/assets/netflix-logo.svg" alt="Netflix" class="account-modal-logo">
+        <h2 id="profile-modal-title">Add Profile</h2>
+      </div>
+      <button class="account-modal-close" id="profile-modal-close">✕</button>
+    </div>
+    <form id="profile-modal-form" class="account-modal-form">
+      <div class="profile-avatar-picker-section">
+        <label style="font-size:0.9rem; color:#aaa; margin-bottom:10px; display:block;">Choose Profile Icon</label>
+        <div class="avatar-options-grid" id="avatar-options-grid">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" class="avatar-option selected" data-avatar-url="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" alt="Classic Red Smile">
+          <img src="https://occ-0-2794-2219.1.nflxso.net/dnm/api/v6/vN7bi_My87NPKvsBoib006Llxzg/AAAABfjwdaqrqnvWi0qcfMlW0hOWAA2YKukqGE4vd5vDxZGCBm2CQGfkZWGxD77dStW69G09918.png?r=fcd" class="avatar-option" data-avatar-url="https://occ-0-2794-2219.1.nflxso.net/dnm/api/v6/vN7bi_My87NPKvsBoib006Llxzg/AAAABfjwdaqrqnvWi0qcfMlW0hOWAA2YKukqGE4vd5vDxZGCBm2CQGfkZWGxD77dStW69G09918.png?r=fcd" alt="Kids Colorful">
+          <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80" class="avatar-option" data-avatar-url="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80" alt="Avatar Blue">
+          <img src="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=150&q=80" class="avatar-option" data-avatar-url="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=150&q=80" alt="Avatar Yellow">
+          <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=150&q=80" class="avatar-option" data-avatar-url="https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=150&q=80" alt="Avatar Purple">
+          <img src="https://images.unsplash.com/photo-1628157582853-a796fa650a6a?auto=format&fit=crop&w=150&q=80" class="avatar-option" data-avatar-url="https://images.unsplash.com/photo-1628157582853-a796fa650a6a?auto=format&fit=crop&w=150&q=80" alt="Avatar Green">
+        </div>
+      </div>
+      <div class="account-form-row">
+        <label for="profile-name-input">Profile Name</label>
+        <input type="text" id="profile-name-input" class="account-input" placeholder="e.g. Sautrik, Guest, Family" required maxlength="30">
+      </div>
+      <div class="account-form-row" style="flex-direction:row; align-items:center; gap:12px; margin-top:14px;">
+        <input type="checkbox" id="profile-kids-checkbox" style="width:20px; height:20px; accent-color:var(--netflix-red); cursor:pointer;">
+        <div>
+          <label for="profile-kids-checkbox" style="font-size:0.95rem; font-weight:600; cursor:pointer;">Kid?</label>
+          <div style="font-size:0.78rem; color:#888;">See TV shows and movies rated 12 and under only.</div>
+        </div>
+      </div>
+      <div class="account-form-row" style="margin-top:16px;">
+        <label style="font-size:0.88rem; color:#aaa; margin-bottom:8px;">Favorite Genres for Custom Feed</label>
+        <div style="display:flex; flex-wrap:wrap; gap:8px;" id="profile-genres-group">
+          <label class="genre-chip"><input type="checkbox" value="Action" checked> <span>Action</span></label>
+          <label class="genre-chip"><input type="checkbox" value="Sci-Fi" checked> <span>Sci-Fi</span></label>
+          <label class="genre-chip"><input type="checkbox" value="Crime Thriller"> <span>Crime Thriller</span></label>
+          <label class="genre-chip"><input type="checkbox" value="Drama"> <span>Drama</span></label>
+          <label class="genre-chip"><input type="checkbox" value="Anime"> <span>Anime</span></label>
+          <label class="genre-chip"><input type="checkbox" value="Indian Mega Blockbusters"> <span>Indian Cinema</span></label>
+          <label class="genre-chip"><input type="checkbox" value="Comedy"> <span>Comedy</span></label>
+        </div>
+      </div>
+      <div class="account-modal-actions">
+        <button type="button" class="btn-account-cancel" id="profile-cancel-btn">Cancel</button>
+        <button type="submit" class="btn-account-save" id="profile-save-btn">Save Profile</button>
       </div>
     </form>
   </dialog>
