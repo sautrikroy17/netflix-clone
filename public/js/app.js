@@ -47,11 +47,13 @@ class NetflixApp {
     });
 
     document.addEventListener('click', (e) => {
-      const link = e.target.closest('a[data-route]');
-      if (link) {
+      const el = e.target.closest('[data-route]');
+      if (el) {
         e.preventDefault();
-        const route = link.getAttribute('data-route') || link.getAttribute('href');
-        this.navigate(route);
+        const route = el.getAttribute('data-route') || el.getAttribute('href');
+        if (route) {
+          this.navigate(route);
+        }
       }
     });
   }
@@ -226,6 +228,9 @@ class NetflixApp {
       if (!res.ok) throw new Error(data.error || 'Signup failed');
 
       this.currentUser = data.user;
+      await this.fetchWatchlist();
+      await this.fetchContinueWatching();
+      await this.fetchPreferences();
       this.showToast(`Welcome to Netflix, ${data.user.name}!`, 'success');
       this.navigate('/browse');
     } catch (err) {
@@ -245,6 +250,8 @@ class NetflixApp {
 
       this.currentUser = data.user;
       await this.fetchWatchlist();
+      await this.fetchContinueWatching();
+      await this.fetchPreferences();
       this.showToast(`Welcome back, ${data.user.name}`, 'success');
       this.navigate('/browse');
     } catch (err) {
@@ -424,7 +431,7 @@ class NetflixApp {
               <option value="hi" ${isHi ? 'selected' : ''}>हिन्दी</option>
             </select>
           </div>
-          <button class="btn-primary-red" data-route="/login">${t.signIn}</button>
+          <a href="/login" data-route="/login" class="btn-primary-red" id="landing-signin-btn">${t.signIn}</a>
         </div>
       </header>
 
@@ -623,6 +630,15 @@ class NetflixApp {
       });
     });
 
+    // Landing Sign In button direct listener
+    const signInBtn = document.getElementById('landing-signin-btn');
+    if (signInBtn) {
+      signInBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.navigate('/login');
+      });
+    }
+
     // Landing Page Top 10 Click -> Play in Cinema Player
     document.querySelectorAll('[data-landing-play-id]').forEach(item => {
       item.addEventListener('click', () => {
@@ -742,7 +758,7 @@ class NetflixApp {
           <a href="/" data-route="/" class="netflix-brand-link">
             <img src="/assets/netflix-logo.svg" alt="Netflix" class="netflix-brand-logo" />
           </a>
-          <button class="btn-primary-red" data-route="/login">Sign In</button>
+          <a href="/login" data-route="/login" class="btn-primary-red">Sign In</a>
         </header>
 
         <main class="auth-card-container">
