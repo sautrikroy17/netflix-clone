@@ -1509,22 +1509,9 @@ class NetflixApp {
   }
 
   getTrailerForMovie(movie) {
-    if (movie.videoUrl) return movie.videoUrl;
-    if (movie.backupVideoUrl) return movie.backupVideoUrl;
-
-    const id = (movie.id || '').toLowerCase();
-    const genres = (movie.genres || []).join(' ').toLowerCase();
-
-    if (id.includes('wednesday') || genres.includes('comedy') || genres.includes('supernatural') || genres.includes('anime')) {
-      return '/trailers/wednesday.mp4';
-    }
-    if (id.includes('batman') || id.includes('narcos') || genres.includes('crime') || genres.includes('action') || genres.includes('thriller')) {
-      return '/trailers/the-batman.mp4';
-    }
-    if (id.includes('interstellar') || id.includes('oppenheimer') || genres.includes('drama') || genres.includes('sci-fi')) {
-      return '/trailers/interstellar.mp4';
-    }
-    return '/trailers/stranger-things.mp4';
+    if (movie.videoUrl && !movie.videoUrl.startsWith('/trailers/')) return movie.videoUrl;
+    if (movie.backupVideoUrl && !movie.backupVideoUrl.startsWith('/trailers/')) return movie.backupVideoUrl;
+    return 'https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4';
   }
 
   renderMovieCard(movie) {
@@ -2311,7 +2298,7 @@ class NetflixApp {
         } else if (this.activeCinemaMovie.youtubeTrailerId) {
           this.setTrailerMode('youtube');
         } else {
-          this.cinemaVideo.src = '/trailers/stranger-things.mp4';
+          this.cinemaVideo.src = 'https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4';
           this.cinemaVideo.play().catch(() => {});
         }
       }

@@ -29,7 +29,7 @@ const movies = [
     "category": "trending",
     "isOriginal": true,
     "top10Rank": 1,
-    "videoUrl": "/trailers/stranger-things.mp4",
+    "videoUrl": "https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4",
     "backupVideoUrl": "https://ia600104.us.archive.org/1/items/stranger-things-season-2-comic-con-trailer-2017/Stranger%20Things%20Season%202%20Comic-Con%20Trailer%20%282017%29%20-%20Thriller.ia.mp4",
     "youtubeTrailerId": "b9EkMc79ZSU",
     "subtitles": {
@@ -304,7 +304,7 @@ const movies = [
     "category": "trending",
     "isOriginal": true,
     "top10Rank": 3,
-    "videoUrl": "/trailers/wednesday.mp4",
+    "videoUrl": "https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4",
     "backupVideoUrl": "https://archive.org/download/wednesday-season-2-part-2-official-trailer-netflix-720p/Wednesday__Season_2___Part_2_Official_Trailer___Netflix%28720p%29.mp4",
     "youtubeTrailerId": "Qa5kFRxBkNw",
     "subtitles": {
@@ -681,7 +681,7 @@ const movies = [
     ],
     "creator": "Christopher Nolan",
     "category": "scifi",
-    "videoUrl": "/trailers/interstellar.mp4",
+    "videoUrl": "https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4",
     "backupVideoUrl": "https://archive.org/download/interstellar-trailer-3/Interstellar_OfficialTrailer3_4K_51_prores.mp4",
     "youtubeTrailerId": "zSWdZVtXT7E",
     "subtitles": {
@@ -856,7 +856,7 @@ const movies = [
     ],
     "creator": "Christopher Nolan",
     "category": "action",
-    "videoUrl": "/trailers/the-batman.mp4",
+    "videoUrl": "https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4",
     "backupVideoUrl": "https://archive.org/download/yt-5s.com-the-batman-trailer-oficial/yt5s.com-THE%20BATMAN%20-%20Tr%C3%A1iler%20Oficial.mp4",
     "youtubeTrailerId": "EXeTwQWrcwY",
     "subtitles": {
@@ -2273,7 +2273,7 @@ const movies = [
     "creator": "Chris Brancato",
     "category": "drama",
     "isOriginal": true,
-    "videoUrl": "/trailers/the-batman.mp4",
+    "videoUrl": "https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4",
     "tmdbId": 63351,
     "youtubeTrailerId": "RNWAKZzgbp4",
     "subtitles": {
@@ -2574,7 +2574,7 @@ const movies = [
     "isOriginal": false,
     "tmdbId": 414906,
     "youtubeTrailerId": "mqqft2x_Aa4",
-    "videoUrl": "/trailers/the-batman.mp4",
+    "videoUrl": "https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4",
     "backupVideoUrl": "https://vjs.zencdn.net/v/oceans.mp4",
     "subtitles": {
       "en": [

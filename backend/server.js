@@ -420,7 +420,7 @@ app.get('/api/trailer/:id', async (req, res) => {
   // 4. Default fallback to 4K Ultra HD Trailer
   return res.json({
     youtubeTrailerId: 'b9EkMc79ZSU',
-    videoUrl: '/trailers/stranger-things.mp4'
+    videoUrl: 'https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4'
   });
 });
 
