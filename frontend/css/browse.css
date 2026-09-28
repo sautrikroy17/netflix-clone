@@ -201,7 +201,14 @@
 
 .category-row {
   position: relative;
+  z-index: 1;
   padding: 0 4%;
+  transition: z-index 0s;
+}
+
+.category-row:hover,
+.category-row:focus-within {
+  z-index: 80;
 }
 
 .category-header {
@@ -225,25 +232,24 @@
   color: #fff;
 }
 
-/* Horizontal Scroll track */
+/* Horizontal Scroll track with zero clipping for hover preview */
 .movie-slider {
   display: flex;
   gap: 10px;
   overflow-x: auto;
-  overflow-y: hidden;
-  padding: 20px 0 30px;
+  overflow-y: visible;
+  padding: 40px 0 115px;
+  margin-top: -25px;
+  margin-bottom: -90px;
   scroll-behavior: smooth;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 .movie-slider::-webkit-scrollbar {
-  height: 6px;
-}
-
-.movie-slider::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 3px;
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 /* Movie Card */
@@ -354,10 +360,9 @@
   display: block;
 }
 
-/* On hover: Card pops out like Netflix */
+/* On hover: Card elevation */
 .movie-card:hover {
-  transform: scale(1.12);
-  z-index: 20;
+  z-index: 90;
 }
 
 /* Floating Card Badges matching Netflix Screenshot 1 & 2 */
@@ -416,24 +421,21 @@
 }
 
 /* Netflix Hover Box Preview (Screenshot 4 Pixel-Perfect Popout) */
-.movie-card:hover {
-  z-index: 80;
-}
-
 .movie-card-hover-box {
   position: absolute;
-  top: -12%;
-  left: -12%;
-  width: 124%;
+  top: -16%;
+  left: -17%;
+  width: 134%;
   background: #181818;
   border-radius: 6px;
-  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.95);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.98), 0 0 0 1px rgba(255, 255, 255, 0.12);
   opacity: 0;
   visibility: hidden;
-  transform: scale(0.94);
-  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease, visibility 0.22s;
+  transform: scale(0.92);
+  transform-origin: center center;
+  transition: transform 0.26s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease, visibility 0.2s;
   pointer-events: none;
-  z-index: 100;
+  z-index: 120;
   overflow: hidden;
 }
 
@@ -442,6 +444,17 @@
   visibility: visible;
   transform: scale(1);
   pointer-events: auto;
+}
+
+.movie-slider .movie-card:first-child .movie-card-hover-box {
+  left: 0;
+  transform-origin: left center;
+}
+
+.movie-slider .movie-card:last-child .movie-card-hover-box {
+  left: auto;
+  right: 0;
+  transform-origin: right center;
 }
 
 .hover-media-section {
@@ -2553,36 +2566,39 @@ dialog#movie-detail-dialog::backdrop {
 
 /* ══════════════════════════════════════════════════════════════
    NETFLIX INTERACTIVE DETAIL MODAL (<dialog class="movie-modal">)
+   Pixel-Perfect Replica matching Screenshot 3
 ══════════════════════════════════════════════════════════════ */
-.movie-modal {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: clamp(600px, 68vw, 880px);
-  max-height: 90vh;
+dialog.movie-modal {
+  width: clamp(620px, 70vw, 860px);
+  max-width: 94vw;
+  max-height: 92vh;
+  margin: auto;
+  padding: 0;
   background: #181818;
   color: #fff;
   border: none;
-  border-radius: 10px;
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.95);
-  padding: 0;
+  border-radius: 8px;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.98);
   overflow-x: hidden;
   overflow-y: auto;
-  z-index: 1000;
+  z-index: 10000;
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
 }
 
-.movie-modal::backdrop {
-  background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(8px);
+dialog.movie-modal:not([open]) {
+  display: none;
+}
+
+dialog.movie-modal::backdrop {
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
 }
 
 .modal-header-hero {
   position: relative;
   width: 100%;
-  height: 420px;
+  height: 440px;
   background-size: cover;
   background-position: center top;
   background-repeat: no-repeat;
@@ -2605,8 +2621,8 @@ dialog#movie-detail-dialog::backdrop {
 .modal-hero-vignette {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(24, 24, 24, 0) 45%, #181818 100%),
-              linear-gradient(90deg, rgba(24, 24, 24, 0.7) 0%, rgba(24, 24, 24, 0) 60%);
+  background: linear-gradient(180deg, rgba(24, 24, 24, 0) 40%, #181818 100%),
+              linear-gradient(90deg, rgba(24, 24, 24, 0.6) 0%, rgba(24, 24, 24, 0) 50%);
   z-index: 2;
   pointer-events: none;
 }
@@ -2619,7 +2635,7 @@ dialog#movie-detail-dialog::backdrop {
   height: 38px;
   border-radius: 50%;
   background: #181818;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.25);
   color: #fff;
   font-size: 1.1rem;
   font-weight: 700;
@@ -2633,23 +2649,44 @@ dialog#movie-detail-dialog::backdrop {
 
 .modal-close-btn:hover {
   background: rgba(255, 255, 255, 0.2);
-  transform: scale(1.1);
+  border-color: #ffffff;
+  transform: scale(1.08);
 }
 
 .modal-hero-content {
   position: relative;
   z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.modal-series-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  letter-spacing: 3px;
+  font-size: 0.72rem;
+  font-weight: 900;
+  color: #e50914;
+  text-transform: uppercase;
+}
+
+.modal-series-badge .modal-n-red {
+  font-family: var(--netflix-headline-font, 'Bebas Neue', sans-serif);
+  font-size: 1.35rem;
+  line-height: 1;
 }
 
 .modal-title {
   font-family: var(--netflix-headline-font, 'Bebas Neue', sans-serif);
-  font-size: clamp(2.2rem, 4vw, 3.6rem);
+  font-size: clamp(2.4rem, 5vw, 4rem);
   font-weight: 900;
   color: #fff;
-  letter-spacing: 0.5px;
-  line-height: 1;
-  margin-bottom: 18px;
-  text-shadow: 0 3px 12px rgba(0, 0, 0, 0.9);
+  letter-spacing: 1px;
+  line-height: 0.95;
+  margin: 0;
+  text-shadow: 0 4px 16px rgba(0, 0, 0, 0.95);
 }
 
 .modal-actions {
@@ -2658,60 +2695,162 @@ dialog#movie-detail-dialog::backdrop {
   gap: 12px;
 }
 
+.modal-hero-play-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: #ffffff;
+  color: #000000;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 26px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.modal-hero-play-btn:hover {
+  background: #e6e6e6;
+  transform: scale(1.04);
+}
+
+.modal-circle-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(42, 42, 42, 0.75);
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modal-circle-btn:hover {
+  border-color: #fff;
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.1);
+}
+
+.modal-circle-btn.in-list {
+  background: rgba(229, 9, 20, 0.85);
+  border-color: var(--netflix-red);
+}
+
+.modal-hero-sound-btn {
+  margin-left: auto;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(30, 30, 30, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modal-hero-sound-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: #fff;
+}
+
 .modal-body {
   display: grid;
   grid-template-columns: 2fr 1fr;
-  gap: 32px;
+  gap: 36px;
   padding: 24px 40px 30px;
 }
 
 .modal-meta-row {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 12px;
-  margin-bottom: 16px;
   font-size: 0.95rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 12px;
+}
+
+.modal-year {
+  color: #ffffff;
   font-weight: 600;
 }
 
+.modal-duration {
+  color: #a3a3a3;
+  font-weight: 500;
+}
+
+.advisory-badge-box {
+  display: inline-block;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  padding: 1px 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.2;
+  border-radius: 2px;
+}
+
+.modal-advisory-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  font-size: 0.85rem;
+  color: #cccccc;
+  line-height: 1.4;
+}
+
 .modal-synopsis {
-  font-size: 0.96rem;
+  font-size: 0.98rem;
   line-height: 1.6;
-  color: #e5e5e5;
+  color: #ffffff;
   margin: 0;
 }
 
-.modal-detail-item {
-  font-size: 0.85rem;
+.modal-meta-field {
+  font-size: 0.86rem;
   line-height: 1.5;
-  color: #a3a3a3;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
-.modal-detail-item b {
-  color: #777;
+.modal-meta-field .meta-label {
+  color: #777777;
+  font-weight: 500;
 }
 
-.modal-detail-item span {
-  color: #fff;
+.modal-meta-field .meta-val {
+  color: #ffffff;
 }
 
 /* Modal Episodes Section */
 .modal-episodes-section {
-  padding: 10px 40px 30px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 20px 40px 36px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .modal-episodes-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
+  margin-bottom: 8px;
 }
 
 .modal-episodes-title {
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   font-weight: 700;
+  color: #ffffff;
   margin: 0;
 }
 
@@ -2719,30 +2858,39 @@ dialog#movie-detail-dialog::backdrop {
   background: #242424;
   color: #ffffff;
   border: 1px solid rgba(255, 255, 255, 0.3);
-  padding: 6px 14px;
+  padding: 8px 16px;
   border-radius: 4px;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
   outline: none;
 }
 
+.modal-season-advisory {
+  font-size: 0.84rem;
+  color: #a3a3a3;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .modal-episodes-list {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 }
 
 .modal-episode-row {
   display: grid;
-  grid-template-columns: 40px 140px 1fr;
+  grid-template-columns: 36px 140px 1fr;
   gap: 16px;
   align-items: center;
   padding: 16px 14px;
   border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.2s ease;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  transition: background 0.2s ease;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .modal-episode-row:hover {

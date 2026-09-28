@@ -1404,14 +1404,34 @@ class NetflixApp {
     `;
   }
 
+  getTrailerForMovie(movie) {
+    if (movie.videoUrl) return movie.videoUrl;
+    if (movie.backupVideoUrl) return movie.backupVideoUrl;
+
+    const id = (movie.id || '').toLowerCase();
+    const genres = (movie.genres || []).join(' ').toLowerCase();
+
+    if (id.includes('wednesday') || genres.includes('comedy') || genres.includes('supernatural') || genres.includes('anime')) {
+      return '/trailers/wednesday.mp4';
+    }
+    if (id.includes('batman') || id.includes('narcos') || genres.includes('crime') || genres.includes('action') || genres.includes('thriller')) {
+      return '/trailers/the-batman.mp4';
+    }
+    if (id.includes('interstellar') || id.includes('oppenheimer') || genres.includes('drama') || genres.includes('sci-fi')) {
+      return '/trailers/interstellar.mp4';
+    }
+    return '/trailers/stranger-things.mp4';
+  }
+
   renderMovieCard(movie) {
     const isInList = this.watchlist.some(m => m.id === movie.id);
     const userRating = this.ratings[movie.id] || 'none';
+    const trailerUrl = this.getTrailerForMovie(movie);
 
     // Badges calculation matching user's screenshots
     const isTop10 = movie.top10Rank || ['stranger-things','squid-game','wednesday','money-heist','rrr','leo','jawan','animal','kalki-2898-ad','kgf-chapter-2'].includes(movie.id);
     const isNewSeason = movie.year === '2024';
-    const isRecentlyAdded = movie.year === '2023' || movie.id === 'arcane' || movie.id === 'cyberpunk-edgerunners';
+    const isRecentlyAdded = movie.year === '2023' || movie.id === 'arcane' || movie.id === 'cyberpunk-edgerunners' || movie.id === 'narcos';
     const isNewEpisode = movie.type === 'TV Series' && !isNewSeason && !isRecentlyAdded;
 
     return `
@@ -1426,7 +1446,7 @@ class NetflixApp {
           <div class="hover-media-section">
             <span class="hover-n-logo">N</span>
             <img src="${movie.backdrop}" alt="${movie.title}" class="hover-media-img" onerror="this.onerror=null; this.src='https://image.tmdb.org/t/p/w1280/56v2KjBlU4XaOv9rVYEQypROD7P.jpg';">
-            <video class="hover-preview-video" muted loop playsinline preload="none" data-src="${movie.videoUrl || movie.backupVideoUrl || ''}"></video>
+            <video class="hover-preview-video" muted loop playsinline preload="none" data-src="${trailerUrl}"></video>
             <button class="hover-sound-btn" data-hover-sound-id="${movie.id}" title="Toggle Sound">🔇</button>
           </div>
           <div class="hover-details-section">
@@ -1474,35 +1494,204 @@ class NetflixApp {
   }
 
   getEpisodesForMovie(movie, season = 1) {
+    const id = (movie.id || '').toLowerCase();
+
+    if (id === 'narcos') {
+      if (season === 2) {
+        return [
+          {
+            episodeNum: 1,
+            title: 'Free at Last',
+            duration: '53m',
+            thumb: movie.backdrop,
+            synopsis: 'In the wake of a massive military effort to capture Pablo, the family reunites while enemies make daring alliances.'
+          },
+          {
+            episodeNum: 2,
+            title: 'Cambalache',
+            duration: '47m',
+            thumb: movie.poster,
+            synopsis: 'Tata gets impatient with life on the run. Pablo responds to President Gaviria\'s reward offer with ruthless counterattacks.'
+          },
+          {
+            episodeNum: 3,
+            title: 'Our Man in Madrid',
+            duration: '47m',
+            thumb: movie.backdrop,
+            synopsis: 'President Gaviria has a new job for an old colleague. The Search Bloc turns up the heat, striking close to Escobar\'s inner circle.'
+          },
+          {
+            episodeNum: 4,
+            title: 'The Good, the Bad, and the Dead',
+            duration: '56m',
+            thumb: movie.poster,
+            synopsis: 'The Cali cartel weighs an offer to move onto Pablo\'s territory. Limón proposes an ambitious deal to an old neighborhood pal.'
+          }
+        ];
+      }
+      return [
+        {
+          episodeNum: 1,
+          title: 'Descenso',
+          duration: '57m',
+          thumb: movie.backdrop,
+          synopsis: 'Chilean drug chemist Cockroach brings his product to Colombian smuggler Pablo Escobar. DEA agent Steve Murphy joins the war on drugs in Bogotá.'
+        },
+        {
+          episodeNum: 2,
+          title: 'The Sword of Simón Bolívar',
+          duration: '47m',
+          thumb: movie.poster,
+          synopsis: 'Communist radical group M-19 makes a move against the narcos, while Murphy gets an education in Colombian law enforcement from his new partner Peña.'
+        },
+        {
+          episodeNum: 3,
+          title: 'The Men of Always',
+          duration: '45m',
+          thumb: movie.backdrop,
+          synopsis: 'Murphy and Peña try to bring down Escobar by linking him to a high-profile target in politics, while Murphy encounters local corruption.'
+        },
+        {
+          episodeNum: 4,
+          title: 'The Palace in Flames',
+          duration: '44m',
+          thumb: movie.poster,
+          synopsis: 'Despite a new extradition treaty, the U.S. puts more money into the fight, leading Murphy and Peña to target Escobar\'s secret banking.'
+        }
+      ];
+    }
+
+    if (id === 'wednesday') {
+      if (season === 2) {
+        return [
+          {
+            episodeNum: 1,
+            title: 'Chapter I: Here We Woe Again',
+            duration: '55m',
+            thumb: movie.backdrop,
+            synopsis: 'Back at Nevermore, Wednesday unearths fresh dark secrets buried beneath the academy\'s ancient crypts.'
+          },
+          {
+            episodeNum: 2,
+            title: 'Chapter II: The Midnight Murders',
+            duration: '51m',
+            thumb: movie.poster,
+            synopsis: 'A series of eerie occurrences around Jericho leads Wednesday and Enid into forbidden territory.'
+          }
+        ];
+      }
+      return [
+        {
+          episodeNum: 1,
+          title: 'Chapter I: Wednesday\'s Child Is Full of Woe',
+          duration: '59m',
+          thumb: movie.backdrop,
+          synopsis: 'When a delightfully wicked prank gets Wednesday expelled, her parents ship her off to Nevermore Academy, the boarding school where they fell in love.'
+        },
+        {
+          episodeNum: 2,
+          title: 'Chapter II: Woe Is the Loneliest Number',
+          duration: '57m',
+          thumb: movie.poster,
+          synopsis: 'The sheriff questions Wednesday about the night\'s strange happenings. Later, Wednesday faces off against a fierce rival during the Poe Cup race.'
+        },
+        {
+          episodeNum: 3,
+          title: 'Chapter III: Friend or Woe',
+          duration: '48m',
+          thumb: movie.backdrop,
+          synopsis: 'Wednesday stumbles upon a secret society. During Outreach Day, Nevermore\'s outcasts mingle with the normies of Jericho in Pilgrim World.'
+        },
+        {
+          episodeNum: 4,
+          title: 'Chapter IV: Woe What a Night',
+          duration: '49m',
+          thumb: movie.poster,
+          synopsis: 'Wednesday asks Xavier to the Rave\'N dance, sparking Tyler\'s jealousy — but Thing has something up his sleeve. Meanwhile, Eugene stakes out the cave.'
+        }
+      ];
+    }
+
+    if (id === 'stranger-things') {
+      if (season === 2) {
+        return [
+          {
+            episodeNum: 1,
+            title: 'Chapter One: MADMAX',
+            duration: '48m',
+            thumb: movie.backdrop,
+            synopsis: 'As the town preps for Halloween, a high-scoring rival shakes up the arcade, and a skeptical Hopper inspects a field of rotting pumpkins.'
+          },
+          {
+            episodeNum: 2,
+            title: 'Chapter Two: Trick or Treat, Freak',
+            duration: '55m',
+            thumb: movie.poster,
+            synopsis: 'After Will sees something terrible on trick-or-treat night, Mike wonders whether Eleven is still out there. Dustin adopts a strange new pet.'
+          }
+        ];
+      }
+      return [
+        {
+          episodeNum: 1,
+          title: 'Chapter One: The Vanishing of Will Byers',
+          duration: '48m',
+          thumb: movie.backdrop,
+          synopsis: 'On his way home from a friend\'s house, young Will sees something terrifying. Nearby, a sinister secret lurks in the depths of a government lab.'
+        },
+        {
+          episodeNum: 2,
+          title: 'Chapter Two: The Weirdo on Maple Street',
+          duration: '55m',
+          thumb: movie.poster,
+          synopsis: 'Lucas, Mike and Dustin try to talk to the girl they found in the woods. Hopper questions an anxious Joyce about an unsettling phone call.'
+        },
+        {
+          episodeNum: 3,
+          title: 'Chapter Three: Holly, Jolly',
+          duration: '51m',
+          thumb: movie.backdrop,
+          synopsis: 'An increasingly concerned Nancy looks for Barb and finds out what Jonathan\'s been up to. Joyce is convinced Will is trying to talk to her.'
+        },
+        {
+          episodeNum: 4,
+          title: 'Chapter Four: The Body',
+          duration: '50m',
+          thumb: movie.poster,
+          synopsis: 'Refusing to believe Will is dead, Joyce tries to connect with her son. The boys give Eleven a makeover. Nancy and Jonathan form an alliance.'
+        }
+      ];
+    }
+
     if (season === 2) {
       return [
         {
           episodeNum: 1,
-          title: 'Chapter One: Shadows in the Dark',
-          duration: '54m',
+          title: 'Season 2, Episode 1: New Allegiances',
+          duration: '52m',
           thumb: movie.backdrop,
-          synopsis: 'As a new school year begins, strange occurrences whisper through the town, signaling the return of an ancient danger.'
+          synopsis: 'Following the dramatic events of the finale, tensions escalate as new rivals enter the fray.'
         },
         {
           episodeNum: 2,
-          title: 'Chapter Two: The Hidden Frequency',
-          duration: '49m',
+          title: 'Season 2, Episode 2: Breaking Point',
+          duration: '50m',
           thumb: movie.poster,
-          synopsis: 'Secret transmissions are intercepted as alliances shift and an old enemy emerges from the darkest shadows.'
+          synopsis: 'An unexpected betrayal shifts the balance of power, forcing difficult choices.'
         },
         {
           episodeNum: 3,
-          title: 'Chapter Three: The Hive Mind',
-          duration: '56m',
+          title: 'Season 2, Episode 3: Crossfire',
+          duration: '55m',
           thumb: movie.backdrop,
-          synopsis: 'A terrifying revelation links the victims together in an inescapable psychological trap that threatens everyone.'
+          synopsis: 'The conflict spills into the open as both sides prepare for an inevitable confrontation.'
         },
         {
           episodeNum: 4,
-          title: 'Chapter Four: The Gatekeeper',
-          duration: '62m',
-          thumb: movie.backdrop,
-          synopsis: 'Everything hangs by a thread as the brave survivors stage a daring last stand to close the dimensional breach.'
+          title: 'Season 2, Episode 4: Endgame',
+          duration: '58m',
+          thumb: movie.poster,
+          synopsis: 'The season concludes with high-stakes reveals and consequences that change everything.'
         }
       ];
     }
@@ -1510,31 +1699,31 @@ class NetflixApp {
     return [
       {
         episodeNum: 1,
-        title: 'Chapter One: The Awakening',
-        duration: '48m',
+        title: 'Episode 1: The Beginning',
+        duration: '54m',
         thumb: movie.backdrop,
-        synopsis: 'An unexpected disappearance triggers a high-stakes search, revealing secret government experiments and unnatural forces.'
+        synopsis: movie.overview || 'An unexpected event sets into motion a gripping series of secrets and challenges.'
       },
       {
         episodeNum: 2,
-        title: 'Chapter Two: Into the Unknown',
-        duration: '52m',
+        title: 'Episode 2: Into the Shadows',
+        duration: '49m',
         thumb: movie.poster,
-        synopsis: 'Strange clues guide the investigation while a mysterious girl with extraordinary abilities offers desperate help.'
+        synopsis: 'Underground connections come to light as allies struggle to keep their identities guarded.'
       },
       {
         episodeNum: 3,
-        title: 'Chapter Three: The Point of No Return',
-        duration: '50m',
+        title: 'Episode 3: The Gathering Storm',
+        duration: '51m',
         thumb: movie.backdrop,
-        synopsis: 'Tensions peak when underground forces break into the surface, turning hunters into the hunted in a pulse-pounding chase.'
+        synopsis: 'A race against time unfolds across multiple battlegrounds, testing everyone\'s resolve.'
       },
       {
         episodeNum: 4,
-        title: 'Chapter Four: The Final Stand',
-        duration: '58m',
-        thumb: movie.backdrop,
-        synopsis: 'Heroes unite across lines of conflict in an epic showdown to protect their families from total annihilation.'
+        title: 'Episode 4: Turning Point',
+        duration: '56m',
+        thumb: movie.poster,
+        synopsis: 'Surprising discoveries alter the course of the investigation and raise the stakes.'
       }
     ];
   }
@@ -1806,13 +1995,17 @@ class NetflixApp {
       card.addEventListener('mouseenter', () => {
         hoverTimer = setTimeout(() => {
           if (video && video.getAttribute('data-src')) {
-            if (!video.src) {
-              video.src = video.getAttribute('data-src');
+            const src = video.getAttribute('data-src');
+            if (!video.src || !video.src.includes(src)) {
+              video.src = src;
             }
             video.muted = true;
-            video.play().catch(() => {});
+            const p = video.play();
+            if (p !== undefined) {
+              p.catch(() => {});
+            }
           }
-        }, 320); // 320ms Netflix hover intent
+        }, 220); // 220ms Netflix hover intent
       });
 
       card.addEventListener('mouseleave', () => {
@@ -1826,6 +2019,7 @@ class NetflixApp {
       if (soundBtn && video) {
         soundBtn.addEventListener('click', (e) => {
           e.stopPropagation();
+          e.preventDefault();
           video.muted = !video.muted;
           soundBtn.textContent = video.muted ? '🔇' : '🔊';
         });
@@ -2595,7 +2789,14 @@ class NetflixApp {
       const playBtn = e.target.closest('[data-play-id]');
       if (playBtn) {
         const id = playBtn.getAttribute('data-play-id');
-        this.openCinemaPlayer(id);
+        const epNum = playBtn.getAttribute('data-episode-num') ? parseInt(playBtn.getAttribute('data-episode-num'), 10) : null;
+        const dialog = document.getElementById('movie-detail-dialog');
+        if (dialog && dialog.open) {
+          const vid = dialog.querySelector('.modal-hero-video');
+          if (vid) vid.pause();
+          dialog.close();
+        }
+        this.openCinemaPlayer(id, 0, epNum);
         return;
       }
 
@@ -2648,19 +2849,31 @@ class NetflixApp {
       const modalClose = e.target.closest('#modal-close-btn');
       if (modalClose) {
         const dialog = document.getElementById('movie-detail-dialog');
-        if (dialog) dialog.close();
+        if (dialog) {
+          const vid = dialog.querySelector('.modal-hero-video');
+          if (vid) vid.pause();
+          dialog.close();
+        }
         return;
       }
 
-      // 8. Click anywhere on Movie Card or Top 10 Card -> Open Interactive Modal
+      // 8. Open Movie Modal from More Like This or Interactive Cards
+      const modalOpen = e.target.closest('[data-modal-open-id]');
+      if (modalOpen && !e.target.closest('.similar-add-btn') && !e.target.closest('[data-watchlist-id]')) {
+        const id = modalOpen.getAttribute('data-modal-open-id');
+        this.openMovieModal(id);
+        return;
+      }
+
+      // 9. Click anywhere on Movie Card or Top 10 Card -> Open Interactive Modal
       const card = e.target.closest('[data-card-id]');
-      if (card && !e.target.closest('.card-btn')) {
+      if (card && !e.target.closest('.card-btn') && !e.target.closest('.hover-sound-btn')) {
         const id = card.getAttribute('data-card-id');
         this.openMovieModal(id);
         return;
       }
 
-      // 9. Landing Page Top 10 Items -> Open Cinema Player directly
+      // 10. Landing Page Top 10 Items -> Open Cinema Player directly
       const landingCard = e.target.closest('[data-landing-play-id]');
       if (landingCard) {
         const id = landingCard.getAttribute('data-landing-play-id');
@@ -2672,6 +2885,7 @@ class NetflixApp {
 
   /* ══════════════════════════════════════════════
      INTERACTIVE DETAIL MODAL (<dialog>)
+     Pixel-Perfect Replica matching Screenshot 3
   ══════════════════════════════════════════════ */
   openMovieModal(movieId) {
     const movie = this.movies.find(m => m.id === movieId);
@@ -2686,27 +2900,30 @@ class NetflixApp {
     const isSeries = movie.type === 'TV Series';
     const s1Episodes = this.getEpisodesForMovie(movie, 1);
     const s2Episodes = this.getEpisodesForMovie(movie, 2);
+    const trailerUrl = this.getTrailerForMovie(movie);
 
     dialog.innerHTML = `
       <div class="modal-header-hero" style="background-image: url('${movie.backdrop}')">
-        <video class="modal-hero-video" autoplay muted loop playsinline src="${movie.videoUrl || movie.backupVideoUrl || ''}"></video>
+        <video class="modal-hero-video" autoplay muted loop playsinline src="${trailerUrl}"></video>
         <div class="modal-hero-vignette"></div>
         <button class="modal-close-btn" id="modal-close-btn" aria-label="Close dialog">✕</button>
 
         <div class="modal-hero-content">
-          <h2 class="modal-title">${movie.title}</h2>
+          <div class="modal-series-badge">
+            <span class="modal-n-red">N</span>
+            <span class="modal-badge-label">${isSeries ? 'SERIES' : 'FILM'}</span>
+          </div>
+          <h2 class="modal-title">${movie.title.toUpperCase()}</h2>
           <div class="modal-actions">
-            <button class="btn-billboard-play" data-play-id="${movie.id}">
+            <button class="modal-hero-play-btn" data-play-id="${movie.id}">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-              Play
+              <span>Play</span>
             </button>
-            <button class="btn-billboard-list ${isInList ? 'in-list' : ''}" data-watchlist-id="${movie.id}">
-              ${isInList 
-                ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> In My List`
-                : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> My List`}
+            <button class="modal-circle-btn card-btn-list ${isInList ? 'in-list' : ''}" data-watchlist-id="${movie.id}" title="${isInList ? 'In My List' : 'Add to My List'}">
+              ${isInList ? '✓' : '+'}
             </button>
-            <button class="card-btn card-btn-thumb" data-rating-id="${movie.id}" data-rating-val="like" title="I like this">👍</button>
-            <button class="hover-sound-btn" id="modal-hero-sound-btn" style="position:static; margin-left:auto; width:36px; height:36px; font-size:1rem;" title="Toggle sound">🔇</button>
+            <button class="modal-circle-btn card-btn-thumb ${this.ratings[movie.id] === 'like' ? 'rated' : ''}" data-rating-id="${movie.id}" data-rating-val="like" title="I like this">👍</button>
+            <button class="modal-hero-sound-btn" id="modal-hero-sound-btn" title="Toggle audio">🔇</button>
           </div>
         </div>
       </div>
@@ -2714,52 +2931,61 @@ class NetflixApp {
       <div class="modal-body">
         <div class="modal-left">
           <div class="modal-meta-row">
+            <span class="modal-year">${movie.year || '2024'}</span>
+            <span class="modal-duration">${movie.duration}</span>
+            <span class="dolby-badge">Dolby VISION</span>
+            <span class="dolby-badge">AD)))</span>
+            <span class="dolby-badge">[CC]</span>
             <span class="match-score">${movie.matchScore}% Match</span>
-            <span class="age-badge">${movie.ageRating}</span>
-            <span style="color:#aaa;">${movie.duration}</span>
-            <span class="quality-badge">${movie.quality}</span>
-            <span class="quality-badge" style="border-color:#555;">${movie.audio || 'Dolby Atmos'}</span>
+          </div>
+          <div class="modal-advisory-row">
+            <span class="advisory-badge-box">${movie.ageRating || 'A'}</span>
+            <span class="advisory-tags">sex, violence, substances, coarse language, sexual violence, nudity, tobacco use</span>
           </div>
           <p class="modal-synopsis">${movie.overview}</p>
         </div>
 
         <div class="modal-right">
-          <div class="modal-detail-item">
-            <b>Cast:</b> <span>${movie.cast.join(', ')}</span>
+          <div class="modal-meta-field">
+            <span class="meta-label">Cast: </span>
+            <span class="meta-val">${movie.cast.join(', ')}, <em>more</em></span>
           </div>
-          <div class="modal-detail-item">
-            <b>Genres:</b> <span>${movie.genres.join(', ')}</span>
+          <div class="modal-meta-field">
+            <span class="meta-label">Genres: </span>
+            <span class="meta-val">${movie.genres.join(', ')}</span>
           </div>
-          <div class="modal-detail-item">
-            <b>Creator:</b> <span>${movie.creator || 'Netflix Studios'}</span>
+          <div class="modal-meta-field">
+            <span class="meta-label">This Show Is: </span>
+            <span class="meta-val">Gritty, Dark, Exciting</span>
           </div>
         </div>
       </div>
 
-      <!-- Episodes Section (Only for TV Series) -->
+      <!-- Episodes Section (Matching Screenshot 3) -->
       ${isSeries ? `
         <div class="modal-episodes-section">
           <div class="modal-episodes-header">
             <h3 class="modal-episodes-title">Episodes</h3>
             <select class="modal-season-select" id="modal-season-select">
-              <option value="1">Season 1 (${s1Episodes.length} Episodes)</option>
-              <option value="2">Season 2 (${s2Episodes.length} Episodes)</option>
+              <option value="1">Season 1</option>
+              <option value="2">Season 2</option>
             </select>
           </div>
+          <div class="modal-season-advisory" id="modal-season-advisory">Season 1: <span class="advisory-badge-box">${movie.ageRating || 'A'}</span> sex, violence, substances, coarse language, sexual violence, nudity, tobacco use</div>
           <div class="modal-episodes-list" id="modal-episodes-list">
             ${s1Episodes.map(ep => `
               <div class="modal-episode-row" data-play-id="${movie.id}" data-episode-num="${ep.episodeNum}">
                 <div class="episode-num">${ep.episodeNum}</div>
                 <div class="episode-thumb-wrap">
-                  <img src="${ep.thumb}" alt="${ep.title}" loading="lazy">
+                  <img src="${ep.thumb || movie.backdrop}" alt="${ep.title}" loading="lazy">
                   <div class="episode-play-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><polygon points="8 5 19 12 8 19 8 5"/></svg>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><polygon points="8 5 19 12 8 19 8 5"/></svg>
                   </div>
                 </div>
                 <div class="episode-info">
                   <div class="episode-top-line">
-                    <div class="episode-title">${ep.title}</div>
-                    <div class="episode-duration">${ep.duration}</div>
+                    <span class="episode-title">${ep.title}</span>
+                    <span class="episode-duration">${ep.duration}</span>
                   </div>
                   <p class="episode-desc">${ep.synopsis}</p>
                 </div>
@@ -2774,15 +3000,17 @@ class NetflixApp {
         <h3 style="font-size:1.4rem; font-weight:700; margin-bottom:18px;">More Like This</h3>
         <div class="modal-similar-grid">
           ${similar.map(s => `
-            <div class="similar-card" data-play-id="${s.id}">
+            <div class="similar-card" data-modal-open-id="${s.id}">
               <div class="similar-thumb-wrap">
-                <img src="${s.backdrop}" alt="${s.title}" loading="lazy" onerror="this.onerror=null; this.src='https://image.tmdb.org/t/p/w1280/56v2KjBlU4XaOv9rVYEQypROD7P.jpg';">
-                <button class="similar-add-btn" data-watchlist-id="${s.id}" title="Add to My List">+</button>
+                <img src="${s.backdrop || s.poster}" alt="${s.title}" loading="lazy" onerror="this.onerror=null; this.src='https://image.tmdb.org/t/p/w1280/56v2KjBlU4XaOv9rVYEQypROD7P.jpg';">
+                <button class="similar-add-btn ${this.watchlist.some(w => w.id === s.id) ? 'in-list' : ''}" data-watchlist-id="${s.id}" title="Add to My List">
+                  ${this.watchlist.some(w => w.id === s.id) ? '✓' : '+'}
+                </button>
               </div>
               <div class="similar-content">
                 <div class="similar-meta-row">
                   <span class="match-score">${s.matchScore}% Match</span>
-                  <span class="age-badge">${s.ageRating}</span>
+                  <span class="advisory-badge-box">${s.ageRating}</span>
                   <span style="color:#aaa;">${s.year}</span>
                 </div>
                 <p class="similar-synopsis">${s.overview}</p>
@@ -2796,17 +3024,17 @@ class NetflixApp {
       <div style="padding: 10px 40px 40px; border-top: 1px solid rgba(255,255,255,0.1);">
         <h3 style="font-size:1.3rem; margin-bottom:16px;">About <strong>${movie.title}</strong></h3>
         <div style="font-size:0.88rem; line-height:1.7; color:#a3a3a3;">
-          <p><b style="color:#777;">Creators:</b> <span style="color:#fff;">${movie.creator || 'Global Studios'}</span></p>
+          <p><b style="color:#777;">Creators:</b> <span style="color:#fff;">${movie.creator || 'Netflix Studios'}</span></p>
           <p><b style="color:#777;">Cast:</b> <span style="color:#fff;">${movie.cast.join(', ')}</span></p>
           <p><b style="color:#777;">Genres:</b> <span style="color:#fff;">${movie.genres.join(', ')}</span></p>
-          <p><b style="color:#777;">Maturity Rating:</b> <span class="age-badge" style="color:#fff; margin-left:4px;">${movie.ageRating}</span> Recommended for audiences aged ${movie.ageRating.includes('18+') ? '18 and above' : '16 and above'}.</p>
+          <p><b style="color:#777;">Maturity Rating:</b> <span class="advisory-badge-box" style="color:#fff; margin-left:4px;">${movie.ageRating}</span> Recommended for mature audiences.</p>
         </div>
       </div>
     `;
 
     dialog.showModal();
 
-    // Sound toggle in modal
+    // Sound toggle in modal hero
     const heroVid = dialog.querySelector('.modal-hero-video');
     const heroSoundBtn = document.getElementById('modal-hero-sound-btn');
     if (heroVid && heroSoundBtn) {
@@ -2820,23 +3048,27 @@ class NetflixApp {
     // Season selector change
     const seasonSelect = document.getElementById('modal-season-select');
     const epList = document.getElementById('modal-episodes-list');
+    const seasonAdv = document.getElementById('modal-season-advisory');
     if (seasonSelect && epList) {
       seasonSelect.addEventListener('change', () => {
         const season = parseInt(seasonSelect.value);
+        if (seasonAdv) {
+          seasonAdv.innerHTML = `Season ${season}: <span class="advisory-badge-box">${movie.ageRating || 'A'}</span> sex, violence, substances, coarse language, sexual violence, nudity, tobacco use`;
+        }
         const eps = this.getEpisodesForMovie(movie, season);
         epList.innerHTML = eps.map(ep => `
           <div class="modal-episode-row" data-play-id="${movie.id}" data-episode-num="${ep.episodeNum}">
             <div class="episode-num">${ep.episodeNum}</div>
             <div class="episode-thumb-wrap">
-              <img src="${ep.thumb}" alt="${ep.title}" loading="lazy">
+              <img src="${ep.thumb || movie.backdrop}" alt="${ep.title}" loading="lazy">
               <div class="episode-play-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><polygon points="8 5 19 12 8 19 8 5"/></svg>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><polygon points="8 5 19 12 8 19 8 5"/></svg>
               </div>
             </div>
             <div class="episode-info">
               <div class="episode-top-line">
-                <div class="episode-title">${ep.title}</div>
-                <div class="episode-duration">${ep.duration}</div>
+                <span class="episode-title">${ep.title}</span>
+                <span class="episode-duration">${ep.duration}</span>
               </div>
               <p class="episode-desc">${ep.synopsis}</p>
             </div>
@@ -2853,7 +3085,7 @@ class NetflixApp {
       });
     }
 
-    dialog.addEventListener('click', (e) => {
+    dialog.onclick = (e) => {
       const rect = dialog.getBoundingClientRect();
       const isInDialog = (rect.top <= e.clientY && e.clientY <= rect.top + rect.height
         && rect.left <= e.clientX && e.clientX <= rect.left + rect.width);
@@ -2861,7 +3093,7 @@ class NetflixApp {
         if (heroVid) heroVid.pause();
         dialog.close();
       }
-    });
+    };
   }
 
   /* ══════════════════════════════════════════════

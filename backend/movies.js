@@ -1347,19 +1347,19 @@ const movies = [
     "id": "narcos",
     "title": "Narcos",
     "type": "TV Series",
-    "overview": "A chronicled look at the criminal exploits of Colombian drug lord Pablo Escobar and the DEA agents working relentlessly to bring down the Medellin cartel.",
-    "backdrop": "https://image.tmdb.org/t/p/w1280/gL4UqXv9W7k01Z2s3d4e5f6g7.jpg",
-    "poster": "https://image.tmdb.org/t/p/w780/rTmal9fVEwh5x9hJ2v7o3u7X7s0.jpg",
+    "overview": "The true story of Colombia's infamously violent and powerful drug cartels fuels this gritty gangster drama series.",
+    "backdrop": "https://image.tmdb.org/t/p/w1280/y9ekzkPFmWSqUU3Kj0wHmYUM8qu.jpg",
+    "poster": "https://image.tmdb.org/t/p/w780/rTmal9fDbwh5F0waol2hq35U4ah.jpg",
     "matchScore": 98,
     "year": "2017",
-    "ageRating": "A 18+",
+    "ageRating": "A",
     "duration": "3 Seasons",
     "quality": "4K Ultra HD",
-    "audio": "5.1 Surround",
+    "audio": "Dolby VISION",
     "genres": [
-      "Crime",
-      "Biography",
-      "Action Thriller"
+      "TV Dramas",
+      "US",
+      "TV Action & Adventure"
     ],
     "cast": [
       "Wagner Moura",
@@ -1369,6 +1369,7 @@ const movies = [
     "creator": "Chris Brancato",
     "category": "drama",
     "isOriginal": true,
+    "videoUrl": "/trailers/the-batman.mp4",
     "tmdbId": 63351,
     "youtubeTrailerId": "xl8hmgMNCBo"
   },
