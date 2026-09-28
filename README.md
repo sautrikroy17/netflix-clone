@@ -2,7 +2,7 @@
 
 A production-grade, full-stack streaming platform inspired by Netflix. Built with a modular **Node.js/Express** backend, **SQLite** database persistence, and a modern, high-performance vanilla frontend.
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-netflixx--india.vercel.app-E50914?style=flat-square&logo=vercel&logoColor=white)](https://netflixx-india.vercel.app)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-netfixer--stream.vercel.app-E50914?style=flat-square&logo=vercel&logoColor=white)](https://netfixer-stream.vercel.app)
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org/)
 [![Database](https://img.shields.io/badge/Database-SQLite%203-003B57?style=flat-square&logo=sqlite&logoColor=white)](https://sqlite.org/)
 [![License](https://img.shields.io/badge/License-MIT-gray?style=flat-square)](LICENSE)
@@ -11,7 +11,8 @@ A production-grade, full-stack streaming platform inspired by Netflix. Built wit
 
 ## 🚀 Live Demo
 
-- **Production URL**: [netflixx-india.vercel.app](https://netflixx-india.vercel.app)
+- **Production URL**: [netfixer-stream.vercel.app](https://netfixer-stream.vercel.app)
+- **Mirror URL**: [netflixx-player.vercel.app](https://netflixx-player.vercel.app)
 - **Demo Account**: `demo@netflix.com` / `NetflixDemo123!` *(or register a new account on `/signup`)*
 
 ---
