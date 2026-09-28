@@ -1463,94 +1463,74 @@ dialog#movie-detail-dialog::backdrop {
   gap: 12px;
 }
 
-/* NetMirror Stream Switcher */
-.cinema-stream-selector {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(20, 20, 20, 0.85);
-  padding: 4px 6px;
-  border-radius: 30px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
-}
-
-.stream-pill {
-  background: transparent;
-  border: none;
-  color: #bbb;
-  font-size: 0.78rem;
-  font-weight: 600;
-  padding: 6px 14px;
-  border-radius: 20px;
-  cursor: pointer;
+/* Trailer Mode Selector (Netflix Native HD vs YouTube HD) */
+.cinema-mode-pills {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  transition: all 0.2s ease;
-  user-select: none;
-}
-
-.stream-pill:hover {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.12);
-}
-
-.stream-pill.active {
-  background: var(--netflix-red);
-  color: #ffffff;
-  font-weight: 700;
-  box-shadow: 0 2px 12px rgba(229, 9, 20, 0.55);
-}
-
-.live-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #46d369;
-  display: inline-block;
-  box-shadow: 0 0 6px #46d369;
-  animation: pulseLiveDot 1.5s infinite;
-}
-
-@keyframes pulseLiveDot {
-  0% { transform: scale(0.9); opacity: 0.8; }
-  50% { transform: scale(1.25); opacity: 1; }
-  100% { transform: scale(0.9); opacity: 0.8; }
-}
-
-#cinema-top-episodes-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(20, 20, 20, 0.85);
+  background: rgba(20, 20, 20, 0.78);
   border: 1px solid rgba(255, 255, 255, 0.22);
-  color: #ffffff;
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 0.82rem;
-  font-weight: 600;
-  cursor: pointer;
+  border-radius: 999px;
+  padding: 3px;
+  gap: 3px;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  transition: all 0.2s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  pointer-events: auto;
 }
 
-#cinema-top-episodes-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: #ffffff;
-  transform: scale(1.04);
+.cinema-mode-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  color: #ccc;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
 }
 
-#cinema-top-episodes-btn svg {
-  width: 16px;
-  height: 16px;
-  fill: currentColor;
+.cinema-mode-pill:hover {
+  color: #fff;
 }
 
-.cinema-embed-frame {
+.cinema-mode-pill.active {
+  background: #e50914;
+  color: #fff;
+  box-shadow: 0 0 14px rgba(229, 9, 20, 0.55);
+}
+
+/* YouTube HD Trailer Link */
+.cinema-yt-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: rgba(20, 20, 20, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+  border-radius: 50%;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  pointer-events: auto;
+}
+
+.cinema-yt-link:hover {
+  background: rgba(255, 0, 0, 0.35);
+  border-color: #ff0000;
+  color: #ffffff;
+  transform: scale(1.08);
+}
+
+.cinema-yt-frame {
   position: absolute;
   top: 0;
   left: 0;

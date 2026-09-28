@@ -296,7 +296,7 @@ function formatTmdbItem(item) {
     id: `tmdb-${tmdbId}`,
     title,
     type: isTV ? 'TV Series' : 'Movie',
-    overview: item.overview || 'Streaming in full HD with NetMirror multi-server support.',
+    overview: item.overview || 'Watch official high definition trailers in cinematic quality.',
     backdrop,
     poster,
     matchScore,
@@ -314,6 +314,53 @@ function formatTmdbItem(item) {
     videoUrl: 'https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4'
   };
 }
+
+// 0. Dynamic Trailer Lookup (Fetches Official YouTube 4K/HD Trailer ID from TMDB if needed)
+app.get('/api/trailer/:id', async (req, res) => {
+  const { id } = req.params;
+  const rawId = id.replace('tmdb-', '');
+  const isNumeric = /^\d+$/.test(rawId);
+
+  // Check local movies first
+  const localMovie = movies.find(m => m.id === id || String(m.tmdbId) === rawId);
+  if (localMovie && localMovie.youtubeTrailerId) {
+    return res.json({
+      youtubeTrailerId: localMovie.youtubeTrailerId,
+      videoUrl: localMovie.videoUrl,
+      backupVideoUrl: localMovie.backupVideoUrl,
+      subtitles: localMovie.subtitles
+    });
+  }
+
+  if (isNumeric) {
+    try {
+      // Try movie endpoint first, then tv endpoint
+      let tmdbRes = await fetch(`https://api.themoviedb.org/3/movie/${rawId}/videos?api_key=${TMDB_API_KEY}`);
+      let data = tmdbRes.ok ? await tmdbRes.json() : null;
+      if (!data || !data.results || !data.results.length) {
+        tmdbRes = await fetch(`https://api.themoviedb.org/3/tv/${rawId}/videos?api_key=${TMDB_API_KEY}`);
+        data = tmdbRes.ok ? await tmdbRes.json() : null;
+      }
+      if (data && data.results && data.results.length) {
+        const trailer = data.results.find(v => v.site === 'YouTube' && (v.type === 'Trailer' || v.type === 'Teaser')) || data.results[0];
+        if (trailer && trailer.key) {
+          return res.json({
+            youtubeTrailerId: trailer.key,
+            videoUrl: 'https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4'
+          });
+        }
+      }
+    } catch (err) {
+      // ignore
+    }
+  }
+
+  // Fallback to Stranger Things trailer
+  return res.json({
+    youtubeTrailerId: 'b9EkMc79ZSU',
+    videoUrl: '/trailers/stranger-things.mp4'
+  });
+});
 
 // 1. Live Dynamic Search (Searches the entire global TMDB library)
 app.get('/api/tmdb/search', async (req, res) => {

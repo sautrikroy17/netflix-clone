@@ -506,7 +506,7 @@ const movies = [
     "creator": "Studio Trigger",
     "category": "trending",
     "isOriginal": true,
-    "videoUrl": "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/720/Big_Buck_Bunny_720_10s_5MB.mp4",
+    "videoUrl": "https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4",
     "subtitles": {
       "en": [
         {
@@ -944,7 +944,7 @@ const movies = [
     ],
     "creator": "Vince Gilligan",
     "category": "drama",
-    "videoUrl": "https://test-videos.co.uk/vids/sintel/mp4/h264/720/Sintel_720_10s_5MB.mp4",
+    "videoUrl": "https://vjs.zencdn.net/v/oceans.mp4",
     "subtitles": {
       "en": [
         {
