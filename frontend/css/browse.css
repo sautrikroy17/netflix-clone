@@ -1408,12 +1408,20 @@ dialog#movie-detail-dialog::backdrop {
 #netflix-cinema-player.embed-active .cinema-bottom-bar,
 #netflix-cinema-player.embed-active .cinema-stage {
   display: none !important;
+  pointer-events: none !important;
 }
 
 #netflix-cinema-player.embed-active .cinema-top-bar {
   background: linear-gradient(180deg, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.7) 70%, transparent 100%);
   pointer-events: auto;
   z-index: 100;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+#netflix-cinema-player.embed-active.idle .cinema-top-bar {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateY(-15px);
 }
 
 /* Center Stage & Subtitles */

@@ -2434,11 +2434,11 @@ class NetflixApp {
       this.cinemaPlayer.classList.remove('idle');
       clearTimeout(this.idleTimer);
       this.idleTimer = setTimeout(() => {
-        if (!this.cinemaVideo.paused) {
+        if (!this.cinemaVideo.paused || this.cinemaPlayer.classList.contains('embed-active')) {
           this.cinemaPlayer.classList.add('idle');
-          this.cinemaAudioMenu.classList.remove('open');
+          if (this.cinemaAudioMenu) this.cinemaAudioMenu.classList.remove('open');
         }
-      }, 3500);
+      }, 3000);
     });
 
     // Global Player Keyboard Shortcuts
@@ -2483,6 +2483,7 @@ class NetflixApp {
     if (!movie || !this.cinemaPlayer) return;
 
     this.activeCinemaMovie = movie;
+    this.activeCinemaMovieProgress = startSecs || 0;
     const episodes = this.getEpisodesForMovie(movie);
     this.activeEpisodeIndex = 0;
     if (episodeNum) {
@@ -2490,12 +2491,20 @@ class NetflixApp {
       if (idx !== -1) this.activeEpisodeIndex = idx;
     }
     const currentEp = episodes[this.activeEpisodeIndex];
+    if (currentEp) {
+      this.activeEpisode = currentEp.episodeNum;
+    }
 
-    // Update metadata
-    document.getElementById('cinema-title').textContent = movie.title;
-    document.getElementById('cinema-episode-badge').textContent = movie.type === 'TV Series' 
-      ? `S1:E${currentEp.episodeNum} "${currentEp.title}"`
-      : movie.duration;
+    // Update metadata - Clean Netflix Standard (no 4K Ultra HD or Dolby Atmos clutter)
+    const titleEl = document.getElementById('cinema-title');
+    if (titleEl) titleEl.textContent = movie.title;
+
+    const badgeEl = document.getElementById('cinema-episode-badge');
+    if (badgeEl) {
+      badgeEl.textContent = movie.type === 'TV Series' 
+        ? `S1:E${currentEp ? currentEp.episodeNum : 1} "${currentEp ? currentEp.title : ''}"`
+        : (movie.duration || '');
+    }
 
     // Show or hide episodes button
     if (this.cinemaEpisodesBtn) {
@@ -2520,9 +2529,9 @@ class NetflixApp {
         </div>
       `).join('');
 
-      const titleEl = document.getElementById('episodes-drawer-title');
+      const dTitleEl = document.getElementById('episodes-drawer-title');
       const seasonEl = document.getElementById('episodes-drawer-season');
-      if (titleEl) titleEl.textContent = movie.title;
+      if (dTitleEl) dTitleEl.textContent = movie.title;
       if (seasonEl) seasonEl.textContent = `Season 1 (${episodes.length} Episodes)`;
 
       this.cinemaEpisodesList.querySelectorAll('[data-play-ep-num]').forEach(item => {
@@ -2534,53 +2543,31 @@ class NetflixApp {
       });
     }
 
-    // Load stream and seek position with automatic backup fallback
-    this.cinemaVideo.src = movie.videoUrl;
-    this.cinemaVideo.poster = movie.backdrop;
-    this.cinemaVideo.onerror = () => {
-      if (movie.backupVideoUrl && !this.cinemaVideo.src.includes(movie.backupVideoUrl)) {
-        console.warn('Primary stream failed, switching to backup HD stream:', movie.backupVideoUrl);
-        this.cinemaVideo.src = movie.backupVideoUrl;
-        this.cinemaVideo.play().catch(() => {});
-      }
-    };
-    this.cinemaVideo.currentTime = startSecs || 0;
-    this.cinemaVideo.volume = 0.85;
-    this.cinemaVideo.muted = false;
-    this.cinemaVolumeSlider.value = 0.85;
-    this.updateCinemaVolumeUI();
-
-    const ytLink = document.getElementById('cinema-yt-link');
-    if (ytLink) {
-      if (movie.youtubeTrailerId) {
-        ytLink.href = `https://www.youtube.com/watch?v=${movie.youtubeTrailerId}`;
-        ytLink.style.display = 'inline-flex';
-      } else {
-        ytLink.style.display = 'none';
-      }
-    }
+    // Unload background native video element to avoid dual bandwidth consumption and seek stalls
+    this.cinemaVideo.pause();
+    this.cinemaVideo.removeAttribute('src');
+    this.cinemaVideo.load();
+    this.cinemaVideo.style.display = 'none';
 
     // Show player
     this.cinemaPlayer.classList.add('active');
+    this.cinemaPlayer.classList.remove('idle');
     document.body.style.overflow = 'hidden';
 
-    // Activate selected stream source (NetMirror full movie/show, Server 2, or Cinema 4K Lab)
+    // Activate selected stream source (defaults to Server 1)
     this.switchStreamSource(this.activeStreamSource || 'netmirror');
 
-    // Progress throttling: saves to SQLite database every 4 seconds
+    // Record initial playback progress to SQLite database
+    this.recordPlaybackProgress(movie.id, Math.max(60, startSecs || 60), 7200, 0);
+
+    // Save playback progress at a reasonable interval (30 seconds) to avoid connection flooding
     clearInterval(this.playbackThrottleTimer);
     this.playbackThrottleTimer = setInterval(() => {
-      if (this.activeStreamSource === 'cinema' && !this.cinemaVideo.paused && this.cinemaVideo.duration > 0) {
-        const ct = this.cinemaVideo.currentTime;
-        const dur = this.cinemaVideo.duration;
-        const isCompleted = ct >= dur * 0.95 ? 1 : 0;
-        this.recordPlaybackProgress(movie.id, ct, dur, isCompleted);
-      } else if (this.activeStreamSource !== 'cinema' && this.activeCinemaMovie) {
-        this.recordPlaybackProgress(movie.id, 120, 3600, 0);
+      if (this.activeCinemaMovie) {
+        this.activeCinemaMovieProgress = (this.activeCinemaMovieProgress || 60) + 30;
+        this.recordPlaybackProgress(this.activeCinemaMovie.id, this.activeCinemaMovieProgress, 7200, 0);
       }
-    }, 4000);
-
-    this.setSubtitleTrack(this.preferences.subtitle_language || 'en');
+    }, 30000);
   }
 
   switchStreamSource(source) {
@@ -2598,41 +2585,40 @@ class NetflixApp {
     const season = this.activeSeason || 1;
     const episode = this.activeEpisode || 1;
 
-    if (source === 'netmirror') {
-      this.cinemaPlayer.classList.add('embed-active');
-      this.cinemaVideo.pause();
-      this.cinemaVideo.style.display = 'none';
-      if (this.cinemaEmbedFrame) {
-        this.cinemaEmbedFrame.style.display = 'block';
-        if (isTV) {
-          this.cinemaEmbedFrame.src = `https://vidlink.pro/tv/${tmdbId}/${season}/${episode}?autoplay=true`;
-        } else {
-          this.cinemaEmbedFrame.src = `https://vidlink.pro/movie/${tmdbId}?autoplay=true`;
-        }
+    // Ensure native video element is stopped and detached
+    this.cinemaVideo.pause();
+    this.cinemaVideo.removeAttribute('src');
+    this.cinemaVideo.load();
+    this.cinemaVideo.style.display = 'none';
+
+    this.cinemaPlayer.classList.add('embed-active');
+    if (this.cinemaEmbedFrame) {
+      this.cinemaEmbedFrame.style.display = 'block';
+      let streamUrl = '';
+      let serverLabel = '';
+
+      if (source === 'vidsrc') {
+        serverLabel = 'Server 2 (AutoStream VIP)';
+        streamUrl = isTV
+          ? `https://autoembed.co/tv/tmdb/${tmdbId}-${season}-${episode}`
+          : `https://autoembed.co/movie/tmdb/${tmdbId}`;
+      } else if (source === 'embedpro') {
+        serverLabel = 'Server 3 (2Embed VIP)';
+        streamUrl = isTV
+          ? `https://2embed.skin/embedtv/${tmdbId}&s=${season}&e=${episode}`
+          : `https://2embed.skin/embed/${tmdbId}`;
+      } else {
+        // Default: Server 1 (Ultra HD Fast Stream)
+        serverLabel = 'Server 1 (Ultra HD)';
+        streamUrl = isTV
+          ? `https://vidlink.pro/tv/${tmdbId}/${season}/${episode}?primaryColor=e50914&secondaryColor=ffffff&iconColor=e50914`
+          : `https://vidlink.pro/movie/${tmdbId}?primaryColor=e50914&secondaryColor=ffffff&iconColor=e50914`;
       }
-      this.showCinemaOsd('🎬', `Streaming Full ${isTV ? 'Episode' : 'Movie'}: ${movie.title} (NetMirror HD)`);
-    } else if (source === 'vidsrc') {
-      this.cinemaPlayer.classList.add('embed-active');
-      this.cinemaVideo.pause();
-      this.cinemaVideo.style.display = 'none';
-      if (this.cinemaEmbedFrame) {
-        this.cinemaEmbedFrame.style.display = 'block';
-        if (isTV) {
-          this.cinemaEmbedFrame.src = `https://vidsrc.pm/embed/tv/${tmdbId}/${season}/${episode}`;
-        } else {
-          this.cinemaEmbedFrame.src = `https://vidsrc.pm/embed/movie/${tmdbId}`;
-        }
+
+      if (this.cinemaEmbedFrame.src !== streamUrl) {
+        this.cinemaEmbedFrame.src = streamUrl;
       }
-      this.showCinemaOsd('⚡', `Server 2 (VidSrc VIP): ${movie.title}`);
-    } else if (source === 'cinema') {
-      this.cinemaPlayer.classList.remove('embed-active');
-      if (this.cinemaEmbedFrame) {
-        this.cinemaEmbedFrame.style.display = 'none';
-        this.cinemaEmbedFrame.src = '';
-      }
-      this.cinemaVideo.style.display = 'block';
-      this.cinemaVideo.play().catch(() => {});
-      this.showCinemaOsd('🔥', `Cinema 4K Lab: ${movie.title} (Dolby Atmos & Subtitles)`);
+      this.showCinemaOsd('🎬', `${movie.title} • ${serverLabel}`);
     }
   }
 
@@ -2654,27 +2640,15 @@ class NetflixApp {
       });
     }
 
-    if (this.activeStreamSource === 'netmirror' || this.activeStreamSource === 'vidsrc') {
-      this.switchStreamSource(this.activeStreamSource);
-    } else {
-      this.cinemaVideo.currentTime = 0;
-      this.cinemaVideo.play().catch(() => {});
-      this.showCinemaOsd('▶', `Playing Episode ${epNum}`);
-    }
+    this.switchStreamSource(this.activeStreamSource || 'netmirror');
   }
 
   closeCinemaPlayer() {
     if (!this.cinemaPlayer) return;
     clearInterval(this.playbackThrottleTimer);
     if (this.activeCinemaMovie) {
-      if (this.activeStreamSource === 'cinema' && this.cinemaVideo.duration > 0) {
-        const ct = this.cinemaVideo.currentTime;
-        const dur = this.cinemaVideo.duration;
-        const isCompleted = ct >= dur * 0.95 ? 1 : 0;
-        this.recordPlaybackProgress(this.activeCinemaMovie.id, ct, dur, isCompleted);
-      } else {
-        this.recordPlaybackProgress(this.activeCinemaMovie.id, 120, 3600, 0);
-      }
+      const prog = this.activeCinemaMovieProgress || 120;
+      this.recordPlaybackProgress(this.activeCinemaMovie.id, prog, 7200, 0);
       this.fetchContinueWatching();
     }
     if (this.cinemaEmbedFrame) {
@@ -2683,6 +2657,8 @@ class NetflixApp {
     }
     this.cinemaPlayer.classList.remove('embed-active', 'active', 'idle');
     this.cinemaVideo.pause();
+    this.cinemaVideo.removeAttribute('src');
+    this.cinemaVideo.load();
     this.cinemaVideo.currentTime = 0;
     if (this.cinemaEpisodesDrawer) this.cinemaEpisodesDrawer.classList.remove('open');
     document.body.style.overflow = '';
