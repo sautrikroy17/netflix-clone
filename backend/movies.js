@@ -2115,6 +2115,70 @@ const movies = [
     "isOriginal": false,
     "tmdbId": 1071489,
     "youtubeTrailerId": "2U8GgL9x8qA"
+  },
+  {
+    "id": "drishyam",
+    "title": "Drishyam",
+    "type": "Movie",
+    "overview": "When the son of an influential IG goes missing, a desperate father uses his wits and knowledge gained from cinema to protect his family from relentless interrogation.",
+    "backdrop": "https://image.tmdb.org/t/p/w1280/lprsAHkwMxk2iC6VZxNmV0H7g1t.jpg",
+    "poster": "https://image.tmdb.org/t/p/w780/49WJfeN0moxb9IPfGn8AIqMGskD.jpg",
+    "matchScore": 98,
+    "year": "2015",
+    "ageRating": "U/A 16+",
+    "duration": "2h 43m",
+    "quality": "4K Ultra HD",
+    "audio": "Dolby Atmos",
+    "genres": [
+      "Crime",
+      "Mystery",
+      "Thriller",
+      "Indian Mega Blockbusters"
+    ],
+    "cast": [
+      "Ajay Devgn",
+      "Tabu",
+      "Shriya Saran",
+      "Ishita Dutta"
+    ],
+    "creator": "Nishikant Kamat",
+    "category": "trending",
+    "isOriginal": false,
+    "top10Rank": 3,
+    "tmdbId": 353491,
+    "youtubeTrailerId": "AuuX2j14NBg"
+  },
+  {
+    "id": "drishyam-2",
+    "title": "Drishyam 2",
+    "type": "Movie",
+    "overview": "Seven years after the sensational case, Vijay Salgaonkar and his family find themselves in the crosshairs of a new IG determined to reopen the investigation.",
+    "backdrop": "https://image.tmdb.org/t/p/w1280/5LtSjMNw6j3LkG29Oa4O0iY5U8.jpg",
+    "poster": "https://image.tmdb.org/t/p/w780/jFt1gS4BGHlK8xt76Y81Alp4dbt.jpg",
+    "matchScore": 97,
+    "year": "2022",
+    "ageRating": "U/A 16+",
+    "duration": "2h 20m",
+    "quality": "4K Ultra HD",
+    "audio": "Dolby Atmos",
+    "genres": [
+      "Crime",
+      "Mystery",
+      "Thriller",
+      "Indian Mega Blockbusters"
+    ],
+    "cast": [
+      "Ajay Devgn",
+      "Akshaye Khanna",
+      "Tabu",
+      "Shriya Saran"
+    ],
+    "creator": "Abhishek Pathak",
+    "category": "trending",
+    "isOriginal": false,
+    "top10Rank": 4,
+    "tmdbId": 979924,
+    "youtubeTrailerId": "cxA2y9Tgl7o"
   }
 ];
 

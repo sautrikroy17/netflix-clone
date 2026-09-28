@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <defs>
+    <linearGradient id="kidsGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF5722"/>
+      <stop offset="50%" stop-color="#FF9800"/>
+      <stop offset="100%" stop-color="#FFEB3B"/>
+    </linearGradient>
+  </defs>
+  <rect width="120" height="120" rx="8" fill="url(#kidsGrad)"/>
+  <!-- Star / Playful Eyes -->
+  <circle cx="40" cy="46" r="10" fill="#212121"/>
+  <circle cx="43" cy="43" r="3" fill="#FFFFFF"/>
+  <circle cx="80" cy="46" r="10" fill="#212121"/>
+  <circle cx="83" cy="43" r="3" fill="#FFFFFF"/>
+  <!-- Big Happy Open Smile -->
+  <path d="M 34 68 C 42 98, 78 98, 86 68 Z" fill="#212121"/>
+  <path d="M 46 84 C 54 94, 66 94, 74 84 Z" fill="#E91E63"/>
+</svg>

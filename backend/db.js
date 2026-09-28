@@ -22,7 +22,7 @@ db.exec(`
     name TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL COLLATE NOCASE,
     password_hash TEXT NOT NULL,
-    avatar TEXT DEFAULT 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
+    avatar TEXT DEFAULT '/assets/avatars/avatar-red.svg',
     plan TEXT DEFAULT 'Premium Ultra HD',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
@@ -162,7 +162,7 @@ if (!checkProfiles || checkProfiles.length === 0) {
   addProfile.run(
     demoUserId,
     'Sautrik',
-    'https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png',
+    '/assets/avatars/avatar-red.svg',
     0,
     JSON.stringify(['Trending', 'Action', 'Sci-Fi', 'Indian Mega Blockbusters'])
   );
@@ -170,7 +170,7 @@ if (!checkProfiles || checkProfiles.length === 0) {
   addProfile.run(
     demoUserId,
     'Kids',
-    'https://occ-0-2794-2219.1.nflxso.net/dnm/api/v6/vN7bi_My87NPKvsBoib006Llxzg/AAAABfjwdaqrqnvWi0qcfMlW0hOWAA2YKukqGE4vd5vDxZGCBm2CQGfkZWGxD77dStW69G09918.png?r=fcd',
+    '/assets/avatars/avatar-kids.svg',
     1,
     JSON.stringify(['Animation', 'Family', 'Anime', 'Adventure'])
   );
@@ -178,7 +178,7 @@ if (!checkProfiles || checkProfiles.length === 0) {
   addProfile.run(
     demoUserId,
     'Cinema Buff',
-    'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
+    '/assets/avatars/avatar-blue.svg',
     0,
     JSON.stringify(['Crime Thriller', 'Mind-Bending', 'Period Piece', 'Drama'])
   );

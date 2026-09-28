@@ -386,19 +386,69 @@
 .card-badge-bottom {
   position: absolute;
   bottom: 8px;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 8px;
   background: #e50914;
   color: #fff;
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   font-weight: 800;
-  padding: 3px 9px;
+  padding: 2px 7px;
   border-radius: 2px;
   white-space: nowrap;
   z-index: 5;
   box-shadow: 0 2px 8px rgba(0,0,0,0.85);
-  letter-spacing: 0.3px;
+  letter-spacing: 0.2px;
   pointer-events: none;
+}
+
+/* Card Title Overlay for Search & Feed */
+.card-title-overlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 30px 10px 8px;
+  background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.45) 40%, rgba(0, 0, 0, 0.92) 100%);
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+  z-index: 4;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 4px;
+  transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.movie-card:hover .card-title-overlay {
+  opacity: 0;
+}
+
+.card-title-text {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 0.2px;
+  line-height: 1.15;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.95), 0 2px 10px rgba(0, 0, 0, 0.85);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+}
+
+.card-badge-pill {
+  display: inline-flex;
+  align-self: flex-start;
+  background: #e50914;
+  color: #ffffff;
+  font-size: 0.62rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 2px;
+  letter-spacing: 0.2px;
+  text-transform: uppercase;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.85);
 }
 
 /* Continue Watching Card Progress Bar */
@@ -999,27 +1049,51 @@
 ══════════════════════════════════════════════════════════════ */
 .top10-card {
   position: relative;
-  flex: 0 0 230px;
+  flex: 0 0 240px;
+  width: 240px;
+  height: 205px;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
+  justify-content: flex-end;
   cursor: pointer;
-  transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
   user-select: none;
+  transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  margin-right: 12px;
 }
 
 .top10-number,
 .top10-rank {
+  position: absolute;
+  left: 0;
+  bottom: -15px;
+  width: 125px;
+  height: 100%;
   font-family: var(--netflix-headline-font, 'Bebas Neue', 'Impact', sans-serif);
-  font-size: 13rem;
-  line-height: 0.75;
+  font-size: 15.5rem;
+  line-height: 0.76;
   font-weight: 900;
   color: #000000;
   -webkit-text-stroke: 4.5px #595959;
-  letter-spacing: -22px;
-  margin-right: -44px;
+  letter-spacing: -6px;
   z-index: 1;
   pointer-events: none;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
   transition: -webkit-text-stroke 0.25s ease;
+}
+
+.top10-number.rank-1,
+.top10-rank.rank-1 {
+  left: 10px;
+  width: 110px;
+}
+
+.top10-number.rank-10,
+.top10-rank.rank-10 {
+  left: -12px;
+  width: 140px;
+  letter-spacing: -14px;
 }
 
 .top10-card:hover .top10-number,
@@ -1030,13 +1104,14 @@
 .top10-poster-wrap,
 .top10-poster {
   position: relative;
-  width: 135px;
-  height: 195px;
+  width: 142px;
+  height: 200px;
   border-radius: 4px;
   overflow: hidden;
   box-shadow: 0 6px 22px rgba(0, 0, 0, 0.9);
   transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.3s ease;
   z-index: 2;
+  margin-left: auto;
 }
 
 .top10-card:hover .top10-poster-wrap {
@@ -1055,14 +1130,15 @@
   font-size: 0.62rem;
   font-weight: 800;
   text-align: center;
-  padding: 2.5px 0;
+  padding: 3px 0;
   letter-spacing: 0.3px;
   text-transform: uppercase;
   z-index: 4;
 }
 
 .top10-poster-wrap img,
-.top10-poster img {
+.top10-poster img,
+.top10-poster-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -1438,6 +1514,98 @@ dialog#movie-detail-dialog::backdrop {
   border: none;
   background: #000;
   z-index: 2;
+}
+
+/* Persistent Floating Cinema Back Button (Always visible & clickable in embed mode) */
+.cinema-floating-back-btn {
+  position: absolute;
+  top: 24px;
+  left: 28px;
+  z-index: 9999999 !important;
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  background: rgba(20, 20, 20, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 8px 18px 8px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.7);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: auto !important;
+  opacity: 0.92;
+}
+
+.cinema-floating-back-btn:hover {
+  background: rgba(229, 9, 20, 0.95);
+  border-color: #e50914;
+  color: #ffffff;
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(229, 9, 20, 0.6);
+  opacity: 1 !important;
+}
+
+#netflix-cinema-player.idle .cinema-floating-back-btn {
+  opacity: 0.55;
+}
+
+#netflix-cinema-player.idle .cinema-floating-back-btn:hover {
+  opacity: 1 !important;
+}
+
+/* Search Results Back Button */
+.search-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, transform 0.15s;
+}
+
+.search-back-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: #ffffff;
+  transform: translateX(-2px);
+}
+
+/* Screen Back Button (e.g. Profiles Switcher) */
+.screen-back-btn {
+  position: absolute;
+  top: 32px;
+  left: 40px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+  z-index: 2010;
+}
+
+.screen-back-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: #ffffff;
 }
 
 /* When embed is active, adjust bottom controls bar */

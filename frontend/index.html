@@ -29,6 +29,15 @@
 
   <!-- Dedicated Netflix Fullscreen Cinema Player -->
   <div id="netflix-cinema-player">
+    <!-- Persistent Floating Back Button (Always visible & clickable even during embed/iframe playback) -->
+    <button class="cinema-floating-back-btn" id="cinema-floating-back-btn" title="Back to Netflix Browse">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+      </svg>
+      <span>Back</span>
+    </button>
+
     <iframe id="cinema-embed-frame" class="cinema-embed-frame" src="" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="origin" loading="eager" style="display:none; width:100%; height:100%; border:none; position:absolute; top:0; left:0; z-index:2; background:#000;"></iframe>
     <video id="cinema-video" class="cinema-video-element" playsinline preload="none"></video>
 
@@ -298,12 +307,12 @@
       <div class="profile-avatar-picker-section">
         <label style="font-size:0.9rem; color:#aaa; margin-bottom:10px; display:block;">Choose Profile Icon</label>
         <div class="avatar-options-grid" id="avatar-options-grid">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" class="avatar-option selected" data-avatar-url="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" alt="Classic Red Smile">
-          <img src="https://occ-0-2794-2219.1.nflxso.net/dnm/api/v6/vN7bi_My87NPKvsBoib006Llxzg/AAAABfjwdaqrqnvWi0qcfMlW0hOWAA2YKukqGE4vd5vDxZGCBm2CQGfkZWGxD77dStW69G09918.png?r=fcd" class="avatar-option" data-avatar-url="https://occ-0-2794-2219.1.nflxso.net/dnm/api/v6/vN7bi_My87NPKvsBoib006Llxzg/AAAABfjwdaqrqnvWi0qcfMlW0hOWAA2YKukqGE4vd5vDxZGCBm2CQGfkZWGxD77dStW69G09918.png?r=fcd" alt="Kids Colorful">
-          <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80" class="avatar-option" data-avatar-url="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80" alt="Avatar Blue">
-          <img src="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=150&q=80" class="avatar-option" data-avatar-url="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=150&q=80" alt="Avatar Yellow">
-          <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=150&q=80" class="avatar-option" data-avatar-url="https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=150&q=80" alt="Avatar Purple">
-          <img src="https://images.unsplash.com/photo-1628157582853-a796fa650a6a?auto=format&fit=crop&w=150&q=80" class="avatar-option" data-avatar-url="https://images.unsplash.com/photo-1628157582853-a796fa650a6a?auto=format&fit=crop&w=150&q=80" alt="Avatar Green">
+          <img src="/assets/avatars/avatar-red.svg" class="avatar-option selected" data-avatar-url="/assets/avatars/avatar-red.svg" alt="Classic Red Smile">
+          <img src="/assets/avatars/avatar-kids.svg" class="avatar-option" data-avatar-url="/assets/avatars/avatar-kids.svg" alt="Kids Colorful">
+          <img src="/assets/avatars/avatar-blue.svg" class="avatar-option" data-avatar-url="/assets/avatars/avatar-blue.svg" alt="Avatar Blue">
+          <img src="/assets/avatars/avatar-yellow.svg" class="avatar-option" data-avatar-url="/assets/avatars/avatar-yellow.svg" alt="Avatar Yellow">
+          <img src="/assets/avatars/avatar-purple.svg" class="avatar-option" data-avatar-url="/assets/avatars/avatar-purple.svg" alt="Avatar Purple">
+          <img src="/assets/avatars/avatar-green.svg" class="avatar-option" data-avatar-url="/assets/avatars/avatar-green.svg" alt="Avatar Green">
         </div>
       </div>
       <div class="account-form-row">

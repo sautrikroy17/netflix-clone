@@ -118,7 +118,14 @@ class NetflixApp {
       const res = await fetch('/api/profiles');
       if (res.ok) {
         const data = await res.json();
-        this.profiles = data.profiles || [];
+        const rawProfiles = data.profiles || [];
+        this.profiles = rawProfiles.map(p => {
+          let av = p.avatar;
+          if (!av || av.includes('wikimedia.org') || av.includes('nflxso.net') || av.includes('unsplash.com')) {
+            av = p.is_kids ? '/assets/avatars/avatar-kids.svg' : '/assets/avatars/avatar-red.svg';
+          }
+          return { ...p, avatar: av };
+        });
         const savedId = localStorage.getItem('netflix_active_profile_id');
         const match = this.profiles.find(p => p.id == savedId);
         this.activeProfile = match || this.profiles[0] || null;
@@ -145,17 +152,27 @@ class NetflixApp {
 
   async createProfile(name, avatar, isKids, favoriteGenres) {
     try {
+      let chosenAvatar = avatar;
+      if (!chosenAvatar || chosenAvatar.includes('wikimedia.org') || chosenAvatar.includes('nflxso.net') || chosenAvatar.includes('unsplash.com')) {
+        chosenAvatar = isKids ? '/assets/avatars/avatar-kids.svg' : '/assets/avatars/avatar-red.svg';
+      }
       const res = await fetch('/api/profiles', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, avatar, isKids, favoriteGenres })
+        body: JSON.stringify({ name, avatar: chosenAvatar, isKids, favoriteGenres })
       });
       if (res.ok) {
         const data = await res.json();
-        this.profiles.push(data.profile);
-        this.showToast(`Profile "${name}" created successfully!`, 'success');
-        await this.switchProfile(data.profile.id);
-        return true;
+        const prof = data.profile;
+        if (prof) {
+          if (!prof.avatar || prof.avatar.includes('wikimedia.org') || prof.avatar.includes('nflxso.net') || prof.avatar.includes('unsplash.com')) {
+            prof.avatar = prof.is_kids ? '/assets/avatars/avatar-kids.svg' : '/assets/avatars/avatar-red.svg';
+          }
+          this.profiles.push(prof);
+          this.showToast(`Profile "${name}" created successfully!`, 'success');
+          await this.switchProfile(prof.id);
+          return true;
+        }
       }
     } catch (e) {
       this.showToast('Failed to create profile', 'error');
@@ -935,6 +952,67 @@ class NetflixApp {
     }
   }
 
+  // 3b. "Who's Watching?" Profiles Selection Screen
+  renderProfilesScreen() {
+    return `
+      <div class="profiles-screen-container">
+        <button class="screen-back-btn" id="profiles-back-btn" title="Back to Browse">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          <span>Back to Browse</span>
+        </button>
+
+        <h1 class="profiles-screen-title">Who's watching?</h1>
+        <div class="profiles-grid">
+          ${this.profiles.map(p => `
+            <div class="profile-tile" data-select-profile-id="${p.id}">
+              <div class="profile-tile-avatar">
+                <img src="${p.avatar || '/assets/avatars/avatar-red.svg'}" alt="${p.name}" onerror="this.onerror=null; this.src='${p.is_kids ? '/assets/avatars/avatar-kids.svg' : '/assets/avatars/avatar-red.svg'}';">
+              </div>
+              <div class="profile-tile-name">${p.name}${p.is_kids ? ' <span style="font-size:0.8rem; color:#f5a623;">(Kids)</span>' : ''}</div>
+            </div>
+          `).join('')}
+          <div class="profile-tile" id="screen-add-profile-btn">
+            <div class="profile-tile-avatar profile-tile-add">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            </div>
+            <div class="profile-tile-name">Add Profile</div>
+          </div>
+        </div>
+        <button class="btn-manage-profiles" id="btn-manage-profiles">Manage Profiles</button>
+      </div>
+    `;
+  }
+
+  attachProfilesScreenEvents() {
+    const backBtn = document.getElementById('profiles-back-btn');
+    if (backBtn) {
+      backBtn.addEventListener('click', () => this.navigate('/browse'));
+    }
+
+    document.querySelectorAll('[data-select-profile-id]').forEach(tile => {
+      tile.addEventListener('click', () => {
+        const id = tile.getAttribute('data-select-profile-id');
+        this.switchProfile(id);
+      });
+    });
+
+    const addBtn = document.getElementById('screen-add-profile-btn');
+    const profileDialog = document.getElementById('profile-modal-dialog');
+    if (addBtn && profileDialog) {
+      addBtn.addEventListener('click', () => {
+        profileDialog.showModal();
+      });
+    }
+
+    const manageBtn = document.getElementById('btn-manage-profiles');
+    if (manageBtn) {
+      manageBtn.addEventListener('click', () => {
+        const accountDialog = document.getElementById('account-modal-dialog');
+        if (accountDialog) accountDialog.showModal();
+      });
+    }
+  }
+
   // 4. Authenticated Browse Dashboard
   renderBrowseDashboard() {
     const featured = this.movies[0] || {};
@@ -975,11 +1053,13 @@ class NetflixApp {
       );
     }
 
-    // Category lists for rows
-    const topShows = this.movies.filter(m => m.type === 'TV Series' && (m.top10Rank || ['stranger-things','squid-game','wednesday','money-heist','arcane','peaky-blinders','breaking-bad','dark','narcos','better-call-saul'].includes(m.id))).slice(0, 10);
+    // Category lists for rows with curated Netflix ranking
+    const topShowIds = ['stranger-things','squid-game','wednesday','money-heist','arcane','peaky-blinders','breaking-bad','dark','narcos','better-call-saul'];
+    const topShows = topShowIds.map(id => this.movies.find(m => m.id === id)).filter(Boolean);
     const newOnNetflix = this.movies.filter(m => m.year === '2024' || m.year === '2023');
     const yourNextWatch = this.movies.filter(m => m.matchScore >= 95).slice(0, 10);
-    const topMovies = this.movies.filter(m => m.type === 'Movie' && (m.top10Rank || ['rrr','leo','jawan','animal','kalki-2898-ad','kgf-chapter-2','interstellar','inception','the-dark-knight','oppenheimer'].includes(m.id))).slice(0, 10);
+    const topMovieIds = ['jawan', 'animal', 'rrr', 'kalki-2898-ad', 'leo', 'kgf-chapter-2', 'salaar', 'interstellar', 'inception', 'the-dark-knight'];
+    const topMovies = topMovieIds.map(id => this.movies.find(m => m.id === id)).filter(Boolean);
     const topPicks = this.movies.filter(m => ['narcos', 'interstellar', 'cyberpunk-edgerunners', 'dune-part-two', 'all-of-us-are-dead', 'the-witcher'].includes(m.id) || m.matchScore >= 96);
     const usThrillers = this.movies.filter(m => m.genres.some(g => ['crime', 'thriller', 'mystery'].some(kw => g.toLowerCase().includes(kw))));
     const grittyShows = this.movies.filter(m => m.type === 'TV Series' && (m.genres.some(g => ['crime', 'drama', 'action'].some(kw => g.toLowerCase().includes(kw))) || ['breaking-bad', 'better-call-saul', 'narcos', 'peaky-blinders', 'dark'].includes(m.id)));
@@ -987,7 +1067,10 @@ class NetflixApp {
     const scifi = this.movies.filter(m => m.genres.some(g => g.toLowerCase().includes('sci-fi') || g.toLowerCase().includes('cyberpunk') || g.toLowerCase().includes('multiverse')));
     const anime = this.movies.filter(m => m.genres.some(g => g.toLowerCase().includes('anime') || g.toLowerCase().includes('animation')));
 
-    const activeAvatar = this.activeProfile?.avatar || 'https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png';
+    let activeAvatar = this.activeProfile?.avatar;
+    if (!activeAvatar || activeAvatar.includes('wikimedia.org') || activeAvatar.includes('nflxso.net') || activeAvatar.includes('unsplash.com')) {
+      activeAvatar = this.activeProfile?.is_kids ? '/assets/avatars/avatar-kids.svg' : '/assets/avatars/avatar-red.svg';
+    }
     const activeProfileName = this.activeProfile?.name || this.currentUser.name || 'Home';
 
     return `
@@ -1070,7 +1153,7 @@ class NetflixApp {
             <!-- Profile Menu Dropdown with Switcher -->
             <div class="profile-menu-wrapper" id="profile-menu-wrapper">
               <div class="profile-avatar-btn">
-                <img src="${activeAvatar}" alt="Profile Avatar" class="profile-img">
+                <img src="${activeAvatar}" alt="Profile Avatar" class="profile-img" onerror="this.onerror=null; this.src='/assets/avatars/avatar-red.svg';">
                 <span class="profile-caret">▼</span>
               </div>
               <div class="profile-dropdown-menu" id="profile-dropdown">
@@ -1084,7 +1167,7 @@ class NetflixApp {
                   <div style="padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.1); display:flex; flex-direction:column; gap:4px;">
                     ${this.profiles.map(p => `
                       <div class="profile-switch-item ${this.activeProfile?.id === p.id ? 'active' : ''}" data-switch-profile-id="${p.id}" style="display:flex; align-items:center; gap:10px; padding:6px 14px; cursor:pointer; font-size:0.88rem; transition:background 0.15s ease;">
-                        <img src="${p.avatar}" alt="${p.name}" style="width:26px; height:26px; border-radius:4px; object-fit:cover;">
+                        <img src="${p.avatar || '/assets/avatars/avatar-red.svg'}" alt="${p.name}" style="width:26px; height:26px; border-radius:4px; object-fit:cover;" onerror="this.onerror=null; this.src='${p.is_kids ? '/assets/avatars/avatar-kids.svg' : '/assets/avatars/avatar-red.svg'}';">
                         <span style="flex:1;">${p.name}${p.is_kids ? ' <span style="font-size:0.75rem; color:#f5a623;">(Kids)</span>' : ''}</span>
                         ${this.activeProfile?.id === p.id ? '<span style="color:var(--netflix-red); font-size:0.8rem;">●</span>' : ''}
                       </div>
@@ -1133,13 +1216,30 @@ class NetflixApp {
           </div>
         ` : ''}
 
-        <!-- Search Results View -->
+        <!-- Search Results View with Back Button -->
         ${this.searchQuery ? `
-          <div style="padding: 120px 4% 40px;">
-            <h2 style="font-size: 1.5rem; margin-bottom: 20px;">Search results for "${this.searchQuery}" (${displayedMovies.length} found)</h2>
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px;">
-              ${displayedMovies.map(m => this.renderMovieCard(m)).join('')}
+          <div class="search-results-container" style="padding: 110px 4% 40px; min-height: 80vh;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
+              <div style="display:flex; align-items:center; gap: 16px;">
+                <button class="search-back-btn" id="search-back-btn" title="Back to Browse">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                  <span>Back to Browse</span>
+                </button>
+                <h2 style="font-size: 1.4rem; font-weight: 700; margin: 0; color: #fff;">
+                  Search results for "${this.searchQuery}" <span style="font-size: 0.95rem; font-weight: normal; color: #888;">(${displayedMovies.length} found)</span>
+                </h2>
+              </div>
             </div>
+            ${displayedMovies.length > 0 ? `
+              <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px;">
+                ${displayedMovies.map(m => this.renderMovieCard(m)).join('')}
+              </div>
+            ` : `
+              <div style="text-align: center; padding: 60px 20px; color: #888;">
+                <p style="font-size: 1.2rem; margin-bottom: 12px; color: #fff;">No titles found matching "${this.searchQuery}".</p>
+                <p style="font-size: 0.95rem;">Try searching for movie names like "Drishyam", "Jawan", "Stranger Things", or "Interstellar".</p>
+              </div>
+            `}
           </div>
         ` : `
           <!-- Hero Billboard Spotlight -->
@@ -1206,7 +1306,6 @@ class NetflixApp {
                 <div class="category-header">
                   <h2 class="category-title">
                     <span>Continue Watching for ${activeProfileName}</span>
-                    <span style="font-size:0.8rem; font-weight:normal; color:#888;">(Resumes at saved timestamp)</span>
                   </h2>
                 </div>
                 <button class="slider-arrow slider-arrow-left" aria-label="Previous">‹</button>
@@ -1222,8 +1321,7 @@ class NetflixApp {
               <div class="category-row">
                 <div class="category-header">
                   <h2 class="category-title">
-                    <span>My List &bull; Saved to Database</span>
-                    <span style="font-size:0.8rem; font-weight:normal; color:#888;">(${this.watchlist.length} items)</span>
+                    <span>My List</span>
                   </h2>
                 </div>
                 <button class="slider-arrow slider-arrow-left" aria-label="Previous">‹</button>
@@ -1242,28 +1340,34 @@ class NetflixApp {
 
             ${this.activeCategory === 'tv' || this.activeCategory === 'movies' ? `
               <div style="padding: 20px 4% 30px;">
-                <h2 style="font-size: 1.8rem; margin-bottom: 20px; font-weight: 700;">
-                  ${this.activeCategory === 'tv' ? '📺 TV Shows & Global Series' : '🎬 Hollywood & Indian Blockbuster Movies'}
-                  <span style="font-size: 0.9rem; font-weight: normal; color: #888;">(${displayedMovies.length} titles${this.activeGenreFilter !== 'all' ? ' &bull; ' + this.activeGenreFilter : ''})</span>
-                </h2>
+                <div style="display:flex; align-items:center; gap:16px; margin-bottom: 20px; flex-wrap:wrap;">
+                  <button class="search-back-btn" data-category="all" data-route="/browse">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                    <span>Back to Home</span>
+                  </button>
+                  <h2 style="font-size: 1.6rem; font-weight: 700; margin: 0; color: #fff;">
+                    ${this.activeCategory === 'tv' ? 'TV Shows & Global Series' : 'Hollywood & Indian Blockbuster Movies'}
+                    <span style="font-size: 0.9rem; font-weight: normal; color: #888;">(${displayedMovies.length} titles${this.activeGenreFilter !== 'all' ? ' &bull; ' + this.activeGenreFilter : ''})</span>
+                  </h2>
+                </div>
                 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px;">
                   ${displayedMovies.map(m => this.renderMovieCard(m)).join('')}
                 </div>
               </div>
             ` : (this.activeCategory !== 'mylist' && this.activeCategory !== 'languages' ? `
-              <!-- 2. Top 10 Shows in India Today (Screenshot 1 Exact) -->
+              <!-- 2. Top 10 Shows in India Today -->
               <div class="category-row">
                 <div class="category-header">
                   <h2 class="category-title">Top 10 Shows in India Today</h2>
                 </div>
                 <button class="slider-arrow slider-arrow-left" aria-label="Previous">‹</button>
                 <div class="movie-slider">
-                  ${topShows.map(m => this.renderTop10Card(m)).join('')}
+                  ${topShows.map((m, idx) => this.renderTop10Card(m, idx + 1)).join('')}
                 </div>
                 <button class="slider-arrow slider-arrow-right" aria-label="Next">›</button>
               </div>
 
-              <!-- 3. New on Netflix (Screenshot 1 Exact) -->
+              <!-- 3. New on Netflix -->
               <div class="category-row">
                 <div class="category-header">
                   <h2 class="category-title">New on Netflix</h2>
@@ -1275,7 +1379,7 @@ class NetflixApp {
                 <button class="slider-arrow slider-arrow-right" aria-label="Next">›</button>
               </div>
 
-              <!-- 4. Your Next Watch (Screenshot 1 Exact) -->
+              <!-- 4. Your Next Watch -->
               <div class="category-row">
                 <div class="category-header">
                   <h2 class="category-title">Your Next Watch</h2>
@@ -1287,14 +1391,14 @@ class NetflixApp {
                 <button class="slider-arrow slider-arrow-right" aria-label="Next">›</button>
               </div>
 
-              <!-- 5. Top 10 Movies in India Today (Screenshot 2 Exact) -->
+              <!-- 5. Top 10 Movies in India Today (Screenshot 5 Exact) -->
               <div class="category-row">
                 <div class="category-header">
                   <h2 class="category-title">Top 10 Movies in India Today</h2>
                 </div>
                 <button class="slider-arrow slider-arrow-left" aria-label="Previous">‹</button>
                 <div class="movie-slider">
-                  ${topMovies.map(m => this.renderTop10Card(m)).join('')}
+                  ${topMovies.map((m, idx) => this.renderTop10Card(m, idx + 1)).join('')}
                 </div>
                 <button class="slider-arrow slider-arrow-right" aria-label="Next">›</button>
               </div>
@@ -1437,9 +1541,14 @@ class NetflixApp {
     return `
       <div class="movie-card" data-card-id="${movie.id}">
         ${isTop10 ? `<div class="card-badge-top-left">TOP 10</div>` : ''}
-        ${isNewSeason ? `<div class="card-badge-bottom">New Season</div>` : (isRecentlyAdded ? `<div class="card-badge-bottom">Recently added</div>` : (isNewEpisode ? `<div class="card-badge-bottom">New Episode &bull; Watch Now</div>` : ''))}
         
         <img src="${movie.backdrop}" alt="${movie.title}" loading="lazy" class="movie-card-thumb" onerror="this.onerror=null; this.src='https://image.tmdb.org/t/p/w1280/56v2KjBlU4XaOv9rVYEQypROD7P.jpg';">
+
+        <!-- Movie Title & Badge Overlay (Visible on Feed & Search results) -->
+        <div class="card-title-overlay">
+          <div class="card-title-text">${movie.title}</div>
+          ${isNewSeason ? `<div class="card-badge-pill">New Season</div>` : (isRecentlyAdded ? `<div class="card-badge-pill">Recently added</div>` : (isNewEpisode ? `<div class="card-badge-pill">New Episode</div>` : ''))}
+        </div>
 
         <!-- Netflix Popout Hover Preview Card (Screenshot 4 Pixel-Perfect Replica) -->
         <div class="movie-card-hover-box">
@@ -1479,14 +1588,15 @@ class NetflixApp {
     `;
   }
 
-  renderTop10Card(movie) {
+  renderTop10Card(movie, rank = 1) {
     const isInList = this.watchlist.some(m => m.id === movie.id);
+    const finalRank = rank;
 
     return `
       <div class="top10-card" data-card-id="${movie.id}">
-        <div class="top10-number">${movie.top10Rank || 1}</div>
+        <div class="top10-number ${finalRank === 1 ? 'rank-1' : (finalRank === 10 ? 'rank-10' : '')}">${finalRank}</div>
         <div class="top10-poster-wrap">
-          <img src="${movie.poster}" alt="${movie.title}" loading="lazy" class="top10-poster" onerror="this.onerror=null; this.src='https://image.tmdb.org/t/p/w780/49WJfeN0moxb9IPfGn8AIqMGskD.jpg';">
+          <img src="${movie.poster}" alt="${movie.title}" loading="lazy" class="top10-poster-img" onerror="this.onerror=null; this.src='https://image.tmdb.org/t/p/w780/49WJfeN0moxb9IPfGn8AIqMGskD.jpg';">
           <div class="top10-badge-bottom">Recently added</div>
           <div class="top10-overlay-actions">
             <button class="card-btn card-btn-play" data-play-id="${movie.id}" title="Play preview">▶</button>
@@ -2127,8 +2237,22 @@ class NetflixApp {
         const genres = Array.from(document.querySelectorAll('#profile-genres-group input:checked')).map(cb => cb.value);
 
         if (!name) return;
-        await this.createProfile(name, selAvatar, isKids, genres);
+        const finalAvatar = selAvatar.includes('wikimedia') || selAvatar.includes('nflxso') || selAvatar.includes('unsplash')
+          ? (isKids ? '/assets/avatars/avatar-kids.svg' : '/assets/avatars/avatar-red.svg')
+          : selAvatar;
+        await this.createProfile(name, finalAvatar, isKids, genres);
         profileDialog.close();
+      });
+    }
+
+    // Search back button
+    const searchBackBtn = document.getElementById('search-back-btn');
+    if (searchBackBtn) {
+      searchBackBtn.addEventListener('click', () => {
+        this.searchQuery = '';
+        const sInput = document.getElementById('search-input');
+        if (sInput) sInput.value = '';
+        this.navigate('/browse');
       });
     }
   }
@@ -2155,6 +2279,7 @@ class NetflixApp {
     this.cinemaAudioMenu = document.getElementById('cinema-audio-menu');
     this.cinemaSpeedBtn = document.getElementById('cinema-speed-btn');
     this.cinemaBackBtn = document.getElementById('cinema-back-btn');
+    this.cinemaFloatingBackBtn = document.getElementById('cinema-floating-back-btn');
     this.cinemaForwardBtn = document.getElementById('cinema-forward-btn');
     this.cinemaRewindBtn = document.getElementById('cinema-rewind-btn');
     this.cinemaFullscreenBtn = document.getElementById('cinema-fullscreen-btn');
@@ -2189,8 +2314,16 @@ class NetflixApp {
     this.cinemaPlayBtn.addEventListener('click', () => this.toggleCinemaPlay());
     this.cinemaVideo.addEventListener('click', () => this.toggleCinemaPlay());
 
-    // Back button
-    this.cinemaBackBtn.addEventListener('click', () => this.closeCinemaPlayer());
+    // Back button (both top-bar and floating persistent button)
+    if (this.cinemaBackBtn) {
+      this.cinemaBackBtn.addEventListener('click', () => this.closeCinemaPlayer());
+    }
+    if (this.cinemaFloatingBackBtn) {
+      this.cinemaFloatingBackBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.closeCinemaPlayer();
+      });
+    }
 
     // Episodes Drawer Toggle
     if (this.cinemaEpisodesBtn && this.cinemaEpisodesDrawer) {
