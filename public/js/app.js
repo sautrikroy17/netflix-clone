@@ -1360,7 +1360,7 @@ class NetflixApp {
         const val = e.target.value;
         const cursorPos = e.target.selectionStart;
         this.searchQuery = val;
-        searchDebounce = setTimeout(() => {
+        searchDebounce = setTimeout(async () => {
           this.renderCurrentRoute();
           const refreshedInput = document.getElementById('search-input');
           const refreshedBox = document.getElementById('search-box');
@@ -1369,7 +1369,38 @@ class NetflixApp {
             refreshedInput.focus();
             try { refreshedInput.setSelectionRange(cursorPos, cursorPos); } catch(err) {}
           }
-        }, 100);
+
+          // Live TMDB Global Search in Background
+          if (val.trim().length >= 2) {
+            try {
+              const res = await fetch(`/api/tmdb/search?q=${encodeURIComponent(val.trim())}`);
+              if (res.ok) {
+                const data = await res.json();
+                if (data.results && data.results.length) {
+                  const existingIds = new Set(this.movies.map(m => m.id));
+                  let added = false;
+                  data.results.forEach(tmdbMovie => {
+                    if (!existingIds.has(tmdbMovie.id)) {
+                      this.movies.push(tmdbMovie);
+                      existingIds.add(tmdbMovie.id);
+                      added = true;
+                    }
+                  });
+                  if (added && this.searchQuery === val) {
+                    this.renderCurrentRoute();
+                    const refInp = document.getElementById('search-input');
+                    const refBox = document.getElementById('search-box');
+                    if (refBox) refBox.classList.add('active');
+                    if (refInp) {
+                      refInp.focus();
+                      try { refInp.setSelectionRange(cursorPos, cursorPos); } catch(err) {}
+                    }
+                  }
+                }
+              }
+            } catch (err) {}
+          }
+        }, 120);
       });
 
       if (searchClear) {

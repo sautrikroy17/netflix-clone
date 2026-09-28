@@ -242,6 +242,89 @@ app.get('/api/movies/:id', optionalAuth, (req, res) => {
 });
 
 /* ══════════════════════════════════════════════
+   TMDB LIVE MOVIE & SERIES SERVICE
+   (Enables dynamic global movie streaming access)
+══════════════════════════════════════════════ */
+const TMDB_API_KEY = process.env.TMDB_API_KEY || '2dca580c2a14b55200e784d157207b4d';
+
+function formatTmdbItem(item) {
+  const isTV = item.media_type === 'tv' || (!item.title && !!item.name);
+  const title = item.title || item.name || 'Untitled';
+  const tmdbId = item.id;
+  const matchScore = Math.min(99, Math.max(78, Math.round((item.vote_average || 7.8) * 10)));
+  const year = (item.release_date || item.first_air_date || '2024').substring(0, 4);
+  const backdrop = item.backdrop_path 
+    ? `https://image.tmdb.org/t/p/w1280${item.backdrop_path}` 
+    : (item.poster_path ? `https://image.tmdb.org/t/p/w780${item.poster_path}` : 'https://image.tmdb.org/t/p/w1280/56v2KjBlU4XaOv9rVYEQypROD7P.jpg');
+  const poster = item.poster_path 
+    ? `https://image.tmdb.org/t/p/w780${item.poster_path}` 
+    : backdrop;
+
+  return {
+    id: `tmdb-${tmdbId}`,
+    title,
+    type: isTV ? 'TV Series' : 'Movie',
+    overview: item.overview || 'Streaming in full HD with NetMirror multi-server support.',
+    backdrop,
+    poster,
+    matchScore,
+    year,
+    ageRating: item.adult ? 'A 18+' : 'U/A 16+',
+    duration: isTV ? 'Series' : '2h 15m',
+    quality: '4K Ultra HD',
+    audio: 'Dolby Atmos',
+    genres: ['Trending', isTV ? 'TV Show' : 'Movie'],
+    cast: ['Hollywood / Global Cast'],
+    creator: 'Global Studios',
+    category: 'trending',
+    isOriginal: false,
+    tmdbId,
+    videoUrl: 'https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4'
+  };
+}
+
+// 1. Live Dynamic Search (Searches the entire global TMDB library)
+app.get('/api/tmdb/search', async (req, res) => {
+  const query = req.query.q;
+  if (!query) return res.json({ results: [] });
+
+  try {
+    const tmdbRes = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}&include_adult=false`);
+    if (!tmdbRes.ok) throw new Error('TMDB error');
+    const data = await tmdbRes.json();
+    const formatted = (data.results || [])
+      .filter(item => (item.backdrop_path || item.poster_path) && (item.title || item.name))
+      .slice(0, 18)
+      .map(formatTmdbItem);
+    return res.json({ results: formatted });
+  } catch (err) {
+    const q = query.toLowerCase();
+    const localMatches = movies.filter(m => 
+      m.title.toLowerCase().includes(q) ||
+      m.overview.toLowerCase().includes(q) ||
+      m.genres.some(g => g.toLowerCase().includes(q))
+    );
+    return res.json({ results: localMatches });
+  }
+});
+
+// 2. Live Dynamic Trending Feed
+app.get('/api/tmdb/trending', async (req, res) => {
+  try {
+    const tmdbRes = await fetch(`https://api.themoviedb.org/3/trending/all/week?api_key=${TMDB_API_KEY}`);
+    if (!tmdbRes.ok) throw new Error('TMDB error');
+    const data = await tmdbRes.json();
+    const formatted = (data.results || [])
+      .filter(item => item.backdrop_path && (item.title || item.name))
+      .slice(0, 20)
+      .map(formatTmdbItem);
+    return res.json({ results: formatted });
+  } catch (err) {
+    return res.json({ results: movies.slice(0, 20) });
+  }
+});
+
+/* ══════════════════════════════════════════════
    WATCHLIST (MY LIST) CRUD ENDPOINTS
    (Fulfills mandatory DB persistence requirement)
 ══════════════════════════════════════════════ */
