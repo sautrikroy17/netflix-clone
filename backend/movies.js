@@ -306,7 +306,7 @@ const movies = [
     "top10Rank": 3,
     "videoUrl": "/trailers/wednesday.mp4",
     "backupVideoUrl": "https://archive.org/download/wednesday-season-2-part-2-official-trailer-netflix-720p/Wednesday__Season_2___Part_2_Official_Trailer___Netflix%28720p%29.mp4",
-    "youtubeTrailerId": "Di310BC8zMg",
+    "youtubeTrailerId": "Qa5kFRxBkNw",
     "subtitles": {
       "en": [
         {
@@ -683,7 +683,7 @@ const movies = [
     "category": "scifi",
     "videoUrl": "/trailers/interstellar.mp4",
     "backupVideoUrl": "https://archive.org/download/interstellar-trailer-3/Interstellar_OfficialTrailer3_4K_51_prores.mp4",
-    "youtubeTrailerId": "2Sm7e2v9Mzg",
+    "youtubeTrailerId": "zSWdZVtXT7E",
     "subtitles": {
       "en": [
         {
@@ -1280,7 +1280,7 @@ const movies = [
       ]
     },
     "tmdbId": 99966,
-    "youtubeTrailerId": "IN5TD4VRcMo"
+    "youtubeTrailerId": "IN5TD4VRcSM"
   },
   {
     "id": "dune-2",
@@ -1576,7 +1576,7 @@ const movies = [
     "isOriginal": false,
     "top10Rank": 7,
     "tmdbId": 872906,
-    "youtubeTrailerId": "MWOlnZSnXWE",
+    "youtubeTrailerId": "MWOlnZSnXJo",
     "videoUrl": "https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4",
     "backupVideoUrl": "https://vjs.zencdn.net/v/oceans.mp4",
     "subtitles": {
@@ -1778,7 +1778,7 @@ const movies = [
     "isOriginal": false,
     "top10Rank": 9,
     "tmdbId": 801688,
-    "youtubeTrailerId": "y1-w1pUGuz4",
+    "youtubeTrailerId": "y1-w1kUGuz8",
     "videoUrl": "https://vjs.zencdn.net/v/oceans.mp4",
     "backupVideoUrl": "https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4",
     "subtitles": {
@@ -2275,7 +2275,7 @@ const movies = [
     "isOriginal": true,
     "videoUrl": "/trailers/the-batman.mp4",
     "tmdbId": 63351,
-    "youtubeTrailerId": "xl8hmgMNCBo",
+    "youtubeTrailerId": "RNWAKZzgbp4",
     "subtitles": {
       "en": [
         {
@@ -3879,7 +3879,7 @@ const movies = [
     "category": "action",
     "isOriginal": false,
     "tmdbId": 757837,
-    "youtubeTrailerId": "OKBMCLzuvTW",
+    "youtubeTrailerId": "OKBMCL-frPU",
     "videoUrl": "https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4",
     "backupVideoUrl": "https://media.w3.org/2010/05/sintel/trailer.mp4",
     "subtitles": {
@@ -3978,7 +3978,7 @@ const movies = [
     "category": "drama",
     "isOriginal": false,
     "tmdbId": 1024546,
-    "youtubeTrailerId": "8Mrp_10vWdg",
+    "youtubeTrailerId": "6oKFao0aISA",
     "videoUrl": "https://media.w3.org/2010/05/sintel/trailer.mp4",
     "backupVideoUrl": "https://vjs.zencdn.net/v/oceans.mp4",
     "subtitles": {
@@ -4454,7 +4454,7 @@ const movies = [
     "category": "action",
     "isOriginal": false,
     "tmdbId": 95479,
-    "youtubeTrailerId": "pkZXBNda8kM",
+    "youtubeTrailerId": "VpO6APNqY1c",
     "videoUrl": "https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4",
     "backupVideoUrl": "https://media.w3.org/2010/05/sintel/trailer.mp4",
     "subtitles": {
@@ -4554,7 +4554,7 @@ const movies = [
     "category": "action",
     "isOriginal": false,
     "tmdbId": 76479,
-    "youtubeTrailerId": "06rueu_fh30",
+    "youtubeTrailerId": "tcrNsIaQkb4",
     "videoUrl": "https://vjs.zencdn.net/v/oceans.mp4",
     "backupVideoUrl": "https://media.w3.org/2010/05/sintel/trailer.mp4",
     "subtitles": {
@@ -4642,7 +4642,7 @@ const movies = [
     "category": "scifi",
     "isOriginal": true,
     "tmdbId": 42009,
-    "youtubeTrailerId": "V0Uv6k6p1wE",
+    "youtubeTrailerId": "1iqra1ojEvM",
     "videoUrl": "https://vjs.zencdn.net/v/oceans.mp4",
     "backupVideoUrl": "https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4",
     "subtitles": {
@@ -4742,7 +4742,7 @@ const movies = [
     "category": "drama",
     "isOriginal": false,
     "tmdbId": 1071489,
-    "youtubeTrailerId": "2U8GgL9x8qA",
+    "youtubeTrailerId": "ACKQDAlAfFE",
     "videoUrl": "https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4",
     "backupVideoUrl": "https://media.w3.org/2010/05/sintel/trailer.mp4",
     "subtitles": {
@@ -4844,7 +4844,7 @@ const movies = [
     "isOriginal": false,
     "top10Rank": 3,
     "tmdbId": 353491,
-    "youtubeTrailerId": "AuuX2j14NBg",
+    "youtubeTrailerId": "64xJLmcA2K8",
     "videoUrl": "https://media.w3.org/2010/05/sintel/trailer.mp4",
     "backupVideoUrl": "https://vjs.zencdn.net/v/oceans.mp4",
     "subtitles": {
@@ -5019,4 +5019,5 @@ const movies = [
     }
   }
 ];
+
 module.exports = movies;

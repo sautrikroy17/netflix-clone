@@ -2660,11 +2660,14 @@ class NetflixApp {
       // Show and load YouTube embed
       const ytId = this.activeCinemaMovie.youtubeTrailerId || 'b9EkMc79ZSU';
       if (this.cinemaYtFrame) {
-        this.cinemaYtFrame.src = `https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&controls=1&rel=0&modestbranding=1&enablejsapi=1`;
+        const embedUrl = `https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&controls=1&rel=0&modestbranding=1&playsinline=1&enablejsapi=1`;
+        if (this.cinemaYtFrame.src !== embedUrl) {
+          this.cinemaYtFrame.src = embedUrl;
+        }
         this.cinemaYtFrame.style.display = 'block';
       }
       this.cinemaPlayer.classList.add('embed-active');
-      this.showCinemaOsd('▶', `${this.activeCinemaMovie.title} • YouTube HD Trailer`);
+      this.showCinemaOsd('▶', `${this.activeCinemaMovie.title} • Official Studio Trailer`);
     } else {
       // Native Ultra HD Mode
       if (this.cinemaYtFrame) {
@@ -2686,15 +2689,28 @@ class NetflixApp {
   openCinemaPlayer(movieId, startSecs = 0, episodeNum = null) {
     let movie = this.movies.find(m => m.id === movieId);
     if (!movie && movieId && movieId.startsWith('tmdb-')) {
+      const tmdbId = movieId.replace('tmdb-', '');
+      const cardEl = document.querySelector(`[data-card-id="${movieId}"]`);
       movie = {
         id: movieId,
-        title: 'Featured Title',
+        title: cardEl?.querySelector('.card-hover-title')?.textContent || 'Trending Movie',
         type: 'Movie',
         duration: 'Official Trailer',
         videoUrl: 'https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4',
         youtubeTrailerId: 'b9EkMc79ZSU',
-        subtitles: { en: [{ time: 1, text: '[Cinematic Orchestra Swells]' }] }
+        subtitles: { en: [{ time: 1, text: '[Official Studio Trailer]' }] }
       };
+      // Asynchronously fetch the actual YouTube trailer key for this TMDB item
+      fetch(`/api/trailer/${tmdbId}`)
+        .then(r => r.json())
+        .then(t => {
+          if (t && t.youtubeTrailerId) {
+            movie.youtubeTrailerId = t.youtubeTrailerId;
+            if (this.activeCinemaMovie && this.activeCinemaMovie.id === movieId && this.trailerMode === 'youtube') {
+              this.setTrailerMode('youtube');
+            }
+          }
+        }).catch(() => {});
     }
     if (!movie || !this.cinemaPlayer) return;
 
@@ -2776,8 +2792,11 @@ class NetflixApp {
     this.cinemaPlayer.classList.remove('idle');
     document.body.style.overflow = 'hidden';
 
-    // Start with Native Ultra HD Trailer mode
-    this.setTrailerMode('native');
+    // Does this title have an offline local trailer file?
+    const hasLocalTrailer = ['stranger-things', 'wednesday', 'interstellar', 'the-batman'].includes(movie.id);
+
+    // If it has an actual local trailer, start in native mode; otherwise, play the real official studio trailer via YouTube HD!
+    this.setTrailerMode(hasLocalTrailer ? 'native' : 'youtube');
     if (startSecs && this.cinemaVideo) {
       this.cinemaVideo.currentTime = startSecs;
     }
@@ -2813,7 +2832,12 @@ class NetflixApp {
       });
     }
 
-    if (this.cinemaVideo) {
+    if (this.trailerMode === 'youtube') {
+      const ytId = this.activeCinemaMovie.youtubeTrailerId || 'b9EkMc79ZSU';
+      if (this.cinemaYtFrame) {
+        this.cinemaYtFrame.src = `https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&controls=1&rel=0&modestbranding=1&playsinline=1&enablejsapi=1`;
+      }
+    } else if (this.cinemaVideo) {
       this.cinemaVideo.currentTime = 0;
       this.cinemaVideo.play().catch(() => {});
     }
