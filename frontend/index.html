@@ -29,22 +29,16 @@
 
   <!-- Dedicated Netflix Fullscreen Cinema Player -->
   <div id="netflix-cinema-player">
-    <!-- Persistent Floating Back Button (Always visible & clickable even during embed/iframe playback) -->
-    <button class="cinema-floating-back-btn" id="cinema-floating-back-btn" title="Back to Netflix Browse">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="19" y1="12" x2="5" y2="12"></line>
-        <polyline points="12 19 5 12 12 5"></polyline>
-      </svg>
-      <span>Back</span>
-    </button>
-
     <iframe id="cinema-embed-frame" class="cinema-embed-frame" src="" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="origin" loading="eager" style="display:none; width:100%; height:100%; border:none; position:absolute; top:0; left:0; z-index:2; background:#000;"></iframe>
-    <video id="cinema-video" class="cinema-video-element" playsinline preload="none"></video>
+    <video id="cinema-video" class="cinema-video-element" playsinline preload="auto"></video>
 
     <!-- Top Bar -->
-    <header class="cinema-top-bar">
-      <button class="cinema-back-btn" id="cinema-back-btn" title="Back to Browse">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    <header class="cinema-top-bar" id="cinema-top-bar">
+      <button class="cinema-back-btn" id="cinema-back-btn" title="Back to Netflix Browse">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
         <span>Back</span>
       </button>
 
@@ -57,13 +51,13 @@
 
       <!-- Server / Stream Switcher -->
       <div class="cinema-stream-selector" id="cinema-stream-selector">
-        <button type="button" class="stream-pill active" id="btn-stream-netmirror" data-source="netmirror" title="Server 1 (Ultra HD Fast Stream)">
-          <span class="live-dot"></span> Server 1
+        <button type="button" class="stream-pill active" id="btn-stream-native" data-source="native" title="Fast Ultra HD (Super Smooth Native Engine)">
+          <span class="live-dot"></span> Fast Ultra HD
         </button>
-        <button type="button" class="stream-pill" id="btn-stream-vidsrc" data-source="vidsrc" title="Server 2 (AutoStream VIP Mirror)">
+        <button type="button" class="stream-pill" id="btn-stream-vidsrc" data-source="vidsrc" title="Server 2 (AutoStream Mirror)">
           Server 2
         </button>
-        <button type="button" class="stream-pill" id="btn-stream-embedpro" data-source="embedpro" title="Server 3 (2Embed VIP Pro Mirror)">
+        <button type="button" class="stream-pill" id="btn-stream-embedpro" data-source="embedpro" title="Server 3 (VIP Mirror)">
           Server 3
         </button>
       </div>

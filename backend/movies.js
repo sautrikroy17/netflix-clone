@@ -1,4 +1,4 @@
-// Official Netflix Curated Catalog with 50 Verified 200 OK HD Titles & NetMirror Streams
+// Mock movie database for Netflix clone
 const movies = [
   {
     "id": "stranger-things",
@@ -116,6 +116,48 @@ const movies = [
           "time": 90,
           "text": "[विशाल छाया राक्षस आसमान में गरजता है]"
         }
+      ],
+      "es": [
+        {
+          "time": 2,
+          "text": "[ominous 80s synthesizer hums softly - en español]"
+        },
+        {
+          "time": 7,
+          "text": "DUSTIN: Will, do you see the storm coming?"
+        },
+        {
+          "time": 13,
+          "text": "WILL: I felt it... it didn't feel like a dream."
+        },
+        {
+          "time": 20,
+          "text": "JOYCE: What happened to my boy in the Upside Down?!"
+        },
+        {
+          "time": 28,
+          "text": "VINCENT PRICE: Darkness falls across the land..."
+        },
+        {
+          "time": 38,
+          "text": "[Michael Jackson's Thriller beat erupts in Dolby Atmos - en español]"
+        },
+        {
+          "time": 48,
+          "text": "HOPPER: Whatever is happening, it's spreading from the lab."
+        },
+        {
+          "time": 60,
+          "text": "MIKE: If they find us, they'll never let us leave."
+        },
+        {
+          "time": 75,
+          "text": "ELEVEN: I can fight it. I won't let them hurt you."
+        },
+        {
+          "time": 90,
+          "text": "[giant towering shadow monster rumbles across the sky - en español]"
+        }
       ]
     },
     "tmdbId": 66732
@@ -203,6 +245,32 @@ const movies = [
           "time": 24,
           "text": "[मैदान में गोली की गूंज]"
         }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[playful, chilling carnival chime plays - en español]"
+        },
+        {
+          "time": 5,
+          "text": "FRONT MAN: Welcome to the 33rd Squid Game."
+        },
+        {
+          "time": 9,
+          "text": "GI-HUN: This is madness! People are dying!"
+        },
+        {
+          "time": 14,
+          "text": "SANG-WOO: Only one of us walks away with the money."
+        },
+        {
+          "time": 19,
+          "text": "[giant robotic doll sings in Korean - en español]"
+        },
+        {
+          "time": 24,
+          "text": "[gunshot echoes through the arena - en español]"
+        }
       ]
     },
     "tmdbId": 93405
@@ -283,6 +351,28 @@ const movies = [
           "time": 20,
           "text": "[घने जंगल में राक्षस की दहाड़]"
         }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[gothic cello music plays passionately - en español]"
+        },
+        {
+          "time": 5,
+          "text": "WEDNESDAY: I don't bury the hatchet. I sharpen it."
+        },
+        {
+          "time": 10,
+          "text": "ENID: Wednesday! We're roomies! Give me a hug!"
+        },
+        {
+          "time": 15,
+          "text": "WEDNESDAY: Try it, and you'll lose that hand."
+        },
+        {
+          "time": 20,
+          "text": "[monster roars in the dark woods - en español]"
+        }
       ]
     },
     "tmdbId": 119051
@@ -361,6 +451,28 @@ const movies = [
           "time": 19,
           "text": "[बाहर पुलिस की गाड़ियाँ सायरन बजाती हैं]"
         }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[Bella Ciao plays in background - en español]"
+        },
+        {
+          "time": 4,
+          "text": "PROFESSOR: This is not just a robbery. It's a statement."
+        },
+        {
+          "time": 9,
+          "text": "BERLIN: Gentlemen, today we make history."
+        },
+        {
+          "time": 14,
+          "text": "TOKYO: When the shooting started, love was our only shield."
+        },
+        {
+          "time": 19,
+          "text": "[police sirens wail loudly outside - en español]"
+        }
       ]
     },
     "tmdbId": 71446,
@@ -431,6 +543,24 @@ const movies = [
           "time": 13,
           "text": "डेविड: मैंने तुम्हें चांद पर ले जाने का वादा किया था।"
         }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[neon techno synth bass drops heavy - en español]"
+        },
+        {
+          "time": 4,
+          "text": "DAVID: I'm not running away anymore, Lucy."
+        },
+        {
+          "time": 8,
+          "text": "LUCY: David! Your cyberware is pushing you over the edge!"
+        },
+        {
+          "time": 13,
+          "text": "DAVID: I promised I'd take you to the moon."
+        }
       ]
     },
     "tmdbId": 105248,
@@ -500,6 +630,24 @@ const movies = [
         {
           "time": 14,
           "text": "सिल्को: क्या एक बेटी से ज्यादा कोई इंसान को कमजोर कर सकता है?"
+        }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[orchestral brass swells dramatically - en español]"
+        },
+        {
+          "time": 4,
+          "text": "VI: Powder, whatever happens, we stick together."
+        },
+        {
+          "time": 9,
+          "text": "JINX: Powder fell down a well. I'm Jinx now."
+        },
+        {
+          "time": 14,
+          "text": "SILCO: Is there anything so undoing as a daughter?"
         }
       ]
     },
@@ -572,6 +720,24 @@ const movies = [
           "time": 16,
           "text": "कूपर: मर्फ़... मैं वापस आ रहा हूँ।"
         }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[Hans Zimmer pipe organ plays intensely - en español]"
+        },
+        {
+          "time": 4,
+          "text": "COOPER: We used to look up at the sky and wonder at our place in the stars."
+        },
+        {
+          "time": 10,
+          "text": "BRAND: Love is the one thing we're capable of perceiving that transcends dimensions."
+        },
+        {
+          "time": 16,
+          "text": "COOPER: Murph... I'm coming home."
+        }
       ]
     },
     "tmdbId": 157336
@@ -639,6 +805,24 @@ const movies = [
         {
           "time": 15,
           "text": "कॉब: यह मुमकिन है। तुम्हें बस बहुत गहराई में जाना होगा।"
+        }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[brass horn blast resounds deeply - en español]"
+        },
+        {
+          "time": 4,
+          "text": "COBB: An idea is like a virus. Resilient. Highly contagious."
+        },
+        {
+          "time": 10,
+          "text": "ARTHUR: You want us to perform inception? It's impossible."
+        },
+        {
+          "time": 15,
+          "text": "COBB: It is possible. You just have to go deep enough."
         }
       ]
     },
@@ -711,6 +895,24 @@ const movies = [
           "time": 12,
           "text": "गॉर्डन: वह वह नायक है जिसका गोथम हकदार है, लेकिन जिसकी अभी उसे ज़रूरत नहीं है।"
         }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[cackling laugh echoes sinisterly - en español]"
+        },
+        {
+          "time": 4,
+          "text": "JOKER: Why so serious?"
+        },
+        {
+          "time": 8,
+          "text": "BATMAN: You'll never break Gotham."
+        },
+        {
+          "time": 12,
+          "text": "GORDON: Because he's the hero Gotham deserves, but not the one it needs right now."
+        }
       ]
     },
     "tmdbId": 155
@@ -779,6 +981,24 @@ const movies = [
           "time": 14,
           "text": "वाल्टर: मेरा नाम बोलो।"
         }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[desert wind blows across New Mexico - en español]"
+        },
+        {
+          "time": 4,
+          "text": "WALTER: I am not in danger, Skyler. I am the danger."
+        },
+        {
+          "time": 9,
+          "text": "JESSE: Yeah science, b*tch!"
+        },
+        {
+          "time": 14,
+          "text": "WALTER: Say my name."
+        }
       ]
     },
     "tmdbId": 1396,
@@ -841,6 +1061,20 @@ const movies = [
           "time": 9,
           "text": "जैस्कियर: अपने जादूगर के लिए एक सिक्का उछालो!"
         }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[silver sword draws with a metallic ring - en español]"
+        },
+        {
+          "time": 4,
+          "text": "GERALT: Evil is evil. Lesser, greater, middling, it's all the same."
+        },
+        {
+          "time": 9,
+          "text": "JASKIER: Toss a coin to your witcher, O Valley of Plenty!"
+        }
       ]
     },
     "tmdbId": 71912,
@@ -902,6 +1136,20 @@ const movies = [
           "time": 8,
           "text": "आर्थर: कड़ाके की सर्द सर्दियों में..."
         }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[Red Right Hand by Nick Cave plays - en español]"
+        },
+        {
+          "time": 4,
+          "text": "TOMMY: By order of the Peaky Blinders!"
+        },
+        {
+          "time": 8,
+          "text": "ARTHUR: In the bleak midwinter..."
+        }
       ]
     },
     "tmdbId": 60574,
@@ -954,6 +1202,16 @@ const movies = [
         {
           "time": 4,
           "text": "बेथ: शतरंज सिर्फ मुकाबला नहीं है, यह एक खूबसूरत कला है।"
+        }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[clock ticking on the chess board - en español]"
+        },
+        {
+          "time": 4,
+          "text": "BETH: Chess isn't always competitive. It can also be beautiful."
         }
       ]
     },
@@ -1009,6 +1267,16 @@ const movies = [
           "time": 4,
           "text": "चेयोंग-सान: भागो! उन्हें काटने मत देना!"
         }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[snarls and screams echo down high school hallway - en español]"
+        },
+        {
+          "time": 4,
+          "text": "CHEONG-SAN: Run! Don't let them bite you!"
+        }
       ]
     },
     "tmdbId": 99966,
@@ -1062,6 +1330,16 @@ const movies = [
           "time": 4,
           "text": "पॉल: योद्धा अमर रहें! इन्हें स्वर्ग की ओर ले चलो!"
         }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[sand dunes shift with deep bass vibration - en español]"
+        },
+        {
+          "time": 4,
+          "text": "PAUL: Long live the fighters! Lead them to paradise!"
+        }
       ]
     },
     "tmdbId": 693134,
@@ -1096,7 +1374,77 @@ const movies = [
     "isOriginal": false,
     "top10Rank": 5,
     "tmdbId": 579974,
-    "youtubeTrailerId": "NgBoMJy386M"
+    "youtubeTrailerId": "NgBoMJy386M",
+    "videoUrl": "https://vjs.zencdn.net/v/oceans.mp4",
+    "backupVideoUrl": "https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4",
+    "subtitles": {
+      "en": [
+        {
+          "time": 1,
+          "text": "[intense dhol beats and roaring flames]"
+        },
+        {
+          "time": 4,
+          "text": "BHEEM: For my people, I will tear down any empire!"
+        },
+        {
+          "time": 9,
+          "text": "RAJU: Look into my eyes. Fire and water will meet!"
+        },
+        {
+          "time": 15,
+          "text": "[Naatu Naatu rhythm kicks in wildly]"
+        },
+        {
+          "time": 20,
+          "text": "BHEEM & RAJU: Not just a fight, this is revolution!"
+        },
+        {
+          "time": 26,
+          "text": "[arrow strikes with explosive thunder]"
+        }
+      ],
+      "hi": [
+        {
+          "time": 1,
+          "text": "[धड़कते ढोल और धधकती लपटें]"
+        },
+        {
+          "time": 4,
+          "text": "भीम: अपने लोगों के लिए, मैं साम्राज्य को खाक कर दूँगा!"
+        },
+        {
+          "time": 9,
+          "text": "राजू: मेरी आँखों में देख। आग और पानी का मिलन होगा!"
+        },
+        {
+          "time": 15,
+          "text": "[नाटू नाटू की जोशीली थाप]"
+        },
+        {
+          "time": 20,
+          "text": "भीम और राजू: यह केवल युद्ध नहीं, यह क्रांति है!"
+        }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[tambores arrolladores y fuego en combustión]"
+        },
+        {
+          "time": 4,
+          "text": "BHEEM: ¡Por mi gente, derribaré cualquier imperio!"
+        },
+        {
+          "time": 9,
+          "text": "RAJU: Mírame a los ojos. ¡El fuego y el agua colisionan!"
+        },
+        {
+          "time": 15,
+          "text": "[el ritmo triunfal de Naatu Naatu retumba]"
+        }
+      ]
+    }
   },
   {
     "id": "leo",
@@ -1127,7 +1475,77 @@ const movies = [
     "isOriginal": false,
     "top10Rank": 6,
     "tmdbId": 1075794,
-    "youtubeTrailerId": "Po3jStA673E"
+    "youtubeTrailerId": "Po3jStA673E",
+    "videoUrl": "https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4",
+    "backupVideoUrl": "https://media.w3.org/2010/05/sintel/trailer.mp4",
+    "subtitles": {
+      "en": [
+        {
+          "time": 1,
+          "text": "[atmospheric soundtrack swells - Leo: Bloody Sweet]"
+        },
+        {
+          "time": 4,
+          "text": "THALAPATHY VIJAY: Everything we fought for comes down to this moment."
+        },
+        {
+          "time": 10,
+          "text": "SANJAY DUTT: We cannot afford to back down now."
+        },
+        {
+          "time": 16,
+          "text": "[dramatic cinematic climax unfolds in Ultra HD]"
+        },
+        {
+          "time": 22,
+          "text": "THALAPATHY VIJAY: Hold the line! This is our destiny!"
+        }
+      ],
+      "hi": [
+        {
+          "time": 1,
+          "text": "[रोमांचक सिनेमाई संगीत - Leo: Bloody Sweet]"
+        },
+        {
+          "time": 4,
+          "text": "Thalapathy Vijay: हमने जो कुछ भी सहा है, उसका फैसला आज होगा।"
+        },
+        {
+          "time": 10,
+          "text": "Sanjay Dutt: अब पीछे हटने का कोई रास्ता नहीं है।"
+        },
+        {
+          "time": 16,
+          "text": "[भव्य दृश्य और धमाकेदार एक्शन]"
+        },
+        {
+          "time": 22,
+          "text": "Thalapathy Vijay: डटे रहो! यही हमारी मंजिल है!"
+        }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[música cinematográfica envolvente - Leo: Bloody Sweet]"
+        },
+        {
+          "time": 4,
+          "text": "Thalapathy Vijay: Todo por lo que luchamos se decide en este momento."
+        },
+        {
+          "time": 10,
+          "text": "Sanjay Dutt: No podemos retroceder ahora."
+        },
+        {
+          "time": 16,
+          "text": "[acción espectacular en Ultra HD]"
+        },
+        {
+          "time": 22,
+          "text": "Thalapathy Vijay: ¡Mantengan la línea! ¡Este es nuestro destino!"
+        }
+      ]
+    }
   },
   {
     "id": "jawan",
@@ -1158,7 +1576,77 @@ const movies = [
     "isOriginal": false,
     "top10Rank": 7,
     "tmdbId": 872906,
-    "youtubeTrailerId": "MWOlnZSnXWE"
+    "youtubeTrailerId": "MWOlnZSnXWE",
+    "videoUrl": "https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4",
+    "backupVideoUrl": "https://vjs.zencdn.net/v/oceans.mp4",
+    "subtitles": {
+      "en": [
+        {
+          "time": 1,
+          "text": "[whistling retro tune with heavy bass]"
+        },
+        {
+          "time": 4,
+          "text": "AZAD: Ready, chief!"
+        },
+        {
+          "time": 8,
+          "text": "VIKRAM RATHORE: Before touching the son, deal with the father."
+        },
+        {
+          "time": 14,
+          "text": "[machine gun bullets spray in slow motion]"
+        },
+        {
+          "time": 20,
+          "text": "AZAD: When I become a villain, no hero stands a chance."
+        },
+        {
+          "time": 26,
+          "text": "[cigar smoke drifts across burning rubble]"
+        }
+      ],
+      "hi": [
+        {
+          "time": 1,
+          "text": "[सीटी की धुन के साथ भारी बीट]"
+        },
+        {
+          "time": 4,
+          "text": "आज़ाद: तैयार हैं चीफ!"
+        },
+        {
+          "time": 8,
+          "text": "विक्रम राठौर: बेटे को हाथ लगाने से पहले, बाप से बात कर।"
+        },
+        {
+          "time": 14,
+          "text": "[गोलियों की ताबड़तोड़ बारिश]"
+        },
+        {
+          "time": 20,
+          "text": "आज़ाद: जब मैं विलेन बनता हूँ ना, तो किसी हीरो की नहीं चलती।"
+        }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[silbido retro con potente bajo cinematográfico]"
+        },
+        {
+          "time": 4,
+          "text": "AZAD: ¡Listo, jefe!"
+        },
+        {
+          "time": 8,
+          "text": "VIKRAM RATHORE: Antes de tocar al hijo, habla con el padre."
+        },
+        {
+          "time": 14,
+          "text": "[ráfagas de balas en cámara lenta]"
+        }
+      ]
+    }
   },
   {
     "id": "animal",
@@ -1189,7 +1677,77 @@ const movies = [
     "isOriginal": false,
     "top10Rank": 8,
     "tmdbId": 781732,
-    "youtubeTrailerId": "Dydmpfo68DA"
+    "youtubeTrailerId": "Dydmpfo68DA",
+    "videoUrl": "https://media.w3.org/2010/05/sintel/trailer.mp4",
+    "backupVideoUrl": "https://vjs.zencdn.net/v/oceans.mp4",
+    "subtitles": {
+      "en": [
+        {
+          "time": 1,
+          "text": "[distorted acoustic strings and ominous bass]"
+        },
+        {
+          "time": 4,
+          "text": "RANVIJAY: Papa, you are my hero."
+        },
+        {
+          "time": 8,
+          "text": "BALBIR: You are not a normal boy, Ranvijay."
+        },
+        {
+          "time": 13,
+          "text": "RANVIJAY: If anyone touches my father, I will set this world on fire."
+        },
+        {
+          "time": 19,
+          "text": "[massive war machine fires with deafening blast]"
+        },
+        {
+          "time": 25,
+          "text": "RANVIJAY: Sunte ho sab log?! Main aa raha hoon!"
+        }
+      ],
+      "hi": [
+        {
+          "time": 1,
+          "text": "[गंभीर गिटार और खौफनाक सन्नाटा]"
+        },
+        {
+          "time": 4,
+          "text": "रणविजय: पापा, आप मेरे हीरो हैं।"
+        },
+        {
+          "time": 8,
+          "text": "बलबीर: तुम सामान्य लड़के नहीं हो, रणविजय।"
+        },
+        {
+          "time": 13,
+          "text": "रणविजय: अगर किसी ने मेरे पापा पर उंगली भी उठाई, तो मैं दुनिया जला दूँगा।"
+        },
+        {
+          "time": 19,
+          "text": "[विशालकाय मशीन गन की प्रचंड गर्जना]"
+        }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[acordes oscuros y tensión amenazante]"
+        },
+        {
+          "time": 4,
+          "text": "RANVIJAY: Papá, tú eres mi héroe."
+        },
+        {
+          "time": 8,
+          "text": "BALBIR: No eres un chico normal, Ranvijay."
+        },
+        {
+          "time": 13,
+          "text": "RANVIJAY: Si alguien toca a mi padre, quemaré este mundo."
+        }
+      ]
+    }
   },
   {
     "id": "kalki-2898-ad",
@@ -1220,7 +1778,69 @@ const movies = [
     "isOriginal": false,
     "top10Rank": 9,
     "tmdbId": 801688,
-    "youtubeTrailerId": "y1-w1pUGuz4"
+    "youtubeTrailerId": "y1-w1pUGuz4",
+    "videoUrl": "https://vjs.zencdn.net/v/oceans.mp4",
+    "backupVideoUrl": "https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4",
+    "subtitles": {
+      "en": [
+        {
+          "time": 1,
+          "text": "[futuristic conch shell resonates across desert]"
+        },
+        {
+          "time": 4,
+          "text": "ASHWATTHAMA: The final avatar has arrived."
+        },
+        {
+          "time": 9,
+          "text": "BHAIRAVA: In Kasi, units talk, not gods."
+        },
+        {
+          "time": 14,
+          "text": "BUJJII: Bujji online! Weapons armed, Bhairava!"
+        },
+        {
+          "time": 19,
+          "text": "[divine laser clashes with mystical staff]"
+        },
+        {
+          "time": 25,
+          "text": "ASHWATTHAMA: My time has come to fulfill my promise."
+        }
+      ],
+      "hi": [
+        {
+          "time": 1,
+          "text": "[भविष्यवादी शंखनाद रेगिस्तान में गूंजता है]"
+        },
+        {
+          "time": 4,
+          "text": "अश्वत्थामा: अंतिम अवतार का आगमन हो चुका है।"
+        },
+        {
+          "time": 9,
+          "text": "भैरव: काशी में केवल यूनिट्स बोलते हैं, भगवान नहीं।"
+        },
+        {
+          "time": 14,
+          "text": "बुज्जी: बुज्जी तैयार है! हथियार लोड हैं, भैरव!"
+        }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[eco místico de caracola sobre el desierto distópico]"
+        },
+        {
+          "time": 4,
+          "text": "ASHWATTHAMA: El avatar final ha llegado."
+        },
+        {
+          "time": 9,
+          "text": "BHAIRAVA: En Kasi solo valen las unidades, no los dioses."
+        }
+      ]
+    }
   },
   {
     "id": "kgf-chapter-2",
@@ -1251,7 +1871,65 @@ const movies = [
     "isOriginal": false,
     "top10Rank": 10,
     "tmdbId": 587412,
-    "youtubeTrailerId": "JKa05nyUmuQ"
+    "youtubeTrailerId": "JKa05nyUmuQ",
+    "videoUrl": "https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4",
+    "backupVideoUrl": "https://vjs.zencdn.net/v/oceans.mp4",
+    "subtitles": {
+      "en": [
+        {
+          "time": 1,
+          "text": "[heavy metallic clang with thunderous drums]"
+        },
+        {
+          "time": 4,
+          "text": "ROCKY: Violence... Violence... Violence! I don't like it. I avoid."
+        },
+        {
+          "time": 11,
+          "text": "ROCKY: But... Violence likes me! I can't avoid!"
+        },
+        {
+          "time": 17,
+          "text": "ADHEERA: This gold mine was written in my blood."
+        },
+        {
+          "time": 22,
+          "text": "ROCKY: Tell the government that the Sultan of KGF is here."
+        }
+      ],
+      "hi": [
+        {
+          "time": 1,
+          "text": "[भारी हथौड़े की चोट और गूंजते ढोल]"
+        },
+        {
+          "time": 4,
+          "text": "रॉकी: वायलेंस... वायलेंस... वायलेंस! मुझे पसंद नहीं, मैं बचता हूँ।"
+        },
+        {
+          "time": 11,
+          "text": "रॉकी: लेकिन... वायलेंस को मैं पसंद हूँ! मैं बच नहीं सकता!"
+        },
+        {
+          "time": 17,
+          "text": "अधीरा: यह सोने की खदान मेरे खून से लिखी गई थी।"
+        }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[golpe metálico masivo con tambores atronadores]"
+        },
+        {
+          "time": 4,
+          "text": "ROCKY: Violencia... violencia... ¡no me gusta, la evito!"
+        },
+        {
+          "time": 11,
+          "text": "ROCKY: ¡Pero a la violencia le gusto yo! ¡No puedo evitarla!"
+        }
+      ]
+    }
   },
   {
     "id": "salaar",
@@ -1281,7 +1959,77 @@ const movies = [
     "category": "action",
     "isOriginal": false,
     "tmdbId": 770906,
-    "youtubeTrailerId": "4GPvYMKtrtI"
+    "youtubeTrailerId": "4GPvYMKtrtI",
+    "videoUrl": "https://vjs.zencdn.net/v/oceans.mp4",
+    "backupVideoUrl": "https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4",
+    "subtitles": {
+      "en": [
+        {
+          "time": 1,
+          "text": "[atmospheric soundtrack swells - Salaar: Part 1 – Ceasefire]"
+        },
+        {
+          "time": 4,
+          "text": "PRABHAS: Everything we fought for comes down to this moment."
+        },
+        {
+          "time": 10,
+          "text": "PRITHVIRAJ SUKUMARAN: We cannot afford to back down now."
+        },
+        {
+          "time": 16,
+          "text": "[dramatic cinematic climax unfolds in Ultra HD]"
+        },
+        {
+          "time": 22,
+          "text": "PRABHAS: Hold the line! This is our destiny!"
+        }
+      ],
+      "hi": [
+        {
+          "time": 1,
+          "text": "[रोमांचक सिनेमाई संगीत - Salaar: Part 1 – Ceasefire]"
+        },
+        {
+          "time": 4,
+          "text": "Prabhas: हमने जो कुछ भी सहा है, उसका फैसला आज होगा।"
+        },
+        {
+          "time": 10,
+          "text": "Prithviraj Sukumaran: अब पीछे हटने का कोई रास्ता नहीं है।"
+        },
+        {
+          "time": 16,
+          "text": "[भव्य दृश्य और धमाकेदार एक्शन]"
+        },
+        {
+          "time": 22,
+          "text": "Prabhas: डटे रहो! यही हमारी मंजिल है!"
+        }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[música cinematográfica envolvente - Salaar: Part 1 – Ceasefire]"
+        },
+        {
+          "time": 4,
+          "text": "Prabhas: Todo por lo que luchamos se decide en este momento."
+        },
+        {
+          "time": 10,
+          "text": "Prithviraj Sukumaran: No podemos retroceder ahora."
+        },
+        {
+          "time": 16,
+          "text": "[acción espectacular en Ultra HD]"
+        },
+        {
+          "time": 22,
+          "text": "Prabhas: ¡Mantengan la línea! ¡Este es nuestro destino!"
+        }
+      ]
+    }
   },
   {
     "id": "oppenheimer",
@@ -1311,7 +2059,89 @@ const movies = [
     "category": "drama",
     "isOriginal": false,
     "tmdbId": 872585,
-    "youtubeTrailerId": "uYPbbksJxIg"
+    "youtubeTrailerId": "uYPbbksJxIg",
+    "videoUrl": "https://vjs.zencdn.net/v/oceans.mp4",
+    "backupVideoUrl": "https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4",
+    "subtitles": {
+      "en": [
+        {
+          "time": 1,
+          "text": "[eerie theoretical physics hums in background]"
+        },
+        {
+          "time": 4,
+          "text": "LEWIS STRAUSS: What did you and Einstein talk about by the pond?"
+        },
+        {
+          "time": 10,
+          "text": "J. ROBERT OPPENHEIMER: We imagined a chain reaction..."
+        },
+        {
+          "time": 16,
+          "text": "OPPENHEIMER: ...one that would destroy the entire world."
+        },
+        {
+          "time": 22,
+          "text": "[atomic blast concussive wave shakes the room]"
+        },
+        {
+          "time": 27,
+          "text": "OPPENHEIMER: Now I am become Death, the destroyer of worlds."
+        }
+      ],
+      "hi": [
+        {
+          "time": 1,
+          "text": "[परमाणु विस्फोट की गूंजती धड़कन]"
+        },
+        {
+          "time": 4,
+          "text": "स्ट्रॉस: तुमने और आइंस्टीन ने तालाब के किनारे क्या बात की?"
+        },
+        {
+          "time": 10,
+          "text": "ओपेनहाइमर: हमने एक ऐसी श्रृंखला की कल्पना की थी..."
+        },
+        {
+          "time": 16,
+          "text": "ओपेनहाइमर: ...जो इस पूरी दुनिया को नष्ट कर देगी।"
+        },
+        {
+          "time": 22,
+          "text": "[भीषण परमाणु शॉकवेव की गर्जना]"
+        },
+        {
+          "time": 27,
+          "text": "ओपेनहाइमर: अब मैं काल बन चुका हूँ, संसार का विनाशक।"
+        }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[resonancia cuántica y sintetizadores tensos]"
+        },
+        {
+          "time": 4,
+          "text": "STRAUSS: ¿De qué hablaron tú y Einstein junto al lago?"
+        },
+        {
+          "time": 10,
+          "text": "OPPENHEIMER: Imaginamos una reacción en cadena..."
+        },
+        {
+          "time": 16,
+          "text": "OPPENHEIMER: ...una que destruiría el mundo entero."
+        },
+        {
+          "time": 22,
+          "text": "[la onda expansiva nuclear sacude la tierra]"
+        },
+        {
+          "time": 27,
+          "text": "OPPENHEIMER: Ahora me he convertido en la muerte, destructora de mundos."
+        }
+      ]
+    }
   },
   {
     "id": "dark",
@@ -1341,7 +2171,81 @@ const movies = [
     "category": "scifi",
     "isOriginal": true,
     "tmdbId": 70523,
-    "youtubeTrailerId": "rrwycJ08PSA"
+    "youtubeTrailerId": "rrwycJ08PSA",
+    "videoUrl": "https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4",
+    "backupVideoUrl": "https://vjs.zencdn.net/v/oceans.mp4",
+    "subtitles": {
+      "en": [
+        {
+          "time": 1,
+          "text": "[chilling clock ticking with heavy bass]"
+        },
+        {
+          "time": 4,
+          "text": "JONAS: The question isn't how, the question is when."
+        },
+        {
+          "time": 9,
+          "text": "H.G. TANNHOUSE: The distinction between past, present, and future is an illusion."
+        },
+        {
+          "time": 16,
+          "text": "MARTHA: We are not free in what we do, because we are not free in what we want."
+        },
+        {
+          "time": 23,
+          "text": "JONAS: The loop must be broken."
+        },
+        {
+          "time": 28,
+          "text": "[cave portal glows with temporal energy]"
+        }
+      ],
+      "hi": [
+        {
+          "time": 1,
+          "text": "[घड़ी की टिक-टिक के साथ भारी सन्नाटा]"
+        },
+        {
+          "time": 4,
+          "text": "जोनास: सवाल यह नहीं कि कैसे, सवाल यह है कि कब।"
+        },
+        {
+          "time": 9,
+          "text": "तानहौस: भूतकाल, वर्तमान और भविष्य के बीच का अंतर केवल एक भ्रम है।"
+        },
+        {
+          "time": 16,
+          "text": "मार्था: हम जो करते हैं उसमें स्वतंत्र नहीं हैं।"
+        },
+        {
+          "time": 23,
+          "text": "जोनास: इस चक्र को तोड़ना ही होगा।"
+        }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[el tictac del reloj resuena en la caverna]"
+        },
+        {
+          "time": 4,
+          "text": "JONAS: La pregunta no es cómo, la pregunta es cuándo."
+        },
+        {
+          "time": 9,
+          "text": "TANNHOUSE: La diferencia entre pasado, presente y futuro es una ilusión."
+        },
+        {
+          "time": 16,
+          "text": "MARTHA: No somos libres de lo que hacemos porque no somos libres de lo que deseamos."
+        },
+        {
+          "time": 23,
+          "text": "JONAS: El ciclo debe romperse."
+        }
+      ]
+    }
   },
   {
     "id": "narcos",
@@ -1371,7 +2275,75 @@ const movies = [
     "isOriginal": true,
     "videoUrl": "/trailers/the-batman.mp4",
     "tmdbId": 63351,
-    "youtubeTrailerId": "xl8hmgMNCBo"
+    "youtubeTrailerId": "xl8hmgMNCBo",
+    "subtitles": {
+      "en": [
+        {
+          "time": 1,
+          "text": "[atmospheric soundtrack swells - Narcos]"
+        },
+        {
+          "time": 4,
+          "text": "WAGNER MOURA: Everything we fought for comes down to this moment."
+        },
+        {
+          "time": 10,
+          "text": "PEDRO PASCAL: We cannot afford to back down now."
+        },
+        {
+          "time": 16,
+          "text": "[dramatic cinematic climax unfolds in Ultra HD]"
+        },
+        {
+          "time": 22,
+          "text": "WAGNER MOURA: Hold the line! This is our destiny!"
+        }
+      ],
+      "hi": [
+        {
+          "time": 1,
+          "text": "[रोमांचक सिनेमाई संगीत - Narcos]"
+        },
+        {
+          "time": 4,
+          "text": "Wagner Moura: हमने जो कुछ भी सहा है, उसका फैसला आज होगा।"
+        },
+        {
+          "time": 10,
+          "text": "Pedro Pascal: अब पीछे हटने का कोई रास्ता नहीं है।"
+        },
+        {
+          "time": 16,
+          "text": "[भव्य दृश्य और धमाकेदार एक्शन]"
+        },
+        {
+          "time": 22,
+          "text": "Wagner Moura: डटे रहो! यही हमारी मंजिल है!"
+        }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[música cinematográfica envolvente - Narcos]"
+        },
+        {
+          "time": 4,
+          "text": "Wagner Moura: Todo por lo que luchamos se decide en este momento."
+        },
+        {
+          "time": 10,
+          "text": "Pedro Pascal: No podemos retroceder ahora."
+        },
+        {
+          "time": 16,
+          "text": "[acción espectacular en Ultra HD]"
+        },
+        {
+          "time": 22,
+          "text": "Wagner Moura: ¡Mantengan la línea! ¡Este es nuestro destino!"
+        }
+      ]
+    }
   },
   {
     "id": "game-of-thrones",
@@ -1401,7 +2373,81 @@ const movies = [
     "category": "drama",
     "isOriginal": false,
     "tmdbId": 1399,
-    "youtubeTrailerId": "KPLWWIOCOOQ"
+    "youtubeTrailerId": "KPLWWIOCOOQ",
+    "videoUrl": "https://media.w3.org/2010/05/sintel/trailer.mp4",
+    "backupVideoUrl": "https://vjs.zencdn.net/v/oceans.mp4",
+    "subtitles": {
+      "en": [
+        {
+          "time": 1,
+          "text": "[epic French horns and cellos swell]"
+        },
+        {
+          "time": 5,
+          "text": "NED STARK: The man who passes the sentence should swing the sword."
+        },
+        {
+          "time": 11,
+          "text": "CERSEI LANNISTER: When you play the game of thrones, you win or you die."
+        },
+        {
+          "time": 17,
+          "text": "DAENERYS TARGARYEN: Dracarys!"
+        },
+        {
+          "time": 23,
+          "text": "[dragon unleashes torrent of blazing fire]"
+        },
+        {
+          "time": 28,
+          "text": "JON SNOW: Winter is here."
+        }
+      ],
+      "hi": [
+        {
+          "time": 1,
+          "text": "[राजसी सिम्फनी संगीत गूंजता है]"
+        },
+        {
+          "time": 5,
+          "text": "नेड स्टार्क: जो सजा सुनाता है, तलवार भी उसी को चलानी चाहिए।"
+        },
+        {
+          "time": 11,
+          "text": "सर्सी: तख्त के खेल में या तो जीत होती है, या मौत।"
+        },
+        {
+          "time": 17,
+          "text": "डैनेरिस: ड्रेकेरिस!"
+        },
+        {
+          "time": 23,
+          "text": "[ड्रैगन आग की भीषण लपटें उगलता है]"
+        }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[majestuoso tema de orquesta épica]"
+        },
+        {
+          "time": 5,
+          "text": "NED STARK: El hombre que dicta la sentencia debe blandir la espada."
+        },
+        {
+          "time": 11,
+          "text": "CERSEI: Cuando juegas al juego de tronos, ganas o mueres."
+        },
+        {
+          "time": 17,
+          "text": "DAENERYS: ¡Dracarys!"
+        },
+        {
+          "time": 23,
+          "text": "[el dragón exhala fuego rugiente]"
+        }
+      ]
+    }
   },
   {
     "id": "better-call-saul",
@@ -1431,7 +2477,73 @@ const movies = [
     "category": "drama",
     "isOriginal": true,
     "tmdbId": 60059,
-    "youtubeTrailerId": "HN4oydykJFc"
+    "youtubeTrailerId": "HN4oydykJFc",
+    "videoUrl": "https://vjs.zencdn.net/v/oceans.mp4",
+    "backupVideoUrl": "https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4",
+    "subtitles": {
+      "en": [
+        {
+          "time": 1,
+          "text": "[bluesy jazz guitar strums softly]"
+        },
+        {
+          "time": 4,
+          "text": "JIMMY MCGILL: S'all good, man!"
+        },
+        {
+          "time": 9,
+          "text": "CHUCK MCGILL: Slippin' Jimmy with a law degree is like a chimp with a machine gun!"
+        },
+        {
+          "time": 15,
+          "text": "MIKE EHRMANTRAUT: We all make our choices. And those choices put us on a road."
+        },
+        {
+          "time": 22,
+          "text": "KIM WEXLER: You don't save me, Jimmy. I save me."
+        },
+        {
+          "time": 28,
+          "text": "SAUL GOODMAN: Did you know that you have rights? The Constitution says you do!"
+        }
+      ],
+      "hi": [
+        {
+          "time": 1,
+          "text": "[जैज़ गिटार की हल्की धुन]"
+        },
+        {
+          "time": 4,
+          "text": "जिमी: सब बढ़िया है भाई!"
+        },
+        {
+          "time": 9,
+          "text": "चक: वकालत की डिग्री के साथ जिमी वैसा ही है जैसे बन्दूक लिए बंदर!"
+        },
+        {
+          "time": 15,
+          "text": "माइक: हम सभी फैसले लेते हैं। और वो फैसले एक राह चुनते हैं।"
+        }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[acordes de guitarra blues y ambiente desértico]"
+        },
+        {
+          "time": 4,
+          "text": "JIMMY: ¡Todo bien, amigo!"
+        },
+        {
+          "time": 9,
+          "text": "CHUCK: ¡Jimmy con título de abogado es como un chimpancé con metralleta!"
+        },
+        {
+          "time": 15,
+          "text": "MIKE: Todos tomamos decisiones. Y esas decisiones nos llevan por un camino."
+        }
+      ]
+    }
   },
   {
     "id": "the-batman",
@@ -1461,7 +2573,89 @@ const movies = [
     "category": "action",
     "isOriginal": false,
     "tmdbId": 414906,
-    "youtubeTrailerId": "mqqft2x_Aa4"
+    "youtubeTrailerId": "mqqft2x_Aa4",
+    "videoUrl": "/trailers/the-batman.mp4",
+    "backupVideoUrl": "https://vjs.zencdn.net/v/oceans.mp4",
+    "subtitles": {
+      "en": [
+        {
+          "time": 1,
+          "text": "[dark symphonic cello echoes in the rain]"
+        },
+        {
+          "time": 5,
+          "text": "BATMAN: Thursday, October 31st. The city streets are crowded for the holiday."
+        },
+        {
+          "time": 11,
+          "text": "BATMAN: Even with the rain. Hidden in the chaos is an element, waiting to strike."
+        },
+        {
+          "time": 18,
+          "text": "BATMAN: They think I am hiding in the shadows. But I am the shadows."
+        },
+        {
+          "time": 25,
+          "text": "RIDDLER: If you are justice, please do not lie. What is the price for your blind eye?"
+        },
+        {
+          "time": 32,
+          "text": "[Batmobile jet engine roars to life]"
+        }
+      ],
+      "hi": [
+        {
+          "time": 1,
+          "text": "[गंभीर सिम्फोनिक संगीत गॉथम की बारिश में गूंजता है]"
+        },
+        {
+          "time": 5,
+          "text": "बैटमैन: गुरुवार, इकतीस अक्टूबर। गोथम की सड़कें भरी हुई हैं।"
+        },
+        {
+          "time": 11,
+          "text": "बैटमैन: बारिश में भी, अंधेरे में कोई शिकार की तलाश में है।"
+        },
+        {
+          "time": 18,
+          "text": "बैटमैन: उन्हें लगता है मैं परछाइयों में छिपा हूँ। पर मैं ही परछाई हूँ।"
+        },
+        {
+          "time": 25,
+          "text": "रिडलर: अगर तुम न्याय हो, तो सच बताओ। क्या है तुम्हारी कीमत?"
+        },
+        {
+          "time": 32,
+          "text": "[बैटमोबाइल का जेट इंजन दनदना उठता है]"
+        }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[pesadas cuerdas dramáticas en la lluvia]"
+        },
+        {
+          "time": 5,
+          "text": "BATMAN: Jueves, 31 de octubre. Las calles están repletas."
+        },
+        {
+          "time": 11,
+          "text": "BATMAN: Oculto en el caos hay un elemento esperando atacar."
+        },
+        {
+          "time": 18,
+          "text": "BATMAN: Creen que me escondo en las sombras. Pero yo soy las sombras."
+        },
+        {
+          "time": 25,
+          "text": "RIDDLER: Si eres la justicia, no mientas. ¿Cuál es el precio de tu ceguera?"
+        },
+        {
+          "time": 32,
+          "text": "[el motor del Batimóvil ruge ferozmente]"
+        }
+      ]
+    }
   },
   {
     "id": "fight-club",
@@ -1490,7 +2684,73 @@ const movies = [
     "category": "drama",
     "isOriginal": false,
     "tmdbId": 550,
-    "youtubeTrailerId": "qtRKdVHc-cE"
+    "youtubeTrailerId": "qtRKdVHc-cE",
+    "videoUrl": "https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4",
+    "backupVideoUrl": "https://media.w3.org/2010/05/sintel/trailer.mp4",
+    "subtitles": {
+      "en": [
+        {
+          "time": 1,
+          "text": "[industrial rock bassline throbs]"
+        },
+        {
+          "time": 4,
+          "text": "TYLER DURDEN: The first rule of Fight Club is: you do not talk about Fight Club."
+        },
+        {
+          "time": 11,
+          "text": "TYLER DURDEN: The second rule of Fight Club is: YOU DO NOT TALK ABOUT FIGHT CLUB."
+        },
+        {
+          "time": 18,
+          "text": "NARRATOR: Losing all hope was freedom."
+        },
+        {
+          "time": 24,
+          "text": "TYLER: The things you own end up owning you."
+        },
+        {
+          "time": 30,
+          "text": "[fists collide with raw bone impact]"
+        }
+      ],
+      "hi": [
+        {
+          "time": 1,
+          "text": "[अंडरग्राउंड रॉक संगीत की गूंज]"
+        },
+        {
+          "time": 4,
+          "text": "टायलर: फाइट क्लब का पहला नियम: फाइट क्लब के बारे में बात नहीं करना।"
+        },
+        {
+          "time": 11,
+          "text": "टायलर: फाइट क्लब का दूसरा नियम: फाइट क्लब के बारे में बिल्कुल बात नहीं करना।"
+        },
+        {
+          "time": 18,
+          "text": "नैरेटर: सारी उम्मीदें खो देना ही असली आज़ादी थी।"
+        }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[ritmo de bajo industrial potente]"
+        },
+        {
+          "time": 4,
+          "text": "TYLER DURDEN: La primera regla del Club de la Pelea es: no hablas del Club de la Pelea."
+        },
+        {
+          "time": 11,
+          "text": "TYLER: La segunda regla es: ¡NO HABLAS DEL CLUB DE LA PELEA!"
+        },
+        {
+          "time": 18,
+          "text": "NARRADOR: Perder toda esperanza fue la libertad."
+        }
+      ]
+    }
   },
   {
     "id": "pulp-fiction",
@@ -1520,7 +2780,73 @@ const movies = [
     "category": "drama",
     "isOriginal": false,
     "tmdbId": 680,
-    "youtubeTrailerId": "s7EdQ4FqbhY"
+    "youtubeTrailerId": "s7EdQ4FqbhY",
+    "videoUrl": "https://vjs.zencdn.net/v/oceans.mp4",
+    "backupVideoUrl": "https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4",
+    "subtitles": {
+      "en": [
+        {
+          "time": 1,
+          "text": "[surf guitar riff plays Misirlou]"
+        },
+        {
+          "time": 4,
+          "text": "JULES: Say 'what' again. SAY 'WHAT' AGAIN, I DARE YOU!"
+        },
+        {
+          "time": 10,
+          "text": "VINCENT: You know what they call a Quarter Pounder with cheese in Paris?"
+        },
+        {
+          "time": 16,
+          "text": "JULES: What'd they call it?"
+        },
+        {
+          "time": 19,
+          "text": "VINCENT: Royale with cheese."
+        },
+        {
+          "time": 24,
+          "text": "JULES: The path of the righteous man is beset on all sides..."
+        }
+      ],
+      "hi": [
+        {
+          "time": 1,
+          "text": "[प्रसिद्ध सर्फ रॉक गिटार धुन]"
+        },
+        {
+          "time": 4,
+          "text": "ज्यूल्स: फिर से बोल 'क्या'। दोबारा बोल कर दिखा!"
+        },
+        {
+          "time": 10,
+          "text": "विंसेंट: तुम्हें पता है पेरिस में क्वार्टर पाउंडर को क्या कहते हैं?"
+        },
+        {
+          "time": 16,
+          "text": "विंसेंट: रोयाल विद चीज़।"
+        }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[icónico riff de guitarra surf Misirlou]"
+        },
+        {
+          "time": 4,
+          "text": "JULES: Di 'qué' otra vez. ¡Te reto, di 'qué' una vez más!"
+        },
+        {
+          "time": 10,
+          "text": "VINCENT: ¿Sabes cómo le llaman al Cuarto de Libra con queso en París?"
+        },
+        {
+          "time": 16,
+          "text": "VINCENT: Royale con queso."
+        }
+      ]
+    }
   },
   {
     "id": "the-matrix",
@@ -1550,7 +2876,81 @@ const movies = [
     "category": "scifi",
     "isOriginal": false,
     "tmdbId": 603,
-    "youtubeTrailerId": "vKQi3bBA1y8"
+    "youtubeTrailerId": "vKQi3bBA1y8",
+    "videoUrl": "https://media.w3.org/2010/05/sintel/trailer.mp4",
+    "backupVideoUrl": "https://vjs.zencdn.net/v/oceans.mp4",
+    "subtitles": {
+      "en": [
+        {
+          "time": 1,
+          "text": "[digital green phosphor clicks and synth pads]"
+        },
+        {
+          "time": 4,
+          "text": "MORPHEUS: You take the blue pill, the story ends."
+        },
+        {
+          "time": 9,
+          "text": "MORPHEUS: You take the red pill, you stay in Wonderland, and I show you how deep the rabbit hole goes."
+        },
+        {
+          "time": 17,
+          "text": "NEO: I know kung fu."
+        },
+        {
+          "time": 21,
+          "text": "MORPHEUS: Show me."
+        },
+        {
+          "time": 26,
+          "text": "[bullet time sonic boom ripples the air]"
+        }
+      ],
+      "hi": [
+        {
+          "time": 1,
+          "text": "[डिजिटल कोड की सरसराहट]"
+        },
+        {
+          "time": 4,
+          "text": "मॉर्फियस: नीली गोली लोगे, कहानी खत्म।"
+        },
+        {
+          "time": 9,
+          "text": "मॉर्फियस: लाल गोली लोगे, और मैं दिखाऊँगा सच्चाई कितनी गहरी है।"
+        },
+        {
+          "time": 17,
+          "text": "नियो: मुझे कुंग फू आता है।"
+        },
+        {
+          "time": 21,
+          "text": "मॉर्फियस: करके दिखाओ।"
+        }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[sintetizador digital y código verde fluyendo]"
+        },
+        {
+          "time": 4,
+          "text": "MORFEO: Tomas la pastilla azul, la historia termina."
+        },
+        {
+          "time": 9,
+          "text": "MORFEO: Tomas la pastilla roja, y te muestro qué tan profundo es el agujero del conejo."
+        },
+        {
+          "time": 17,
+          "text": "NEO: Sé kung fu."
+        },
+        {
+          "time": 21,
+          "text": "MORFEO: Muéstramelo."
+        }
+      ]
+    }
   },
   {
     "id": "avatar-way-of-water",
@@ -1580,7 +2980,77 @@ const movies = [
     "category": "scifi",
     "isOriginal": false,
     "tmdbId": 76600,
-    "youtubeTrailerId": "d9MyW72ELq0"
+    "youtubeTrailerId": "d9MyW72ELq0",
+    "videoUrl": "https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4",
+    "backupVideoUrl": "https://media.w3.org/2010/05/sintel/trailer.mp4",
+    "subtitles": {
+      "en": [
+        {
+          "time": 1,
+          "text": "[atmospheric soundtrack swells - Avatar: The Way of Water]"
+        },
+        {
+          "time": 4,
+          "text": "SAM WORTHINGTON: Everything we fought for comes down to this moment."
+        },
+        {
+          "time": 10,
+          "text": "ZOE SALDANA: We cannot afford to back down now."
+        },
+        {
+          "time": 16,
+          "text": "[dramatic cinematic climax unfolds in Ultra HD]"
+        },
+        {
+          "time": 22,
+          "text": "SAM WORTHINGTON: Hold the line! This is our destiny!"
+        }
+      ],
+      "hi": [
+        {
+          "time": 1,
+          "text": "[रोमांचक सिनेमाई संगीत - Avatar: The Way of Water]"
+        },
+        {
+          "time": 4,
+          "text": "Sam Worthington: हमने जो कुछ भी सहा है, उसका फैसला आज होगा।"
+        },
+        {
+          "time": 10,
+          "text": "Zoe Saldana: अब पीछे हटने का कोई रास्ता नहीं है।"
+        },
+        {
+          "time": 16,
+          "text": "[भव्य दृश्य और धमाकेदार एक्शन]"
+        },
+        {
+          "time": 22,
+          "text": "Sam Worthington: डटे रहो! यही हमारी मंजिल है!"
+        }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[música cinematográfica envolvente - Avatar: The Way of Water]"
+        },
+        {
+          "time": 4,
+          "text": "Sam Worthington: Todo por lo que luchamos se decide en este momento."
+        },
+        {
+          "time": 10,
+          "text": "Zoe Saldana: No podemos retroceder ahora."
+        },
+        {
+          "time": 16,
+          "text": "[acción espectacular en Ultra HD]"
+        },
+        {
+          "time": 22,
+          "text": "Sam Worthington: ¡Mantengan la línea! ¡Este es nuestro destino!"
+        }
+      ]
+    }
   },
   {
     "id": "spider-man-spider-verse",
@@ -1610,7 +3080,77 @@ const movies = [
     "category": "action",
     "isOriginal": false,
     "tmdbId": 569094,
-    "youtubeTrailerId": "cqGjhVJWtEg"
+    "youtubeTrailerId": "cqGjhVJWtEg",
+    "videoUrl": "https://media.w3.org/2010/05/sintel/trailer.mp4",
+    "backupVideoUrl": "https://vjs.zencdn.net/v/oceans.mp4",
+    "subtitles": {
+      "en": [
+        {
+          "time": 1,
+          "text": "[atmospheric soundtrack swells - Spider-Man: Across the Spider-Verse]"
+        },
+        {
+          "time": 4,
+          "text": "SHAMEIK MOORE: Everything we fought for comes down to this moment."
+        },
+        {
+          "time": 10,
+          "text": "HAILEE STEINFELD: We cannot afford to back down now."
+        },
+        {
+          "time": 16,
+          "text": "[dramatic cinematic climax unfolds in Ultra HD]"
+        },
+        {
+          "time": 22,
+          "text": "SHAMEIK MOORE: Hold the line! This is our destiny!"
+        }
+      ],
+      "hi": [
+        {
+          "time": 1,
+          "text": "[रोमांचक सिनेमाई संगीत - Spider-Man: Across the Spider-Verse]"
+        },
+        {
+          "time": 4,
+          "text": "Shameik Moore: हमने जो कुछ भी सहा है, उसका फैसला आज होगा।"
+        },
+        {
+          "time": 10,
+          "text": "Hailee Steinfeld: अब पीछे हटने का कोई रास्ता नहीं है।"
+        },
+        {
+          "time": 16,
+          "text": "[भव्य दृश्य और धमाकेदार एक्शन]"
+        },
+        {
+          "time": 22,
+          "text": "Shameik Moore: डटे रहो! यही हमारी मंजिल है!"
+        }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[música cinematográfica envolvente - Spider-Man: Across the Spider-Verse]"
+        },
+        {
+          "time": 4,
+          "text": "Shameik Moore: Todo por lo que luchamos se decide en este momento."
+        },
+        {
+          "time": 10,
+          "text": "Hailee Steinfeld: No podemos retroceder ahora."
+        },
+        {
+          "time": 16,
+          "text": "[acción espectacular en Ultra HD]"
+        },
+        {
+          "time": 22,
+          "text": "Shameik Moore: ¡Mantengan la línea! ¡Este es nuestro destino!"
+        }
+      ]
+    }
   },
   {
     "id": "gladiator",
@@ -1640,7 +3180,77 @@ const movies = [
     "category": "action",
     "isOriginal": false,
     "tmdbId": 98,
-    "youtubeTrailerId": "owK1qxDselE"
+    "youtubeTrailerId": "owK1qxDselE",
+    "videoUrl": "https://vjs.zencdn.net/v/oceans.mp4",
+    "backupVideoUrl": "https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4",
+    "subtitles": {
+      "en": [
+        {
+          "time": 1,
+          "text": "[atmospheric soundtrack swells - Gladiator]"
+        },
+        {
+          "time": 4,
+          "text": "RUSSELL CROWE: Everything we fought for comes down to this moment."
+        },
+        {
+          "time": 10,
+          "text": "JOAQUIN PHOENIX: We cannot afford to back down now."
+        },
+        {
+          "time": 16,
+          "text": "[dramatic cinematic climax unfolds in Ultra HD]"
+        },
+        {
+          "time": 22,
+          "text": "RUSSELL CROWE: Hold the line! This is our destiny!"
+        }
+      ],
+      "hi": [
+        {
+          "time": 1,
+          "text": "[रोमांचक सिनेमाई संगीत - Gladiator]"
+        },
+        {
+          "time": 4,
+          "text": "Russell Crowe: हमने जो कुछ भी सहा है, उसका फैसला आज होगा।"
+        },
+        {
+          "time": 10,
+          "text": "Joaquin Phoenix: अब पीछे हटने का कोई रास्ता नहीं है।"
+        },
+        {
+          "time": 16,
+          "text": "[भव्य दृश्य और धमाकेदार एक्शन]"
+        },
+        {
+          "time": 22,
+          "text": "Russell Crowe: डटे रहो! यही हमारी मंजिल है!"
+        }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[música cinematográfica envolvente - Gladiator]"
+        },
+        {
+          "time": 4,
+          "text": "Russell Crowe: Todo por lo que luchamos se decide en este momento."
+        },
+        {
+          "time": 10,
+          "text": "Joaquin Phoenix: No podemos retroceder ahora."
+        },
+        {
+          "time": 16,
+          "text": "[acción espectacular en Ultra HD]"
+        },
+        {
+          "time": 22,
+          "text": "Russell Crowe: ¡Mantengan la línea! ¡Este es nuestro destino!"
+        }
+      ]
+    }
   },
   {
     "id": "top-gun-maverick",
@@ -1670,7 +3280,77 @@ const movies = [
     "category": "action",
     "isOriginal": false,
     "tmdbId": 361743,
-    "youtubeTrailerId": "giXco2jaZ_4"
+    "youtubeTrailerId": "giXco2jaZ_4",
+    "videoUrl": "https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4",
+    "backupVideoUrl": "https://media.w3.org/2010/05/sintel/trailer.mp4",
+    "subtitles": {
+      "en": [
+        {
+          "time": 1,
+          "text": "[atmospheric soundtrack swells - Top Gun: Maverick]"
+        },
+        {
+          "time": 4,
+          "text": "TOM CRUISE: Everything we fought for comes down to this moment."
+        },
+        {
+          "time": 10,
+          "text": "MILES TELLER: We cannot afford to back down now."
+        },
+        {
+          "time": 16,
+          "text": "[dramatic cinematic climax unfolds in Ultra HD]"
+        },
+        {
+          "time": 22,
+          "text": "TOM CRUISE: Hold the line! This is our destiny!"
+        }
+      ],
+      "hi": [
+        {
+          "time": 1,
+          "text": "[रोमांचक सिनेमाई संगीत - Top Gun: Maverick]"
+        },
+        {
+          "time": 4,
+          "text": "Tom Cruise: हमने जो कुछ भी सहा है, उसका फैसला आज होगा।"
+        },
+        {
+          "time": 10,
+          "text": "Miles Teller: अब पीछे हटने का कोई रास्ता नहीं है।"
+        },
+        {
+          "time": 16,
+          "text": "[भव्य दृश्य और धमाकेदार एक्शन]"
+        },
+        {
+          "time": 22,
+          "text": "Tom Cruise: डटे रहो! यही हमारी मंजिल है!"
+        }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[música cinematográfica envolvente - Top Gun: Maverick]"
+        },
+        {
+          "time": 4,
+          "text": "Tom Cruise: Todo por lo que luchamos se decide en este momento."
+        },
+        {
+          "time": 10,
+          "text": "Miles Teller: No podemos retroceder ahora."
+        },
+        {
+          "time": 16,
+          "text": "[acción espectacular en Ultra HD]"
+        },
+        {
+          "time": 22,
+          "text": "Tom Cruise: ¡Mantengan la línea! ¡Este es nuestro destino!"
+        }
+      ]
+    }
   },
   {
     "id": "avengers-endgame",
@@ -1700,7 +3380,77 @@ const movies = [
     "category": "action",
     "isOriginal": false,
     "tmdbId": 299534,
-    "youtubeTrailerId": "TcMBFSGVi1c"
+    "youtubeTrailerId": "TcMBFSGVi1c",
+    "videoUrl": "https://media.w3.org/2010/05/sintel/trailer.mp4",
+    "backupVideoUrl": "https://vjs.zencdn.net/v/oceans.mp4",
+    "subtitles": {
+      "en": [
+        {
+          "time": 1,
+          "text": "[atmospheric soundtrack swells - Avengers: Endgame]"
+        },
+        {
+          "time": 4,
+          "text": "ROBERT DOWNEY JR.: Everything we fought for comes down to this moment."
+        },
+        {
+          "time": 10,
+          "text": "CHRIS EVANS: We cannot afford to back down now."
+        },
+        {
+          "time": 16,
+          "text": "[dramatic cinematic climax unfolds in Ultra HD]"
+        },
+        {
+          "time": 22,
+          "text": "ROBERT DOWNEY JR.: Hold the line! This is our destiny!"
+        }
+      ],
+      "hi": [
+        {
+          "time": 1,
+          "text": "[रोमांचक सिनेमाई संगीत - Avengers: Endgame]"
+        },
+        {
+          "time": 4,
+          "text": "Robert Downey Jr.: हमने जो कुछ भी सहा है, उसका फैसला आज होगा।"
+        },
+        {
+          "time": 10,
+          "text": "Chris Evans: अब पीछे हटने का कोई रास्ता नहीं है।"
+        },
+        {
+          "time": 16,
+          "text": "[भव्य दृश्य और धमाकेदार एक्शन]"
+        },
+        {
+          "time": 22,
+          "text": "Robert Downey Jr.: डटे रहो! यही हमारी मंजिल है!"
+        }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[música cinematográfica envolvente - Avengers: Endgame]"
+        },
+        {
+          "time": 4,
+          "text": "Robert Downey Jr.: Todo por lo que luchamos se decide en este momento."
+        },
+        {
+          "time": 10,
+          "text": "Chris Evans: No podemos retroceder ahora."
+        },
+        {
+          "time": 16,
+          "text": "[acción espectacular en Ultra HD]"
+        },
+        {
+          "time": 22,
+          "text": "Robert Downey Jr.: ¡Mantengan la línea! ¡Este es nuestro destino!"
+        }
+      ]
+    }
   },
   {
     "id": "titanic",
@@ -1730,7 +3480,77 @@ const movies = [
     "category": "drama",
     "isOriginal": false,
     "tmdbId": 597,
-    "youtubeTrailerId": "kVrqfYjkTdQ"
+    "youtubeTrailerId": "kVrqfYjkTdQ",
+    "videoUrl": "https://vjs.zencdn.net/v/oceans.mp4",
+    "backupVideoUrl": "https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4",
+    "subtitles": {
+      "en": [
+        {
+          "time": 1,
+          "text": "[atmospheric soundtrack swells - Titanic]"
+        },
+        {
+          "time": 4,
+          "text": "LEONARDO DICAPRIO: Everything we fought for comes down to this moment."
+        },
+        {
+          "time": 10,
+          "text": "KATE WINSLET: We cannot afford to back down now."
+        },
+        {
+          "time": 16,
+          "text": "[dramatic cinematic climax unfolds in Ultra HD]"
+        },
+        {
+          "time": 22,
+          "text": "LEONARDO DICAPRIO: Hold the line! This is our destiny!"
+        }
+      ],
+      "hi": [
+        {
+          "time": 1,
+          "text": "[रोमांचक सिनेमाई संगीत - Titanic]"
+        },
+        {
+          "time": 4,
+          "text": "Leonardo DiCaprio: हमने जो कुछ भी सहा है, उसका फैसला आज होगा।"
+        },
+        {
+          "time": 10,
+          "text": "Kate Winslet: अब पीछे हटने का कोई रास्ता नहीं है।"
+        },
+        {
+          "time": 16,
+          "text": "[भव्य दृश्य और धमाकेदार एक्शन]"
+        },
+        {
+          "time": 22,
+          "text": "Leonardo DiCaprio: डटे रहो! यही हमारी मंजिल है!"
+        }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[música cinematográfica envolvente - Titanic]"
+        },
+        {
+          "time": 4,
+          "text": "Leonardo DiCaprio: Todo por lo que luchamos se decide en este momento."
+        },
+        {
+          "time": 10,
+          "text": "Kate Winslet: No podemos retroceder ahora."
+        },
+        {
+          "time": 16,
+          "text": "[acción espectacular en Ultra HD]"
+        },
+        {
+          "time": 22,
+          "text": "Leonardo DiCaprio: ¡Mantengan la línea! ¡Este es nuestro destino!"
+        }
+      ]
+    }
   },
   {
     "id": "baahubali-2",
@@ -1760,7 +3580,77 @@ const movies = [
     "category": "action",
     "isOriginal": false,
     "tmdbId": 350312,
-    "youtubeTrailerId": "G62HrubdD6o"
+    "youtubeTrailerId": "G62HrubdD6o",
+    "videoUrl": "https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4",
+    "backupVideoUrl": "https://media.w3.org/2010/05/sintel/trailer.mp4",
+    "subtitles": {
+      "en": [
+        {
+          "time": 1,
+          "text": "[atmospheric soundtrack swells - Baahubali 2: The Conclusion]"
+        },
+        {
+          "time": 4,
+          "text": "PRABHAS: Everything we fought for comes down to this moment."
+        },
+        {
+          "time": 10,
+          "text": "RANA DAGGUBATI: We cannot afford to back down now."
+        },
+        {
+          "time": 16,
+          "text": "[dramatic cinematic climax unfolds in Ultra HD]"
+        },
+        {
+          "time": 22,
+          "text": "PRABHAS: Hold the line! This is our destiny!"
+        }
+      ],
+      "hi": [
+        {
+          "time": 1,
+          "text": "[रोमांचक सिनेमाई संगीत - Baahubali 2: The Conclusion]"
+        },
+        {
+          "time": 4,
+          "text": "Prabhas: हमने जो कुछ भी सहा है, उसका फैसला आज होगा।"
+        },
+        {
+          "time": 10,
+          "text": "Rana Daggubati: अब पीछे हटने का कोई रास्ता नहीं है।"
+        },
+        {
+          "time": 16,
+          "text": "[भव्य दृश्य और धमाकेदार एक्शन]"
+        },
+        {
+          "time": 22,
+          "text": "Prabhas: डटे रहो! यही हमारी मंजिल है!"
+        }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[música cinematográfica envolvente - Baahubali 2: The Conclusion]"
+        },
+        {
+          "time": 4,
+          "text": "Prabhas: Todo por lo que luchamos se decide en este momento."
+        },
+        {
+          "time": 10,
+          "text": "Rana Daggubati: No podemos retroceder ahora."
+        },
+        {
+          "time": 16,
+          "text": "[acción espectacular en Ultra HD]"
+        },
+        {
+          "time": 22,
+          "text": "Prabhas: ¡Mantengan la línea! ¡Este es nuestro destino!"
+        }
+      ]
+    }
   },
   {
     "id": "dangal",
@@ -1789,7 +3679,77 @@ const movies = [
     "category": "drama",
     "isOriginal": false,
     "tmdbId": 360814,
-    "youtubeTrailerId": "x_7YlGv9u1g"
+    "youtubeTrailerId": "x_7YlGv9u1g",
+    "videoUrl": "https://media.w3.org/2010/05/sintel/trailer.mp4",
+    "backupVideoUrl": "https://vjs.zencdn.net/v/oceans.mp4",
+    "subtitles": {
+      "en": [
+        {
+          "time": 1,
+          "text": "[atmospheric soundtrack swells - Dangal]"
+        },
+        {
+          "time": 4,
+          "text": "AAMIR KHAN: Everything we fought for comes down to this moment."
+        },
+        {
+          "time": 10,
+          "text": "FATIMA SANA SHAIKH: We cannot afford to back down now."
+        },
+        {
+          "time": 16,
+          "text": "[dramatic cinematic climax unfolds in Ultra HD]"
+        },
+        {
+          "time": 22,
+          "text": "AAMIR KHAN: Hold the line! This is our destiny!"
+        }
+      ],
+      "hi": [
+        {
+          "time": 1,
+          "text": "[रोमांचक सिनेमाई संगीत - Dangal]"
+        },
+        {
+          "time": 4,
+          "text": "Aamir Khan: हमने जो कुछ भी सहा है, उसका फैसला आज होगा।"
+        },
+        {
+          "time": 10,
+          "text": "Fatima Sana Shaikh: अब पीछे हटने का कोई रास्ता नहीं है।"
+        },
+        {
+          "time": 16,
+          "text": "[भव्य दृश्य और धमाकेदार एक्शन]"
+        },
+        {
+          "time": 22,
+          "text": "Aamir Khan: डटे रहो! यही हमारी मंजिल है!"
+        }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[música cinematográfica envolvente - Dangal]"
+        },
+        {
+          "time": 4,
+          "text": "Aamir Khan: Todo por lo que luchamos se decide en este momento."
+        },
+        {
+          "time": 10,
+          "text": "Fatima Sana Shaikh: No podemos retroceder ahora."
+        },
+        {
+          "time": 16,
+          "text": "[acción espectacular en Ultra HD]"
+        },
+        {
+          "time": 22,
+          "text": "Aamir Khan: ¡Mantengan la línea! ¡Este es nuestro destino!"
+        }
+      ]
+    }
   },
   {
     "id": "three-idiots",
@@ -1819,7 +3779,77 @@ const movies = [
     "category": "drama",
     "isOriginal": false,
     "tmdbId": 20453,
-    "youtubeTrailerId": "K0eDlFX9GMc"
+    "youtubeTrailerId": "K0eDlFX9GMc",
+    "videoUrl": "https://vjs.zencdn.net/v/oceans.mp4",
+    "backupVideoUrl": "https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4",
+    "subtitles": {
+      "en": [
+        {
+          "time": 1,
+          "text": "[atmospheric soundtrack swells - 3 Idiots]"
+        },
+        {
+          "time": 4,
+          "text": "AAMIR KHAN: Everything we fought for comes down to this moment."
+        },
+        {
+          "time": 10,
+          "text": "R. MADHAVAN: We cannot afford to back down now."
+        },
+        {
+          "time": 16,
+          "text": "[dramatic cinematic climax unfolds in Ultra HD]"
+        },
+        {
+          "time": 22,
+          "text": "AAMIR KHAN: Hold the line! This is our destiny!"
+        }
+      ],
+      "hi": [
+        {
+          "time": 1,
+          "text": "[रोमांचक सिनेमाई संगीत - 3 Idiots]"
+        },
+        {
+          "time": 4,
+          "text": "Aamir Khan: हमने जो कुछ भी सहा है, उसका फैसला आज होगा।"
+        },
+        {
+          "time": 10,
+          "text": "R. Madhavan: अब पीछे हटने का कोई रास्ता नहीं है।"
+        },
+        {
+          "time": 16,
+          "text": "[भव्य दृश्य और धमाकेदार एक्शन]"
+        },
+        {
+          "time": 22,
+          "text": "Aamir Khan: डटे रहो! यही हमारी मंजिल है!"
+        }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[música cinematográfica envolvente - 3 Idiots]"
+        },
+        {
+          "time": 4,
+          "text": "Aamir Khan: Todo por lo que luchamos se decide en este momento."
+        },
+        {
+          "time": 10,
+          "text": "R. Madhavan: No podemos retroceder ahora."
+        },
+        {
+          "time": 16,
+          "text": "[acción espectacular en Ultra HD]"
+        },
+        {
+          "time": 22,
+          "text": "Aamir Khan: ¡Mantengan la línea! ¡Este es nuestro destino!"
+        }
+      ]
+    }
   },
   {
     "id": "vikram",
@@ -1849,7 +3879,77 @@ const movies = [
     "category": "action",
     "isOriginal": false,
     "tmdbId": 757837,
-    "youtubeTrailerId": "OKBMCLzuvTW"
+    "youtubeTrailerId": "OKBMCLzuvTW",
+    "videoUrl": "https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4",
+    "backupVideoUrl": "https://media.w3.org/2010/05/sintel/trailer.mp4",
+    "subtitles": {
+      "en": [
+        {
+          "time": 1,
+          "text": "[atmospheric soundtrack swells - Vikram]"
+        },
+        {
+          "time": 4,
+          "text": "KAMAL HAASAN: Everything we fought for comes down to this moment."
+        },
+        {
+          "time": 10,
+          "text": "VIJAY SETHUPATHI: We cannot afford to back down now."
+        },
+        {
+          "time": 16,
+          "text": "[dramatic cinematic climax unfolds in Ultra HD]"
+        },
+        {
+          "time": 22,
+          "text": "KAMAL HAASAN: Hold the line! This is our destiny!"
+        }
+      ],
+      "hi": [
+        {
+          "time": 1,
+          "text": "[रोमांचक सिनेमाई संगीत - Vikram]"
+        },
+        {
+          "time": 4,
+          "text": "Kamal Haasan: हमने जो कुछ भी सहा है, उसका फैसला आज होगा।"
+        },
+        {
+          "time": 10,
+          "text": "Vijay Sethupathi: अब पीछे हटने का कोई रास्ता नहीं है।"
+        },
+        {
+          "time": 16,
+          "text": "[भव्य दृश्य और धमाकेदार एक्शन]"
+        },
+        {
+          "time": 22,
+          "text": "Kamal Haasan: डटे रहो! यही हमारी मंजिल है!"
+        }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[música cinematográfica envolvente - Vikram]"
+        },
+        {
+          "time": 4,
+          "text": "Kamal Haasan: Todo por lo que luchamos se decide en este momento."
+        },
+        {
+          "time": 10,
+          "text": "Vijay Sethupathi: No podemos retroceder ahora."
+        },
+        {
+          "time": 16,
+          "text": "[acción espectacular en Ultra HD]"
+        },
+        {
+          "time": 22,
+          "text": "Kamal Haasan: ¡Mantengan la línea! ¡Este es nuestro destino!"
+        }
+      ]
+    }
   },
   {
     "id": "kantara",
@@ -1878,7 +3978,77 @@ const movies = [
     "category": "drama",
     "isOriginal": false,
     "tmdbId": 1024546,
-    "youtubeTrailerId": "8Mrp_10vWdg"
+    "youtubeTrailerId": "8Mrp_10vWdg",
+    "videoUrl": "https://media.w3.org/2010/05/sintel/trailer.mp4",
+    "backupVideoUrl": "https://vjs.zencdn.net/v/oceans.mp4",
+    "subtitles": {
+      "en": [
+        {
+          "time": 1,
+          "text": "[atmospheric soundtrack swells - Kantara]"
+        },
+        {
+          "time": 4,
+          "text": "RISHAB SHETTY: Everything we fought for comes down to this moment."
+        },
+        {
+          "time": 10,
+          "text": "SAPTHAMI GOWDA: We cannot afford to back down now."
+        },
+        {
+          "time": 16,
+          "text": "[dramatic cinematic climax unfolds in Ultra HD]"
+        },
+        {
+          "time": 22,
+          "text": "RISHAB SHETTY: Hold the line! This is our destiny!"
+        }
+      ],
+      "hi": [
+        {
+          "time": 1,
+          "text": "[रोमांचक सिनेमाई संगीत - Kantara]"
+        },
+        {
+          "time": 4,
+          "text": "Rishab Shetty: हमने जो कुछ भी सहा है, उसका फैसला आज होगा।"
+        },
+        {
+          "time": 10,
+          "text": "Sapthami Gowda: अब पीछे हटने का कोई रास्ता नहीं है।"
+        },
+        {
+          "time": 16,
+          "text": "[भव्य दृश्य और धमाकेदार एक्शन]"
+        },
+        {
+          "time": 22,
+          "text": "Rishab Shetty: डटे रहो! यही हमारी मंजिल है!"
+        }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[música cinematográfica envolvente - Kantara]"
+        },
+        {
+          "time": 4,
+          "text": "Rishab Shetty: Todo por lo que luchamos se decide en este momento."
+        },
+        {
+          "time": 10,
+          "text": "Sapthami Gowda: No podemos retroceder ahora."
+        },
+        {
+          "time": 16,
+          "text": "[acción espectacular en Ultra HD]"
+        },
+        {
+          "time": 22,
+          "text": "Rishab Shetty: ¡Mantengan la línea! ¡Este es nuestro destino!"
+        }
+      ]
+    }
   },
   {
     "id": "pushpa-the-rise",
@@ -1907,7 +4077,77 @@ const movies = [
     "category": "action",
     "isOriginal": false,
     "tmdbId": 693134,
-    "youtubeTrailerId": "Q1NKMPhP8PY"
+    "youtubeTrailerId": "Q1NKMPhP8PY",
+    "videoUrl": "https://vjs.zencdn.net/v/oceans.mp4",
+    "backupVideoUrl": "https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4",
+    "subtitles": {
+      "en": [
+        {
+          "time": 1,
+          "text": "[atmospheric soundtrack swells - Pushpa: The Rise]"
+        },
+        {
+          "time": 4,
+          "text": "ALLU ARJUN: Everything we fought for comes down to this moment."
+        },
+        {
+          "time": 10,
+          "text": "RASHMIKA MANDANNA: We cannot afford to back down now."
+        },
+        {
+          "time": 16,
+          "text": "[dramatic cinematic climax unfolds in Ultra HD]"
+        },
+        {
+          "time": 22,
+          "text": "ALLU ARJUN: Hold the line! This is our destiny!"
+        }
+      ],
+      "hi": [
+        {
+          "time": 1,
+          "text": "[रोमांचक सिनेमाई संगीत - Pushpa: The Rise]"
+        },
+        {
+          "time": 4,
+          "text": "Allu Arjun: हमने जो कुछ भी सहा है, उसका फैसला आज होगा।"
+        },
+        {
+          "time": 10,
+          "text": "Rashmika Mandanna: अब पीछे हटने का कोई रास्ता नहीं है।"
+        },
+        {
+          "time": 16,
+          "text": "[भव्य दृश्य और धमाकेदार एक्शन]"
+        },
+        {
+          "time": 22,
+          "text": "Allu Arjun: डटे रहो! यही हमारी मंजिल है!"
+        }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[música cinematográfica envolvente - Pushpa: The Rise]"
+        },
+        {
+          "time": 4,
+          "text": "Allu Arjun: Todo por lo que luchamos se decide en este momento."
+        },
+        {
+          "time": 10,
+          "text": "Rashmika Mandanna: No podemos retroceder ahora."
+        },
+        {
+          "time": 16,
+          "text": "[acción espectacular en Ultra HD]"
+        },
+        {
+          "time": 22,
+          "text": "Allu Arjun: ¡Mantengan la línea! ¡Este es nuestro destino!"
+        }
+      ]
+    }
   },
   {
     "id": "attack-on-titan",
@@ -1937,7 +4177,69 @@ const movies = [
     "category": "scifi",
     "isOriginal": false,
     "tmdbId": 1429,
-    "youtubeTrailerId": "MGRm4IzK1SQ"
+    "youtubeTrailerId": "MGRm4IzK1SQ",
+    "videoUrl": "https://media.w3.org/2010/05/sintel/trailer.mp4",
+    "backupVideoUrl": "https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4",
+    "subtitles": {
+      "en": [
+        {
+          "time": 1,
+          "text": "[Sawano choral battle chant thunders]"
+        },
+        {
+          "time": 4,
+          "text": "EREN: If we kill all our enemies over there... will we finally be free?"
+        },
+        {
+          "time": 10,
+          "text": "LEVI: Give up on your dream and die for us."
+        },
+        {
+          "time": 15,
+          "text": "EREN: TATAKAE! Keep moving forward until all my enemies are destroyed!"
+        },
+        {
+          "time": 22,
+          "text": "[Wall Titan footsteps shake the continents]"
+        }
+      ],
+      "hi": [
+        {
+          "time": 1,
+          "text": "[विशालकाय महाकाव्य संगीत]"
+        },
+        {
+          "time": 4,
+          "text": "एरेन: अगर हम समंदर पार के सारे दुश्मनों को खत्म कर दें... क्या हम आज़ाद हो जाएँगे?"
+        },
+        {
+          "time": 10,
+          "text": "लेवाई: अपने सपनों को छोड़ो और लड़ते हुए मरो।"
+        },
+        {
+          "time": 15,
+          "text": "एरेन: ताताकाए! लड़ो और आगे बढ़ते रहो!"
+        }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[coro orquestal épico y atronador]"
+        },
+        {
+          "time": 4,
+          "text": "EREN: Si matamos a todos los enemigos allá... ¿seremos finalmente libres?"
+        },
+        {
+          "time": 10,
+          "text": "LEVI: Renuncia a tus sueños y muere por nosotros."
+        },
+        {
+          "time": 15,
+          "text": "EREN: ¡TATAKAE! ¡Sigue adelante hasta destruir a cada enemigo!"
+        }
+      ]
+    }
   },
   {
     "id": "death-note",
@@ -1966,7 +4268,77 @@ const movies = [
     "category": "drama",
     "isOriginal": false,
     "tmdbId": 13916,
-    "youtubeTrailerId": "NlJZ-YgAt-c"
+    "youtubeTrailerId": "NlJZ-YgAt-c",
+    "videoUrl": "https://media.w3.org/2010/05/sintel/trailer.mp4",
+    "backupVideoUrl": "https://vjs.zencdn.net/v/oceans.mp4",
+    "subtitles": {
+      "en": [
+        {
+          "time": 1,
+          "text": "[atmospheric soundtrack swells - Death Note]"
+        },
+        {
+          "time": 4,
+          "text": "MAMORU MIYANO: Everything we fought for comes down to this moment."
+        },
+        {
+          "time": 10,
+          "text": "KAPPEI YAMAGUCHI: We cannot afford to back down now."
+        },
+        {
+          "time": 16,
+          "text": "[dramatic cinematic climax unfolds in Ultra HD]"
+        },
+        {
+          "time": 22,
+          "text": "MAMORU MIYANO: Hold the line! This is our destiny!"
+        }
+      ],
+      "hi": [
+        {
+          "time": 1,
+          "text": "[रोमांचक सिनेमाई संगीत - Death Note]"
+        },
+        {
+          "time": 4,
+          "text": "Mamoru Miyano: हमने जो कुछ भी सहा है, उसका फैसला आज होगा।"
+        },
+        {
+          "time": 10,
+          "text": "Kappei Yamaguchi: अब पीछे हटने का कोई रास्ता नहीं है।"
+        },
+        {
+          "time": 16,
+          "text": "[भव्य दृश्य और धमाकेदार एक्शन]"
+        },
+        {
+          "time": 22,
+          "text": "Mamoru Miyano: डटे रहो! यही हमारी मंजिल है!"
+        }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[música cinematográfica envolvente - Death Note]"
+        },
+        {
+          "time": 4,
+          "text": "Mamoru Miyano: Todo por lo que luchamos se decide en este momento."
+        },
+        {
+          "time": 10,
+          "text": "Kappei Yamaguchi: No podemos retroceder ahora."
+        },
+        {
+          "time": 16,
+          "text": "[acción espectacular en Ultra HD]"
+        },
+        {
+          "time": 22,
+          "text": "Mamoru Miyano: ¡Mantengan la línea! ¡Este es nuestro destino!"
+        }
+      ]
+    }
   },
   {
     "id": "demon-slayer",
@@ -1995,7 +4367,65 @@ const movies = [
     "category": "action",
     "isOriginal": false,
     "tmdbId": 85937,
-    "youtubeTrailerId": "VQGCKyvzIM4"
+    "youtubeTrailerId": "VQGCKyvzIM4",
+    "videoUrl": "https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4",
+    "backupVideoUrl": "https://vjs.zencdn.net/v/oceans.mp4",
+    "subtitles": {
+      "en": [
+        {
+          "time": 1,
+          "text": "[traditional Japanese flute and soaring strings]"
+        },
+        {
+          "time": 4,
+          "text": "TANJIRO: Total Concentration Breathing... Hinokami Kagura!"
+        },
+        {
+          "time": 10,
+          "text": "NEZUKO: [demon roar of fierce protection]"
+        },
+        {
+          "time": 15,
+          "text": "RENGOKU: Set your heart ablaze! Go beyond your limits!"
+        },
+        {
+          "time": 21,
+          "text": "[flame wheel slashes through darkness with brilliant sparks]"
+        }
+      ],
+      "hi": [
+        {
+          "time": 1,
+          "text": "[पारंपरिक जापानी बांसुरी और सिम्फनी]"
+        },
+        {
+          "time": 4,
+          "text": "तान्जिरो: पूर्ण एकाग्रता श्वास... हिनोकामी कागुरा!"
+        },
+        {
+          "time": 10,
+          "text": "नेज़ुको: [राक्षसी गर्जना के साथ रक्षा करती है]"
+        },
+        {
+          "time": 15,
+          "text": "रेंगोकु: अपने दिल में आग जलाओ! अपनी सीमाओं से आगे बढ़ो!"
+        }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[flauta japonesa tradicional y cuerdas dinámicas]"
+        },
+        {
+          "time": 4,
+          "text": "TANJIRO: ¡Respiración de Enfoque Total... Hinokami Kagura!"
+        },
+        {
+          "time": 15,
+          "text": "RENGOKU: ¡Enciende tu corazón! ¡Supera tus límites!"
+        }
+      ]
+    }
   },
   {
     "id": "jujutsu-kaisen",
@@ -2024,7 +4454,77 @@ const movies = [
     "category": "action",
     "isOriginal": false,
     "tmdbId": 95479,
-    "youtubeTrailerId": "pkZXBNda8kM"
+    "youtubeTrailerId": "pkZXBNda8kM",
+    "videoUrl": "https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4",
+    "backupVideoUrl": "https://media.w3.org/2010/05/sintel/trailer.mp4",
+    "subtitles": {
+      "en": [
+        {
+          "time": 1,
+          "text": "[atmospheric soundtrack swells - Jujutsu Kaisen]"
+        },
+        {
+          "time": 4,
+          "text": "JUNYA ENOKI: Everything we fought for comes down to this moment."
+        },
+        {
+          "time": 10,
+          "text": "YUMA UCHIDA: We cannot afford to back down now."
+        },
+        {
+          "time": 16,
+          "text": "[dramatic cinematic climax unfolds in Ultra HD]"
+        },
+        {
+          "time": 22,
+          "text": "JUNYA ENOKI: Hold the line! This is our destiny!"
+        }
+      ],
+      "hi": [
+        {
+          "time": 1,
+          "text": "[रोमांचक सिनेमाई संगीत - Jujutsu Kaisen]"
+        },
+        {
+          "time": 4,
+          "text": "Junya Enoki: हमने जो कुछ भी सहा है, उसका फैसला आज होगा।"
+        },
+        {
+          "time": 10,
+          "text": "Yuma Uchida: अब पीछे हटने का कोई रास्ता नहीं है।"
+        },
+        {
+          "time": 16,
+          "text": "[भव्य दृश्य और धमाकेदार एक्शन]"
+        },
+        {
+          "time": 22,
+          "text": "Junya Enoki: डटे रहो! यही हमारी मंजिल है!"
+        }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[música cinematográfica envolvente - Jujutsu Kaisen]"
+        },
+        {
+          "time": 4,
+          "text": "Junya Enoki: Todo por lo que luchamos se decide en este momento."
+        },
+        {
+          "time": 10,
+          "text": "Yuma Uchida: No podemos retroceder ahora."
+        },
+        {
+          "time": 16,
+          "text": "[acción espectacular en Ultra HD]"
+        },
+        {
+          "time": 22,
+          "text": "Junya Enoki: ¡Mantengan la línea! ¡Este es nuestro destino!"
+        }
+      ]
+    }
   },
   {
     "id": "the-boys",
@@ -2054,7 +4554,65 @@ const movies = [
     "category": "action",
     "isOriginal": false,
     "tmdbId": 76479,
-    "youtubeTrailerId": "06rueu_fh30"
+    "youtubeTrailerId": "06rueu_fh30",
+    "videoUrl": "https://vjs.zencdn.net/v/oceans.mp4",
+    "backupVideoUrl": "https://media.w3.org/2010/05/sintel/trailer.mp4",
+    "subtitles": {
+      "en": [
+        {
+          "time": 1,
+          "text": "[gritty punk rock guitar explodes]"
+        },
+        {
+          "time": 4,
+          "text": "BILLY BUTCHER: Scorched earth, mate."
+        },
+        {
+          "time": 8,
+          "text": "HOMELANDER: I'm the Homelander. And I can do whatever I want."
+        },
+        {
+          "time": 14,
+          "text": "HUGHIE: We can't cross that line, Butcher!"
+        },
+        {
+          "time": 19,
+          "text": "BUTCHER: When you stand in front of monsters, you become the bastard they fear."
+        },
+        {
+          "time": 25,
+          "text": "[lasers burn through concrete with blinding light]"
+        }
+      ],
+      "hi": [
+        {
+          "time": 1,
+          "text": "[जोशीला पंक रॉक संगीत]"
+        },
+        {
+          "time": 4,
+          "text": "बिली बुचर: अब सब कुछ तबाह होगा, दोस्त।"
+        },
+        {
+          "time": 8,
+          "text": "होमलैंडर: मैं होमलैंडर हूँ। और मैं जो चाहे वो कर सकता हूँ।"
+        }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[guitarra punk agresiva y distorsión]"
+        },
+        {
+          "time": 4,
+          "text": "BUTCHER: Tierra quemada, amigo."
+        },
+        {
+          "time": 8,
+          "text": "HOMELANDER: Soy Homelander. Y puedo hacer lo que se me dé la gana."
+        }
+      ]
+    }
   },
   {
     "id": "black-mirror",
@@ -2084,7 +4642,77 @@ const movies = [
     "category": "scifi",
     "isOriginal": true,
     "tmdbId": 42009,
-    "youtubeTrailerId": "V0Uv6k6p1wE"
+    "youtubeTrailerId": "V0Uv6k6p1wE",
+    "videoUrl": "https://vjs.zencdn.net/v/oceans.mp4",
+    "backupVideoUrl": "https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4",
+    "subtitles": {
+      "en": [
+        {
+          "time": 1,
+          "text": "[atmospheric soundtrack swells - Black Mirror]"
+        },
+        {
+          "time": 4,
+          "text": "DANIEL KALUUYA: Everything we fought for comes down to this moment."
+        },
+        {
+          "time": 10,
+          "text": "JON HAMM: We cannot afford to back down now."
+        },
+        {
+          "time": 16,
+          "text": "[dramatic cinematic climax unfolds in Ultra HD]"
+        },
+        {
+          "time": 22,
+          "text": "DANIEL KALUUYA: Hold the line! This is our destiny!"
+        }
+      ],
+      "hi": [
+        {
+          "time": 1,
+          "text": "[रोमांचक सिनेमाई संगीत - Black Mirror]"
+        },
+        {
+          "time": 4,
+          "text": "Daniel Kaluuya: हमने जो कुछ भी सहा है, उसका फैसला आज होगा।"
+        },
+        {
+          "time": 10,
+          "text": "Jon Hamm: अब पीछे हटने का कोई रास्ता नहीं है।"
+        },
+        {
+          "time": 16,
+          "text": "[भव्य दृश्य और धमाकेदार एक्शन]"
+        },
+        {
+          "time": 22,
+          "text": "Daniel Kaluuya: डटे रहो! यही हमारी मंजिल है!"
+        }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[música cinematográfica envolvente - Black Mirror]"
+        },
+        {
+          "time": 4,
+          "text": "Daniel Kaluuya: Todo por lo que luchamos se decide en este momento."
+        },
+        {
+          "time": 10,
+          "text": "Jon Hamm: No podemos retroceder ahora."
+        },
+        {
+          "time": 16,
+          "text": "[acción espectacular en Ultra HD]"
+        },
+        {
+          "time": 22,
+          "text": "Daniel Kaluuya: ¡Mantengan la línea! ¡Este es nuestro destino!"
+        }
+      ]
+    }
   },
   {
     "id": "dunki",
@@ -2114,7 +4742,77 @@ const movies = [
     "category": "drama",
     "isOriginal": false,
     "tmdbId": 1071489,
-    "youtubeTrailerId": "2U8GgL9x8qA"
+    "youtubeTrailerId": "2U8GgL9x8qA",
+    "videoUrl": "https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4",
+    "backupVideoUrl": "https://media.w3.org/2010/05/sintel/trailer.mp4",
+    "subtitles": {
+      "en": [
+        {
+          "time": 1,
+          "text": "[atmospheric soundtrack swells - Dunki]"
+        },
+        {
+          "time": 4,
+          "text": "SHAH RUKH KHAN: Everything we fought for comes down to this moment."
+        },
+        {
+          "time": 10,
+          "text": "TAAPSEE PANNU: We cannot afford to back down now."
+        },
+        {
+          "time": 16,
+          "text": "[dramatic cinematic climax unfolds in Ultra HD]"
+        },
+        {
+          "time": 22,
+          "text": "SHAH RUKH KHAN: Hold the line! This is our destiny!"
+        }
+      ],
+      "hi": [
+        {
+          "time": 1,
+          "text": "[रोमांचक सिनेमाई संगीत - Dunki]"
+        },
+        {
+          "time": 4,
+          "text": "Shah Rukh Khan: हमने जो कुछ भी सहा है, उसका फैसला आज होगा।"
+        },
+        {
+          "time": 10,
+          "text": "Taapsee Pannu: अब पीछे हटने का कोई रास्ता नहीं है।"
+        },
+        {
+          "time": 16,
+          "text": "[भव्य दृश्य और धमाकेदार एक्शन]"
+        },
+        {
+          "time": 22,
+          "text": "Shah Rukh Khan: डटे रहो! यही हमारी मंजिल है!"
+        }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[música cinematográfica envolvente - Dunki]"
+        },
+        {
+          "time": 4,
+          "text": "Shah Rukh Khan: Todo por lo que luchamos se decide en este momento."
+        },
+        {
+          "time": 10,
+          "text": "Taapsee Pannu: No podemos retroceder ahora."
+        },
+        {
+          "time": 16,
+          "text": "[acción espectacular en Ultra HD]"
+        },
+        {
+          "time": 22,
+          "text": "Shah Rukh Khan: ¡Mantengan la línea! ¡Este es nuestro destino!"
+        }
+      ]
+    }
   },
   {
     "id": "drishyam",
@@ -2146,7 +4844,77 @@ const movies = [
     "isOriginal": false,
     "top10Rank": 3,
     "tmdbId": 353491,
-    "youtubeTrailerId": "AuuX2j14NBg"
+    "youtubeTrailerId": "AuuX2j14NBg",
+    "videoUrl": "https://media.w3.org/2010/05/sintel/trailer.mp4",
+    "backupVideoUrl": "https://vjs.zencdn.net/v/oceans.mp4",
+    "subtitles": {
+      "en": [
+        {
+          "time": 1,
+          "text": "[atmospheric soundtrack swells - Drishyam]"
+        },
+        {
+          "time": 4,
+          "text": "AJAY DEVGN: Everything we fought for comes down to this moment."
+        },
+        {
+          "time": 10,
+          "text": "TABU: We cannot afford to back down now."
+        },
+        {
+          "time": 16,
+          "text": "[dramatic cinematic climax unfolds in Ultra HD]"
+        },
+        {
+          "time": 22,
+          "text": "AJAY DEVGN: Hold the line! This is our destiny!"
+        }
+      ],
+      "hi": [
+        {
+          "time": 1,
+          "text": "[रोमांचक सिनेमाई संगीत - Drishyam]"
+        },
+        {
+          "time": 4,
+          "text": "Ajay Devgn: हमने जो कुछ भी सहा है, उसका फैसला आज होगा।"
+        },
+        {
+          "time": 10,
+          "text": "Tabu: अब पीछे हटने का कोई रास्ता नहीं है।"
+        },
+        {
+          "time": 16,
+          "text": "[भव्य दृश्य और धमाकेदार एक्शन]"
+        },
+        {
+          "time": 22,
+          "text": "Ajay Devgn: डटे रहो! यही हमारी मंजिल है!"
+        }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[música cinematográfica envolvente - Drishyam]"
+        },
+        {
+          "time": 4,
+          "text": "Ajay Devgn: Todo por lo que luchamos se decide en este momento."
+        },
+        {
+          "time": 10,
+          "text": "Tabu: No podemos retroceder ahora."
+        },
+        {
+          "time": 16,
+          "text": "[acción espectacular en Ultra HD]"
+        },
+        {
+          "time": 22,
+          "text": "Ajay Devgn: ¡Mantengan la línea! ¡Este es nuestro destino!"
+        }
+      ]
+    }
   },
   {
     "id": "drishyam-2",
@@ -2178,8 +4946,77 @@ const movies = [
     "isOriginal": false,
     "top10Rank": 4,
     "tmdbId": 979924,
-    "youtubeTrailerId": "cxA2y9Tgl7o"
+    "youtubeTrailerId": "cxA2y9Tgl7o",
+    "videoUrl": "https://vjs.zencdn.net/v/oceans.mp4",
+    "backupVideoUrl": "https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4",
+    "subtitles": {
+      "en": [
+        {
+          "time": 1,
+          "text": "[atmospheric soundtrack swells - Drishyam 2]"
+        },
+        {
+          "time": 4,
+          "text": "AJAY DEVGN: Everything we fought for comes down to this moment."
+        },
+        {
+          "time": 10,
+          "text": "AKSHAYE KHANNA: We cannot afford to back down now."
+        },
+        {
+          "time": 16,
+          "text": "[dramatic cinematic climax unfolds in Ultra HD]"
+        },
+        {
+          "time": 22,
+          "text": "AJAY DEVGN: Hold the line! This is our destiny!"
+        }
+      ],
+      "hi": [
+        {
+          "time": 1,
+          "text": "[रोमांचक सिनेमाई संगीत - Drishyam 2]"
+        },
+        {
+          "time": 4,
+          "text": "Ajay Devgn: हमने जो कुछ भी सहा है, उसका फैसला आज होगा।"
+        },
+        {
+          "time": 10,
+          "text": "Akshaye Khanna: अब पीछे हटने का कोई रास्ता नहीं है।"
+        },
+        {
+          "time": 16,
+          "text": "[भव्य दृश्य और धमाकेदार एक्शन]"
+        },
+        {
+          "time": 22,
+          "text": "Ajay Devgn: डटे रहो! यही हमारी मंजिल है!"
+        }
+      ],
+      "es": [
+        {
+          "time": 1,
+          "text": "[música cinematográfica envolvente - Drishyam 2]"
+        },
+        {
+          "time": 4,
+          "text": "Ajay Devgn: Todo por lo que luchamos se decide en este momento."
+        },
+        {
+          "time": 10,
+          "text": "Akshaye Khanna: No podemos retroceder ahora."
+        },
+        {
+          "time": 16,
+          "text": "[acción espectacular en Ultra HD]"
+        },
+        {
+          "time": 22,
+          "text": "Ajay Devgn: ¡Mantengan la línea! ¡Este es nuestro destino!"
+        }
+      ]
+    }
   }
 ];
-
 module.exports = movies;

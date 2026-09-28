@@ -6,3 +6,4 @@ database/netflix.db-shm
 frontend/*_preview.png
 frontend/*_full.png
 .vercel
+.env*

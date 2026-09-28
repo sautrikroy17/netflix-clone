@@ -1404,21 +1404,37 @@ dialog#movie-detail-dialog::backdrop {
 .cinema-back-btn {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
-  color: #fff;
-  font-size: 1.15rem;
+  gap: 10px;
+  color: #ffffff;
+  font-size: 1rem;
   font-weight: 700;
   cursor: pointer;
-  background: rgba(0, 0, 0, 0.4);
-  padding: 8px 18px;
-  border-radius: 30px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  transition: background-color 0.2s ease, transform 0.1s ease;
+  background: rgba(20, 20, 20, 0.72);
+  padding: 8px 18px 8px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: auto !important;
+  z-index: 1000;
 }
 
 .cinema-back-btn:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-  transform: translateX(-4px);
+  background: rgba(229, 9, 20, 0.95);
+  border-color: #e50914;
+  color: #ffffff;
+  transform: translateX(-4px) scale(1.03);
+  box-shadow: 0 6px 20px rgba(229, 9, 20, 0.55);
+}
+
+.cinema-back-btn svg {
+  transition: transform 0.2s ease;
+}
+
+.cinema-back-btn:hover svg {
+  transform: translateX(-2px);
 }
 
 .cinema-top-title-group {
@@ -1516,48 +1532,7 @@ dialog#movie-detail-dialog::backdrop {
   z-index: 2;
 }
 
-/* Persistent Floating Cinema Back Button (Always visible & clickable in embed mode) */
-.cinema-floating-back-btn {
-  position: absolute;
-  top: 24px;
-  left: 28px;
-  z-index: 9999999 !important;
-  display: flex !important;
-  align-items: center;
-  gap: 8px;
-  background: rgba(20, 20, 20, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  color: #ffffff;
-  font-family: inherit;
-  font-size: 0.95rem;
-  font-weight: 700;
-  padding: 8px 18px 8px 14px;
-  border-radius: 999px;
-  cursor: pointer;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.7);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  pointer-events: auto !important;
-  opacity: 0.92;
-}
 
-.cinema-floating-back-btn:hover {
-  background: rgba(229, 9, 20, 0.95);
-  border-color: #e50914;
-  color: #ffffff;
-  transform: scale(1.05);
-  box-shadow: 0 6px 20px rgba(229, 9, 20, 0.6);
-  opacity: 1 !important;
-}
-
-#netflix-cinema-player.idle .cinema-floating-back-btn {
-  opacity: 0.55;
-}
-
-#netflix-cinema-player.idle .cinema-floating-back-btn:hover {
-  opacity: 1 !important;
-}
 
 /* Search Results Back Button */
 .search-back-btn {
@@ -1642,24 +1617,32 @@ dialog#movie-detail-dialog::backdrop {
 }
 
 .cinema-subtitles-container {
-  max-width: 80%;
+  max-width: 82%;
   min-height: 48px;
   text-align: center;
   font-family: var(--netflix-font);
-  font-size: clamp(1.4rem, 2.4vw, 2.2rem);
+  font-size: clamp(1.25rem, 2.2vw, 1.95rem);
   font-weight: 700;
   line-height: 1.35;
   color: #ffffff;
   text-shadow: 0 0 4px #000, 0 0 8px #000, 0 2px 4px #000, 0 0 16px #000;
-  background: rgba(0, 0, 0, 0.45);
-  border-radius: 6px;
-  padding: 6px 18px;
+  background: rgba(0, 0, 0, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 8px 20px;
   display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
   animation: subtitlePop 0.15s ease-out;
+  pointer-events: auto !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .cinema-subtitles-container.active {
-  display: inline-block;
+  display: inline-flex;
 }
 
 @keyframes subtitlePop {
