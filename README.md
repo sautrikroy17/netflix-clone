@@ -31,11 +31,10 @@ A production-grade, full-stack streaming platform inspired by Netflix. Built wit
 ## 📁 Project Structure
 
 ```
-netflix-clone/
+netflixer/
 ├── frontend/       # Frontend client (HTML5, Vanilla CSS, JS SPA router, Player, Assets)
 ├── backend/        # Backend server (Express REST API, Catalog data, Auth middleware)
 ├── database/       # SQLite persistent storage (netflix.db)
-├── api/            # Serverless deployment gateway
 ├── vercel.json     # Cloud deployment configuration
 └── package.json    # Project dependencies & npm scripts
 ```
@@ -52,8 +51,8 @@ netflix-clone/
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/sautrikroy17/netflix-clone.git
-cd netflix-clone
+git clone https://github.com/sautrikroy17/netflixer.git
+cd netflixer
 
 # 2. Install dependencies
 npm install

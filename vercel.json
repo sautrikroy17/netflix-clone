@@ -1,6 +1,6 @@
 {
   "services": {
-    "netflix-clone": {
+    "netflixer": {
       "root": ".",
       "entrypoint": "backend/server.js"
     }
@@ -10,7 +10,7 @@
       "source": "/(.*)",
       "destination": {
         "type": "service",
-        "service": "netflix-clone"
+        "service": "netflixer"
       }
     }
   ]
