@@ -32,12 +32,12 @@ A production-grade, full-stack streaming platform inspired by Netflix. Built wit
 
 ```
 netflix-clone/
+├── frontend/       # Frontend client (HTML5, Vanilla CSS, JS SPA router, Player, Assets)
+├── backend/        # Backend server (Express REST API, Catalog data, Auth middleware)
+├── database/       # SQLite persistent storage (netflix.db)
 ├── api/            # Serverless deployment gateway
-├── data/           # SQLite database persistence
-├── public/         # Frontend client (HTML, CSS, JS, Assets)
-├── src/            # Backend server, REST API & database models
-├── vercel.json     # Deployment configuration
-└── package.json    # Project dependencies and scripts
+├── vercel.json     # Cloud deployment configuration
+└── package.json    # Project dependencies & npm scripts
 ```
 
 ---

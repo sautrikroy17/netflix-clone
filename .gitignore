@@ -1,8 +1,8 @@
 node_modules/
 .DS_Store
 *.log
-data/netflix.db-wal
-data/netflix.db-shm
-public/*_preview.png
-public/*_full.png
+database/netflix.db-wal
+database/netflix.db-shm
+frontend/*_preview.png
+frontend/*_full.png
 .vercel

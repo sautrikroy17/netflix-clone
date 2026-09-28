@@ -15,7 +15,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'netflix-super-secure-secret-2026';
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, '..', 'public')));
+app.use(express.static(path.join(__dirname, '..', 'frontend')));
 
 // Authentication Helper Middleware
 const authenticateToken = (req, res, next) => {
@@ -730,7 +730,7 @@ app.post('/api/feedback', optionalAuth, (req, res) => {
    CLIENT-SIDE ROUTING FALLBACK
 ══════════════════════════════════════════════ */
 app.use((req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, '..', 'frontend', 'index.html'));
 });
 
 // Export for serverless (Vercel) & direct execution
@@ -739,6 +739,6 @@ module.exports = app;
 if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`🎬 Netflix Clone Server running at http://localhost:${PORT}`);
-    console.log(`📊 SQLite database connected: data/netflix.db`);
+    console.log(`📊 SQLite database connected: database/netflix.db`);
   });
 }

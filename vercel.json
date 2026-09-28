@@ -2,7 +2,7 @@
   "services": {
     "netflix-clone": {
       "root": ".",
-      "entrypoint": "src/server.js"
+      "entrypoint": "backend/server.js"
     }
   },
   "rewrites": [
