@@ -897,11 +897,13 @@ class NetflixApp {
       );
     }
 
-    const trending = this.movies.filter(m => m.category === 'trending');
-    const top10 = this.movies.slice(0, 10);
-    const scifi = this.movies.filter(m => m.category === 'scifi');
-    const action = this.movies.filter(m => m.category === 'action');
-    const drama = this.movies.filter(m => m.category === 'drama');
+    const trending = this.movies.filter(m => m.category === 'trending' || m.top10Rank);
+    const top10 = this.movies.filter(m => m.top10Rank).sort((a, b) => a.top10Rank - b.top10Rank).slice(0, 10);
+    const indianHits = this.movies.filter(m => ['rrr', 'leo', 'jawan', 'animal', 'kalki-2898-ad', 'kgf-chapter-2', 'salaar', 'baahubali-2', 'dangal', 'three-idiots', 'vikram', 'kantara', 'pushpa-the-rise', 'dunki'].includes(m.id));
+    const scifi = this.movies.filter(m => m.genres.some(g => g.toLowerCase().includes('sci-fi') || g.toLowerCase().includes('cyberpunk') || g.toLowerCase().includes('multiverse')));
+    const action = this.movies.filter(m => m.genres.some(g => g.toLowerCase().includes('action') || g.toLowerCase().includes('thriller')));
+    const drama = this.movies.filter(m => m.genres.some(g => g.toLowerCase().includes('drama') || g.toLowerCase().includes('crime') || g.toLowerCase().includes('biography')));
+    const anime = this.movies.filter(m => m.genres.some(g => g.toLowerCase().includes('anime') || g.toLowerCase().includes('animation')));
 
     return `
       <div class="browse-container">
@@ -1102,7 +1104,17 @@ class NetflixApp {
               </div>
             ` : '')}
 
-            ${this.activeCategory !== 'mylist' && this.activeCategory !== 'languages' ? `
+            ${this.activeCategory === 'tv' || this.activeCategory === 'movies' ? `
+              <div style="padding: 20px 4% 30px;">
+                <h2 style="font-size: 1.8rem; margin-bottom: 20px; font-weight: 700;">
+                  ${this.activeCategory === 'tv' ? '📺 TV Shows & Global Series' : '🎬 Hollywood & Indian Blockbuster Movies'}
+                  <span style="font-size: 0.9rem; font-weight: normal; color: #888;">(${displayedMovies.length} titles)</span>
+                </h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px;">
+                  ${displayedMovies.map(m => this.renderMovieCard(m)).join('')}
+                </div>
+              </div>
+            ` : (this.activeCategory !== 'mylist' && this.activeCategory !== 'languages' ? `
               <!-- 2. Trending Now Row -->
               <div class="category-row">
                 <div class="category-header">
@@ -1123,7 +1135,17 @@ class NetflixApp {
                 </div>
               </div>
 
-              <!-- 4. Sci-Fi & Cyberpunk Row -->
+              <!-- 4. Indian Mega Blockbusters -->
+              <div class="category-row">
+                <div class="category-header">
+                  <h2 class="category-title">Indian Mega Blockbusters & Cinema</h2>
+                </div>
+                <div class="movie-slider">
+                  ${indianHits.map(m => this.renderMovieCard(m)).join('')}
+                </div>
+              </div>
+
+              <!-- 5. Sci-Fi & Mind-Bending Row -->
               <div class="category-row">
                 <div class="category-header">
                   <h2 class="category-title">Blockbuster Sci-Fi & Mind-Bending</h2>
@@ -1133,7 +1155,7 @@ class NetflixApp {
                 </div>
               </div>
 
-              <!-- 5. Action & Thrillers Row -->
+              <!-- 6. Action & Adrenaline Thrillers Row -->
               <div class="category-row">
                 <div class="category-header">
                   <h2 class="category-title">Action & Adrenaline Thrillers</h2>
@@ -1143,16 +1165,26 @@ class NetflixApp {
                 </div>
               </div>
 
-              <!-- 6. Critically Acclaimed TV Dramas -->
+              <!-- 7. Critically Acclaimed Dramas & Masterpieces -->
               <div class="category-row">
                 <div class="category-header">
-                  <h2 class="category-title">Critically Acclaimed TV Dramas</h2>
+                  <h2 class="category-title">Critically Acclaimed Dramas & Masterpieces</h2>
                 </div>
                 <div class="movie-slider">
                   ${drama.map(m => this.renderMovieCard(m)).join('')}
                 </div>
               </div>
-            ` : ''}
+
+              <!-- 8. Anime & Animation -->
+              <div class="category-row">
+                <div class="category-header">
+                  <h2 class="category-title">Anime & Animation</h2>
+                </div>
+                <div class="movie-slider">
+                  ${anime.map(m => this.renderMovieCard(m)).join('')}
+                </div>
+              </div>
+            ` : '')}
 
           </main>
         `}
@@ -1322,18 +1354,40 @@ class NetflixApp {
         }
       });
 
+      let searchDebounce;
       searchInput.addEventListener('input', (e) => {
-        this.searchQuery = e.target.value.trim();
-        this.renderCurrentRoute();
+        clearTimeout(searchDebounce);
+        const val = e.target.value;
+        const cursorPos = e.target.selectionStart;
+        this.searchQuery = val;
+        searchDebounce = setTimeout(() => {
+          this.renderCurrentRoute();
+          const refreshedInput = document.getElementById('search-input');
+          const refreshedBox = document.getElementById('search-box');
+          if (refreshedBox) refreshedBox.classList.add('active');
+          if (refreshedInput) {
+            refreshedInput.focus();
+            try { refreshedInput.setSelectionRange(cursorPos, cursorPos); } catch(err) {}
+          }
+        }, 100);
       });
 
       if (searchClear) {
-        searchClear.addEventListener('click', () => {
+        searchClear.addEventListener('click', (e) => {
+          e.stopPropagation();
           this.searchQuery = '';
-          searchInput.value = '';
           this.renderCurrentRoute();
+          const refreshedInput = document.getElementById('search-input');
+          if (refreshedInput) refreshedInput.focus();
         });
       }
+
+      document.addEventListener('click', (e) => {
+        const sb = document.getElementById('search-box');
+        if (sb && !e.target.closest('#search-box') && !this.searchQuery) {
+          sb.classList.remove('active');
+        }
+      });
     }
 
     // Notification Dropdown Toggle
@@ -2097,6 +2151,30 @@ class NetflixApp {
         const id = rateBtn.getAttribute('data-rating-id');
         const val = rateBtn.getAttribute('data-rating-val');
         this.rateMovie(id, val);
+        return;
+      }
+
+      // 7. Modal Close Button
+      const modalClose = e.target.closest('#modal-close-btn');
+      if (modalClose) {
+        const dialog = document.getElementById('movie-detail-dialog');
+        if (dialog) dialog.close();
+        return;
+      }
+
+      // 8. Click anywhere on Movie Card or Top 10 Card -> Open Interactive Modal
+      const card = e.target.closest('[data-card-id]');
+      if (card && !e.target.closest('.card-btn')) {
+        const id = card.getAttribute('data-card-id');
+        this.openMovieModal(id);
+        return;
+      }
+
+      // 9. Landing Page Top 10 Items -> Open Cinema Player directly
+      const landingCard = e.target.closest('[data-landing-play-id]');
+      if (landingCard) {
+        const id = landingCard.getAttribute('data-landing-play-id');
+        this.openCinemaPlayer(id);
         return;
       }
     });
