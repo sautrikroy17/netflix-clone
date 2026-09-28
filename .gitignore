@@ -1,27 +1,8 @@
-# Dependencies
 node_modules/
-
-# OS metadata
 .DS_Store
-Thumbs.db
-
-# Logs
 *.log
-npm-debug.log*
-
-# SQLite Database binaries (auto-generated at runtime)
 database/*.db
 database/*.db-wal
 database/*.db-shm
-*.db
-*.db-wal
-*.db-shm
-
-# Legacy trailer media (all trailers stream in HD via official YouTube API)
-frontend/trailers/
-
-# Local previews and environment
-frontend/*_preview.png
-frontend/*_full.png
 .vercel
 .env*
