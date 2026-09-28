@@ -898,7 +898,8 @@ class NetflixApp {
     }
 
     const trending = this.movies.filter(m => m.category === 'trending' || m.top10Rank);
-    const top10 = this.movies.filter(m => m.top10Rank).sort((a, b) => a.top10Rank - b.top10Rank).slice(0, 10);
+    const top10 = this.movies.filter(m => m.top10Rank && m.top10Rank >= 1 && m.top10Rank <= 10).sort((a, b) => a.top10Rank - b.top10Rank).slice(0, 10);
+    const newOnNetflix = this.movies.filter(m => m.year === '2024' || m.year === '2023');
     const indianHits = this.movies.filter(m => ['rrr', 'leo', 'jawan', 'animal', 'kalki-2898-ad', 'kgf-chapter-2', 'salaar', 'baahubali-2', 'dangal', 'three-idiots', 'vikram', 'kantara', 'pushpa-the-rise', 'dunki'].includes(m.id));
     const scifi = this.movies.filter(m => m.genres.some(g => g.toLowerCase().includes('sci-fi') || g.toLowerCase().includes('cyberpunk') || g.toLowerCase().includes('multiverse')));
     const action = this.movies.filter(m => m.genres.some(g => g.toLowerCase().includes('action') || g.toLowerCase().includes('thriller')));
@@ -1135,7 +1136,17 @@ class NetflixApp {
                 </div>
               </div>
 
-              <!-- 4. Indian Mega Blockbusters -->
+              <!-- 4. New on Netflix Row -->
+              <div class="category-row">
+                <div class="category-header">
+                  <h2 class="category-title">New on Netflix</h2>
+                </div>
+                <div class="movie-slider">
+                  ${newOnNetflix.map(m => this.renderMovieCard(m)).join('')}
+                </div>
+              </div>
+
+              <!-- 5. Indian Mega Blockbusters -->
               <div class="category-row">
                 <div class="category-header">
                   <h2 class="category-title">Indian Mega Blockbusters & Cinema</h2>
@@ -1227,9 +1238,8 @@ class NetflixApp {
 
     return `
       <div class="movie-card" data-card-id="${movie.id}">
-        <img src="${movie.backdrop}" alt="${movie.title}" loading="lazy" class="movie-card-thumb">
+        <img src="${movie.backdrop}" alt="${movie.title}" loading="lazy" class="movie-card-thumb" onerror="this.onerror=null; this.src='https://image.tmdb.org/t/p/w1280/56v2KjBlU4XaOv9rVYEQypROD7P.jpg';">
         <div class="movie-card-hover-box">
-          <div class="hover-media-preview" style="background-image:url('${movie.backdrop}')"></div>
           <div class="hover-content">
             <div class="hover-actions-row">
               <div class="hover-left-btns">
@@ -1260,7 +1270,7 @@ class NetflixApp {
       <div class="top10-card" data-card-id="${movie.id}">
         <div class="top10-number">${movie.top10Rank || 1}</div>
         <div class="top10-poster-wrap">
-          <img src="${movie.poster}" alt="${movie.title}" loading="lazy" class="top10-poster">
+          <img src="${movie.poster}" alt="${movie.title}" loading="lazy" class="top10-poster" onerror="this.onerror=null; this.src='https://image.tmdb.org/t/p/w780/49WJfeN0moxb9IPfGn8AIqMGskD.jpg';">
           <div class="top10-overlay-actions">
             <button class="card-btn card-btn-play" data-play-id="${movie.id}" title="Play preview">▶</button>
             <button class="card-btn card-btn-list ${isInList ? 'in-list' : ''}" data-watchlist-id="${movie.id}">
