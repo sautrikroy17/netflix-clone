@@ -15,6 +15,16 @@ const JWT_SECRET = process.env.JWT_SECRET || 'netflix-super-secure-secret-2026';
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
+app.get('/favicon.ico', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'frontend', 'favicon.ico'));
+});
+app.get('/apple-touch-icon.png', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'frontend', 'apple-touch-icon.png'));
+});
+app.get('/apple-touch-icon-precomposed.png', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'frontend', 'apple-touch-icon.png'));
+});
+
 app.use(express.static(path.join(__dirname, '..', 'frontend')));
 
 // Authentication Helper Middleware
