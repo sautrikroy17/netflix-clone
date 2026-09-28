@@ -19,25 +19,33 @@ const movies = [
     category: "trending",
     isOriginal: true,
     top10Rank: 1,
-    videoUrl: "https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4",
+    videoUrl: "/trailers/stranger-things.mp4",
+    backupVideoUrl: "https://ia600104.us.archive.org/1/items/stranger-things-season-2-comic-con-trailer-2017/Stranger%20Things%20Season%202%20Comic-Con%20Trailer%20%282017%29%20-%20Thriller.ia.mp4",
+    youtubeTrailerId: "b9EkMc79ZSU",
     subtitles: {
       en: [
-        { time: 1, text: "[ominous synth music swells]" },
-        { time: 4, text: "DUSTIN: Something's wrong. The gate is opening again." },
-        { time: 8, text: "ELEVEN: I can stop it. I have to try." },
-        { time: 12, text: "HOPPER: Kid, you're not going back in there alone." },
-        { time: 16, text: "[thunderous rumble from the Upside Down]" },
-        { time: 20, text: "MIKE: El! Stay with us!" },
-        { time: 24, text: "[high-voltage electrical surge hums]" }
+        { time: 2, text: "[ominous 80s synthesizer hums softly]" },
+        { time: 7, text: "DUSTIN: Will, do you see the storm coming?" },
+        { time: 13, text: "WILL: I felt it... it didn't feel like a dream." },
+        { time: 20, text: "JOYCE: What happened to my boy in the Upside Down?!" },
+        { time: 28, text: "VINCENT PRICE: Darkness falls across the land..." },
+        { time: 38, text: "[Michael Jackson's Thriller beat erupts in Dolby Atmos]" },
+        { time: 48, text: "HOPPER: Whatever is happening, it's spreading from the lab." },
+        { time: 60, text: "MIKE: If they find us, they'll never let us leave." },
+        { time: 75, text: "ELEVEN: I can fight it. I won't let them hurt you." },
+        { time: 90, text: "[giant towering shadow monster rumbles across the sky]" }
       ],
       hi: [
-        { time: 1, text: "[रहस्यमयी संगीत गूंजता है]" },
-        { time: 4, text: "डस्टिन: कुछ गड़बड़ है। वह दरवाजा फिर से खुल रहा है।" },
-        { time: 8, text: "इलेवन: मैं इसे रोक सकती हूँ। मुझे कोशिश करनी होगी।" },
-        { time: 12, text: "हॉपर: बच्ची, तुम अकेले अंदर नहीं जाओगी।" },
-        { time: 16, text: "[उल्टी दुनिया से भारी गड़गड़ाहट]" },
-        { time: 20, text: "माइक: एल! हमारे साथ रहो!" },
-        { time: 24, text: "[बिजली का भयानक झटका]" }
+        { time: 2, text: "[गंभीर 80 के दशक का सिंथेसाइज़र संगीत बजता है]" },
+        { time: 7, text: "डस्टिन: विल, क्या तुम वो तूफ़ान देख रहे हो?" },
+        { time: 13, text: "विल: मुझे यह महसूस हुआ... यह कोई सपना नहीं था।" },
+        { time: 20, text: "जॉयस: मेरे बच्चे के साथ उस उल्टी दुनिया में क्या हुआ?!" },
+        { time: 28, text: "विंसेंट प्राइस: ज़मीन पर अंधेरा छा रहा है..." },
+        { time: 38, text: "[माइकल जैक्सन का थ्रिलर संगीत गूंजता है]" },
+        { time: 48, text: "हॉपर: जो कुछ भी हो रहा है, वह लैब से फैल रहा है।" },
+        { time: 60, text: "माइक: अगर उन्होंने हमें ढूँढ लिया, तो जाने नहीं देंगे।" },
+        { time: 75, text: "इलेवन: मैं इससे लड़ सकती हूँ। तुम्हें चोट नहीं पहुँचने दूँगी।" },
+        { time: 90, text: "[विशाल छाया राक्षस आसमान में गरजता है]" }
       ]
     }
   },
@@ -61,6 +69,7 @@ const movies = [
     isOriginal: true,
     top10Rank: 2,
     videoUrl: "https://vjs.zencdn.net/v/oceans.mp4",
+    youtubeTrailerId: "oqxAJKy0ii4",
     subtitles: {
       en: [
         { time: 1, text: "[playful, chilling carnival chime plays]" },
@@ -99,7 +108,9 @@ const movies = [
     category: "trending",
     isOriginal: true,
     top10Rank: 3,
-    videoUrl: "https://media.w3.org/2010/05/sintel/trailer.mp4",
+    videoUrl: "/trailers/wednesday.mp4",
+    backupVideoUrl: "https://archive.org/download/wednesday-season-2-part-2-official-trailer-netflix-720p/Wednesday__Season_2___Part_2_Official_Trailer___Netflix%28720p%29.mp4",
+    youtubeTrailerId: "Di310BC8zMg",
     subtitles: {
       en: [
         { time: 1, text: "[gothic cello music plays passionately]" },
@@ -242,7 +253,9 @@ const movies = [
     creator: "Christopher Nolan",
     category: "scifi",
     top10Rank: 7,
-    videoUrl: "https://media.w3.org/2010/05/sintel/trailer.mp4",
+    videoUrl: "/trailers/interstellar.mp4",
+    backupVideoUrl: "https://archive.org/download/interstellar-trailer-3/Interstellar_OfficialTrailer3_4K_51_prores.mp4",
+    youtubeTrailerId: "2Sm7e2v9Mzg",
     subtitles: {
       en: [
         { time: 1, text: "[Hans Zimmer pipe organ plays intensely]" },
@@ -310,7 +323,9 @@ const movies = [
     creator: "Christopher Nolan",
     category: "action",
     top10Rank: 9,
-    videoUrl: "https://media.w3.org/2010/05/bunny/trailer.mp4",
+    videoUrl: "/trailers/the-batman.mp4",
+    backupVideoUrl: "https://archive.org/download/yt-5s.com-the-batman-trailer-oficial/yt5s.com-THE%20BATMAN%20-%20Tr%C3%A1iler%20Oficial.mp4",
+    youtubeTrailerId: "EXeTwQWrcwY",
     subtitles: {
       en: [
         { time: 1, text: "[cackling laugh echoes sinisterly]" },

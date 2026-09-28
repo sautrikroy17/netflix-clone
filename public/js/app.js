@@ -1354,18 +1354,56 @@ class NetflixApp {
       });
     }
 
-    // Profile Dropdown Toggle
+    // Profile Dropdown Toggle & Hover
     const profileWrap = document.getElementById('profile-menu-wrapper');
     const profileMenu = document.getElementById('profile-dropdown');
-    if (profileWrap && profileMenu) {
-      profileWrap.addEventListener('click', (e) => {
+    const avatarBtn = profileWrap ? profileWrap.querySelector('.profile-avatar-btn') : null;
+
+    if (avatarBtn && profileMenu) {
+      avatarBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        profileMenu.classList.toggle('show');
-        if (notifMenu) notifMenu.classList.remove('show');
+        e.preventDefault();
+        const willShow = !profileMenu.classList.contains('show');
+        if (willShow) {
+          profileMenu.classList.add('show');
+          profileWrap.classList.add('open');
+          if (notifMenu) notifMenu.classList.remove('show');
+        } else {
+          profileMenu.classList.remove('show');
+          profileWrap.classList.remove('open');
+        }
+      });
+    }
+
+    if (profileMenu) {
+      // Prevent internal clicks from triggering outside click listeners
+      profileMenu.addEventListener('click', (e) => {
+        e.stopPropagation();
+      });
+    }
+
+    // Close on outside click
+    document.addEventListener('click', (e) => {
+      if (profileMenu && !e.target.closest('#profile-menu-wrapper')) {
+        profileMenu.classList.remove('show');
+        if (profileWrap) profileWrap.classList.remove('open');
+      }
+    });
+
+    // Smooth Desktop Hover Interaction
+    if (profileWrap && profileMenu) {
+      let profileHoverTimer;
+      profileWrap.addEventListener('mouseenter', () => {
+        clearTimeout(profileHoverTimer);
+        profileMenu.classList.add('show');
+        profileWrap.classList.add('open');
       });
 
-      document.addEventListener('click', () => {
-        profileMenu.classList.remove('show');
+      profileWrap.addEventListener('mouseleave', () => {
+        profileHoverTimer = setTimeout(() => {
+          profileMenu.classList.remove('show');
+          profileWrap.classList.remove('open');
+        }, 300);
       });
     }
 
@@ -1380,7 +1418,10 @@ class NetflixApp {
     const planSelect = document.getElementById('account-plan-select');
 
     if (accountBtn && accountDialog) {
-      accountBtn.addEventListener('click', () => {
+      accountBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (profileMenu) profileMenu.classList.remove('show');
+        if (profileWrap) profileWrap.classList.remove('open');
         if (nameInput) nameInput.value = this.currentUser.name || '';
         if (emailDisplay) emailDisplay.value = this.currentUser.email || '';
         if (planSelect && this.currentUser.plan) {
@@ -1431,7 +1472,12 @@ class NetflixApp {
     // Logout
     const logoutBtn = document.getElementById('btn-logout');
     if (logoutBtn) {
-      logoutBtn.addEventListener('click', () => this.handleLogout());
+      logoutBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (profileMenu) profileMenu.classList.remove('show');
+        if (profileWrap) profileWrap.classList.remove('open');
+        this.handleLogout();
+      });
     }
   }
 
@@ -1741,14 +1787,31 @@ class NetflixApp {
       });
     }
 
-    // Load stream and seek position
+    // Load stream and seek position with automatic backup fallback
     this.cinemaVideo.src = movie.videoUrl;
     this.cinemaVideo.poster = movie.backdrop;
+    this.cinemaVideo.onerror = () => {
+      if (movie.backupVideoUrl && !this.cinemaVideo.src.includes(movie.backupVideoUrl)) {
+        console.warn('Primary stream failed, switching to backup HD stream:', movie.backupVideoUrl);
+        this.cinemaVideo.src = movie.backupVideoUrl;
+        this.cinemaVideo.play().catch(() => {});
+      }
+    };
     this.cinemaVideo.currentTime = startSecs || 0;
     this.cinemaVideo.volume = 0.85;
     this.cinemaVideo.muted = false;
     this.cinemaVolumeSlider.value = 0.85;
     this.updateCinemaVolumeUI();
+
+    const ytLink = document.getElementById('cinema-yt-link');
+    if (ytLink) {
+      if (movie.youtubeTrailerId) {
+        ytLink.href = `https://www.youtube.com/watch?v=${movie.youtubeTrailerId}`;
+        ytLink.style.display = 'inline-flex';
+      } else {
+        ytLink.style.display = 'none';
+      }
+    }
 
     // Show player
     this.cinemaPlayer.classList.add('active');
